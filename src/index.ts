@@ -75,6 +75,14 @@ client.once(Events.ClientReady, async (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
+  const allowedChannelId = process.env.CHANNEL_ID;
+  if (allowedChannelId && interaction.channelId !== allowedChannelId) {
+    return interaction.reply({
+      content: '❌ Chỉ có thể sử dụng lệnh trong kênh được chỉ định!',
+      ephemeral: true
+    });
+  }
+
   const command = slashCommands.get(interaction.commandName);
   if (!command) return;
 

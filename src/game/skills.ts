@@ -1,3 +1,5 @@
+export type SkillRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+
 export interface Skill {
   id: string;
   name: string;
@@ -8,7 +10,25 @@ export interface Skill {
   heal?: number;
   unlockLevel: number;
   class: string;
+  rarity: SkillRarity;
+  gachaRate: number;
 }
+
+export const SKILL_RARITY_NAMES: Record<SkillRarity, string> = {
+  common: 'Phổ Thông',
+  uncommon: 'Ưu Viên',
+  rare: 'Hiếm',
+  epic: 'Sử Thi',
+  legendary: 'Huyền Thoại'
+};
+
+export const SKILL_RARITY_COLORS: Record<SkillRarity, number> = {
+  common: 0x808080,
+  uncommon: 0x1EFF00,
+  rare: 0x0070DD,
+  epic: 0xA335EE,
+  legendary: 0xFF8000
+};
 
 export const SKILLS: Skill[] = [
   // Warrior skills
@@ -20,7 +40,9 @@ export const SKILLS: Skill[] = [
     manaCost: 10,
     damage: 1.5,
     unlockLevel: 3,
-    class: 'warrior'
+    class: 'warrior',
+    rarity: 'common',
+    gachaRate: 0.4
   },
   {
     id: 'shield_bash',
@@ -30,7 +52,9 @@ export const SKILLS: Skill[] = [
     manaCost: 20,
     damage: 1.2,
     unlockLevel: 6,
-    class: 'warrior'
+    class: 'warrior',
+    rarity: 'uncommon',
+    gachaRate: 0.3
   },
   {
     id: 'war_cry',
@@ -40,7 +64,9 @@ export const SKILLS: Skill[] = [
     manaCost: 25,
     damage: 0,
     unlockLevel: 10,
-    class: 'warrior'
+    class: 'warrior',
+    rarity: 'rare',
+    gachaRate: 0.2
   },
   {
     id: 'whirlwind',
@@ -50,7 +76,9 @@ export const SKILLS: Skill[] = [
     manaCost: 35,
     damage: 2.0,
     unlockLevel: 15,
-    class: 'warrior'
+    class: 'warrior',
+    rarity: 'epic',
+    gachaRate: 0.08
   },
 
   // Mage skills
@@ -62,7 +90,9 @@ export const SKILLS: Skill[] = [
     manaCost: 15,
     damage: 1.8,
     unlockLevel: 3,
-    class: 'mage'
+    class: 'mage',
+    rarity: 'common',
+    gachaRate: 0.4
   },
   {
     id: 'ice_shard',
@@ -72,7 +102,9 @@ export const SKILLS: Skill[] = [
     manaCost: 20,
     damage: 1.6,
     unlockLevel: 6,
-    class: 'mage'
+    class: 'mage',
+    rarity: 'uncommon',
+    gachaRate: 0.3
   },
   {
     id: 'heal',
@@ -83,7 +115,9 @@ export const SKILLS: Skill[] = [
     damage: 0,
     heal: 80,
     unlockLevel: 8,
-    class: 'mage'
+    class: 'mage',
+    rarity: 'rare',
+    gachaRate: 0.2
   },
   {
     id: 'meteor',
@@ -93,7 +127,9 @@ export const SKILLS: Skill[] = [
     manaCost: 50,
     damage: 3.0,
     unlockLevel: 15,
-    class: 'mage'
+    class: 'mage',
+    rarity: 'epic',
+    gachaRate: 0.08
   },
 
   // Rogue skills
@@ -105,7 +141,9 @@ export const SKILLS: Skill[] = [
     manaCost: 12,
     damage: 2.0,
     unlockLevel: 3,
-    class: 'rogue'
+    class: 'rogue',
+    rarity: 'common',
+    gachaRate: 0.4
   },
   {
     id: 'poison_blade',
@@ -115,7 +153,9 @@ export const SKILLS: Skill[] = [
     manaCost: 18,
     damage: 1.4,
     unlockLevel: 6,
-    class: 'rogue'
+    class: 'rogue',
+    rarity: 'uncommon',
+    gachaRate: 0.3
   },
   {
     id: 'stealth',
@@ -125,7 +165,9 @@ export const SKILLS: Skill[] = [
     manaCost: 22,
     damage: 0,
     unlockLevel: 10,
-    class: 'rogue'
+    class: 'rogue',
+    rarity: 'rare',
+    gachaRate: 0.2
   },
   {
     id: 'shadow_strike',
@@ -135,7 +177,9 @@ export const SKILLS: Skill[] = [
     manaCost: 40,
     damage: 2.5,
     unlockLevel: 15,
-    class: 'rogue'
+    class: 'rogue',
+    rarity: 'epic',
+    gachaRate: 0.08
   },
 
   // Cleric skills
@@ -147,7 +191,9 @@ export const SKILLS: Skill[] = [
     manaCost: 12,
     damage: 1.4,
     unlockLevel: 3,
-    class: 'cleric'
+    class: 'cleric',
+    rarity: 'common',
+    gachaRate: 0.4
   },
   {
     id: 'holy_heal',
@@ -158,7 +204,9 @@ export const SKILLS: Skill[] = [
     damage: 0,
     heal: 120,
     unlockLevel: 5,
-    class: 'cleric'
+    class: 'cleric',
+    rarity: 'uncommon',
+    gachaRate: 0.3
   },
   {
     id: 'divine_shield',
@@ -168,7 +216,9 @@ export const SKILLS: Skill[] = [
     manaCost: 18,
     damage: 0,
     unlockLevel: 8,
-    class: 'cleric'
+    class: 'cleric',
+    rarity: 'rare',
+    gachaRate: 0.2
   },
   {
     id: 'resurrection',
@@ -179,10 +229,81 @@ export const SKILLS: Skill[] = [
     damage: 0,
     heal: 999,
     unlockLevel: 15,
-    class: 'cleric'
+    class: 'cleric',
+    rarity: 'epic',
+    gachaRate: 0.08
+  },
+
+  // Legendary skills (cross-class)
+  {
+    id: 'dragon_breath',
+    name: 'Hơi Thở Rồng',
+    emoji: '🐉',
+    description: 'Hơi thở rồng thiêu cháy mọi thứ.',
+    manaCost: 60,
+    damage: 4.0,
+    unlockLevel: 20,
+    class: 'warrior',
+    rarity: 'legendary',
+    gachaRate: 0.02
+  },
+  {
+    id: 'arcane_blast',
+    name: 'Bùng Nổ Pháp Thuật',
+    emoji: '💫',
+    description: 'Bùng nổ phép thuật cực mạnh.',
+    manaCost: 70,
+    damage: 5.0,
+    unlockLevel: 20,
+    class: 'mage',
+    rarity: 'legendary',
+    gachaRate: 0.02
+  },
+  {
+    id: 'assassinate',
+    name: 'Ám Sát',
+    emoji: '💀',
+    description: 'Đòn chí mạng致命.',
+    manaCost: 55,
+    damage: 6.0,
+    unlockLevel: 20,
+    class: 'rogue',
+    rarity: 'legendary',
+    gachaRate: 0.02
+  },
+  {
+    id: 'divine_judgment',
+    name: 'Phán Xét Thiêng Liêng',
+    emoji: '⚖️',
+    description: 'Phán xét của thần linh.',
+    manaCost: 80,
+    damage: 3.0,
+    heal: 500,
+    unlockLevel: 20,
+    class: 'cleric',
+    rarity: 'legendary',
+    gachaRate: 0.02
   }
 ];
 
 export function getSkillsForClass(className: string, level: number): Skill[] {
   return SKILLS.filter(s => s.class === className && s.unlockLevel <= level);
+}
+
+export function getRandomSkill(): Skill {
+  const roll = Math.random();
+  let cumulative = 0;
+  
+  for (const skill of SKILLS) {
+    cumulative += skill.gachaRate;
+    if (roll <= cumulative) {
+      return skill;
+    }
+  }
+  
+  return SKILLS[0];
+}
+
+export function getSkillById(id: string): Skill | undefined {
+  return SKILLS.find(s => s.id === id);
 }

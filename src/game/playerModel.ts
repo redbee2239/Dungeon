@@ -17,6 +17,7 @@ export interface IPlayer extends Document {
     speed: number;
     gold: number;
   };
+  gems: number;
   inventory: {
     items: {
       itemId: string;
@@ -37,6 +38,11 @@ export interface IPlayer extends Document {
   totalMonstersKilled: number;
   totalGoldEarned: number;
   highestFloor: number;
+  gachaHistory: {
+    skillId: string;
+    rarity: string;
+    date: Date;
+  }[];
   createdAt: Date;
   lastActive: Date;
 }
@@ -58,6 +64,7 @@ const PlayerSchema = new Schema<IPlayer>({
     speed: { type: Number, default: 5 },
     gold: { type: Number, default: 50 }
   },
+  gems: { type: Number, default: 0 },
   inventory: {
     items: [{
       itemId: String,
@@ -78,6 +85,11 @@ const PlayerSchema = new Schema<IPlayer>({
   totalMonstersKilled: { type: Number, default: 0 },
   totalGoldEarned: { type: Number, default: 0 },
   highestFloor: { type: Number, default: 1 },
+  gachaHistory: [{
+    skillId: String,
+    rarity: String,
+    date: { type: Date, default: Date.now }
+  }],
   createdAt: { type: Date, default: Date.now },
   lastActive: { type: Date, default: Date.now }
 });

@@ -206,17 +206,37 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   const expResult = await db.addExp(player, result.expGained);
   await db.addGold(player, result.goldGained);
 
+  let gemsEarned = 0;
+  if (combatData.monster.isBoss) {
+    gemsEarned = 10 + Math.floor(Math.random() * 40);
+  } else if (combatData.monster.level >= 10) {
+    gemsEarned = 5 + Math.floor(Math.random() * 10);
+  } else {
+    gemsEarned = Math.floor(Math.random() * 3);
+  }
+
+  if (gemsEarned > 0) {
+    await db.addGems(player, gemsEarned);
+  }
+
   if (result.itemDropped) {
     addItem(player.inventory, result.itemDropped);
+    const gemBonus = Math.floor(Math.random() * 10) + 5;
+    await db.addGems(player, gemBonus);
+    gemsEarned += gemBonus;
   }
 
   player.totalMonstersKilled += 1;
   await db.updatePlayer(player);
 
   let msg = `⚔️ **CHIẾN THẮNG!**\n${result.message}`;
+  msg += `\n💎 +${gemsEarned} Gem`;
   if (expResult.leveled) {
+    const levelGems = expResult.levelsGained * 5;
+    await db.addGems(player, levelGems);
     msg += `\n\n🎉 **LEVEL UP!** Level ${player.stats.level} (+${expResult.levelsGained})`;
     msg += `\n⭐ +${expResult.levelsGained} Skill Points`;
+    msg += `\n💎 +${levelGems} Gem (Level Bonus)`;
   }
 
   const embed = new EmbedBuilder()

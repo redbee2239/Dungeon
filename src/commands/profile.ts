@@ -51,6 +51,7 @@ export const prefixCommand = {
             `EXP: ${player.stats.exp}/${player.stats.expToNext} (${expPercent}%)`,
             `${progressBar}`,
             `💰 Gold: ${player.stats.gold}`,
+            `💎 Gem: ${player.gems}`,
             `⭐ Skill Points: ${player.skillPoints}`
           ].join('\n'),
           inline: true

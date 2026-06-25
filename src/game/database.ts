@@ -14,6 +14,7 @@ export interface Player {
   name: string;
   characterClass: CharacterClass;
   stats: PlayerStats;
+  gems: number;
   inventory: {
     items: InventoryItem[];
     maxSlots: number;
@@ -31,6 +32,11 @@ export interface Player {
   totalMonstersKilled: number;
   totalGoldEarned: number;
   highestFloor: number;
+  gachaHistory: {
+    skillId: string;
+    rarity: string;
+    date: Date;
+  }[];
   createdAt: Date;
   lastActive: Date;
 }
@@ -42,6 +48,7 @@ function docToPlayer(doc: IPlayer): Player {
     name: doc.name,
     characterClass: doc.characterClass as CharacterClass,
     stats: doc.stats as PlayerStats,
+    gems: doc.gems || 0,
     inventory: doc.inventory,
     dungeon: doc.dungeon,
     skillPoints: doc.skillPoints,
@@ -50,6 +57,7 @@ function docToPlayer(doc: IPlayer): Player {
     totalMonstersKilled: doc.totalMonstersKilled,
     totalGoldEarned: doc.totalGoldEarned,
     highestFloor: doc.highestFloor,
+    gachaHistory: doc.gachaHistory || [],
     createdAt: doc.createdAt,
     lastActive: doc.lastActive
   };
@@ -81,6 +89,7 @@ export class Database {
       name,
       characterClass,
       stats,
+      gems: 0,
       inventory: { items: [], maxSlots: 20 },
       dungeon: {
         currentFloor: 1,
@@ -104,6 +113,7 @@ export class Database {
       { userId: player.userId },
       {
         stats: player.stats,
+        gems: player.gems,
         inventory: player.inventory,
         dungeon: player.dungeon,
         skillPoints: player.skillPoints,
@@ -112,6 +122,7 @@ export class Database {
         totalMonstersKilled: player.totalMonstersKilled,
         totalGoldEarned: player.totalGoldEarned,
         highestFloor: player.highestFloor,
+        gachaHistory: player.gachaHistory,
         lastActive: new Date()
       }
     );
@@ -143,6 +154,18 @@ export class Database {
   async removeGold(player: Player, gold: number): Promise<boolean> {
     if (player.stats.gold < gold) return false;
     player.stats.gold -= gold;
+    await this.updatePlayer(player);
+    return true;
+  }
+
+  async addGems(player: Player, gems: number): Promise<void> {
+    player.gems += gems;
+    await this.updatePlayer(player);
+  }
+
+  async removeGems(player: Player, gems: number): Promise<boolean> {
+    if (player.gems < gems) return false;
+    player.gems -= gems;
     await this.updatePlayer(player);
     return true;
   }

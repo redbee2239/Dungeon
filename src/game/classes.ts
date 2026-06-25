@@ -15,51 +15,51 @@ export const CLASS_DATA: Record<CharacterClass, ClassStats> = {
   warrior: {
     name: 'Chiến Binh',
     emoji: '⚔️',
-    baseHP: 120,
-    baseMP: 30,
-    baseAttack: 15,
-    baseDefense: 12,
-    baseSpeed: 8,
+    baseHP: 200,
+    baseMP: 50,
+    baseAttack: 25,
+    baseDefense: 18,
+    baseSpeed: 10,
     description: 'Sức mạnh và phòng thủ cao, phù hợp cho người mới.'
   },
   mage: {
     name: 'Pháp Sư',
     emoji: '🔮',
-    baseHP: 70,
-    baseMP: 100,
-    baseAttack: 20,
-    baseDefense: 5,
-    baseSpeed: 10,
+    baseHP: 120,
+    baseMP: 150,
+    baseAttack: 35,
+    baseDefense: 8,
+    baseSpeed: 12,
     description: 'Sức tấn công phép thuật cực mạnh, nhưng máu yếu.'
   },
   rogue: {
     name: 'Sát Thủ',
     emoji: '🗡️',
-    baseHP: 85,
-    baseMP: 50,
-    baseAttack: 18,
-    baseDefense: 7,
-    baseSpeed: 15,
+    baseHP: 150,
+    baseMP: 80,
+    baseAttack: 30,
+    baseDefense: 10,
+    baseSpeed: 22,
     description: 'Tốc độ nhanh, chí mạng cao, lẩn trốn giỏi.'
   },
   cleric: {
     name: 'Tu Sĩ',
     emoji: '✝️',
-    baseHP: 90,
-    baseMP: 80,
-    baseAttack: 10,
-    baseDefense: 10,
-    baseSpeed: 9,
+    baseHP: 160,
+    baseMP: 120,
+    baseAttack: 18,
+    baseDefense: 15,
+    baseSpeed: 11,
     description: 'Có khả năng hồi phục, hỗ trợ đồng đội.'
   },
   gladiator: {
     name: 'Đấu Sĩ',
     emoji: '🏟️',
-    baseHP: 130,
-    baseMP: 20,
-    baseAttack: 18,
-    baseDefense: 10,
-    baseSpeed: 7,
+    baseHP: 220,
+    baseMP: 40,
+    baseAttack: 32,
+    baseDefense: 14,
+    baseSpeed: 9,
     description: 'Sức mạnh tấn công cực cao, chuyên dùng vũ khí sát thương.'
   }
 };
@@ -83,7 +83,7 @@ export function createBaseStats(characterClass: CharacterClass): PlayerStats {
   return {
     level: 1,
     exp: 0,
-    expToNext: 100,
+    expToNext: 80,
     hp: cls.baseHP,
     maxHP: cls.baseHP,
     mp: cls.baseMP,
@@ -91,7 +91,7 @@ export function createBaseStats(characterClass: CharacterClass): PlayerStats {
     attack: cls.baseAttack,
     defense: cls.baseDefense,
     speed: cls.baseSpeed,
-    gold: 50
+    gold: 100
   };
 }
 
@@ -104,11 +104,11 @@ export function levelUp(stats: PlayerStats): PlayerStats {
   newStats.level += 1;
   newStats.expToNext = getExpToNextLevel(newStats.level);
   
-  newStats.maxHP += 10 + Math.floor(Math.random() * 5);
-  newStats.maxMP += 5 + Math.floor(Math.random() * 3);
-  newStats.attack += 2 + Math.floor(Math.random() * 2);
-  newStats.defense += 1 + Math.floor(Math.random() * 2);
-  newStats.speed += 1;
+  newStats.maxHP += 15 + Math.floor(Math.random() * 10);
+  newStats.maxMP += 8 + Math.floor(Math.random() * 5);
+  newStats.attack += 3 + Math.floor(Math.random() * 3);
+  newStats.defense += 2 + Math.floor(Math.random() * 2);
+  newStats.speed += 1 + Math.floor(Math.random() * 2);
   
   newStats.hp = newStats.maxHP;
   newStats.mp = newStats.maxMP;

@@ -4,11 +4,11 @@ import { Database } from '../game/database';
 const STAT_COST = 1;
 
 const STAT_INFO: Record<string, { name: string; emoji: string; base: number }> = {
-  hp: { name: 'HP', emoji: '❤️', base: 10 },
-  mp: { name: 'MP', emoji: '💧', base: 5 },
-  attack: { name: 'ATK', emoji: '⚔️', base: 2 },
-  defense: { name: 'DEF', emoji: '🛡️', base: 1 },
-  speed: { name: 'SPD', emoji: '💨', base: 1 }
+  hp: { name: 'HP', emoji: '❤️', base: 20 },
+  mp: { name: 'MP', emoji: '💧', base: 10 },
+  attack: { name: 'ATK', emoji: '⚔️', base: 4 },
+  defense: { name: 'DEF', emoji: '🛡️', base: 3 },
+  speed: { name: 'SPD', emoji: '💨', base: 2 }
 };
 
 export const prefixCommand = {

@@ -143,13 +143,14 @@ export const prefixCommand = {
       }
 
       if (i.customId === 'skill') {
+        const limitedSkills = skillOptions.slice(0, 25);
         const skillRow = new ActionRowBuilder<StringSelectMenuBuilder>();
         skillRow.addComponents(
           new StringSelectMenuBuilder()
             .setCustomId('skill_select')
             .setPlaceholder('Chọn kỹ năng...')
             .addOptions(
-              skillOptions.map(s => ({
+              limitedSkills.map(s => ({
                 label: `${s.name} (${s.manaCost} MP)`,
                 value: s.id,
                 description: s.description,

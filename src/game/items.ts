@@ -1,7 +1,7 @@
 export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 export type ItemType = 'weapon' | 'armor' | 'potion' | 'accessory';
 export type WeaponType = 'physical' | 'magic';
-export type ItemClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator' | 'all';
+export type ItemClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator' | 'summoner' | 'archer' | 'all';
 
 export interface Item {
   id: string;
@@ -767,6 +767,112 @@ export const ITEMS: Record<string, Item> = {
     classRestriction: ['gladiator'],
     description: 'Vũ khí huyền thoại của đấu trường.',
     stats: { attack: 42, defense: 8, hp: 25 },
+    price: 1800,
+    sellPrice: 900
+  },
+
+  // === BOW WEAPONS (Archer) ===
+  short_bow: {
+    id: 'short_bow',
+    name: 'Cung Ngắn',
+    emoji: '🏹',
+    type: 'weapon',
+    rarity: 'common',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung ngắn đơn giản.',
+    stats: { attack: 5, speed: 3 },
+    price: 35,
+    sellPrice: 14
+  },
+  hunting_bow: {
+    id: 'hunting_bow',
+    name: 'Cung Săn',
+    emoji: '🏹',
+    type: 'weapon',
+    rarity: 'common',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung dùng để săn thú.',
+    stats: { attack: 8, speed: 4 },
+    price: 70,
+    sellPrice: 30
+  },
+  long_bow: {
+    id: 'long_bow',
+    name: 'Cung Dài',
+    emoji: '🏹',
+    type: 'weapon',
+    rarity: 'uncommon',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung dài bắn xa hơn.',
+    stats: { attack: 14, speed: 5 },
+    price: 180,
+    sellPrice: 85
+  },
+  composite_bow: {
+    id: 'composite_bow',
+    name: 'Cung Tổng Hợp',
+    emoji: '🏹',
+    type: 'weapon',
+    rarity: 'uncommon',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung làm từ nhiều vật liệu.',
+    stats: { attack: 16, speed: 6 },
+    price: 220,
+    sellPrice: 100
+  },
+  elm_bow: {
+    id: 'elm_bow',
+    name: 'Cung Gỗ Đào',
+    emoji: '🏹',
+    type: 'weapon',
+    rarity: 'rare',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung làm từ gỗ đàn hương.',
+    stats: { attack: 22, speed: 8 },
+    price: 500,
+    sellPrice: 240
+  },
+  shadow_bow: {
+    id: 'shadow_bow',
+    name: 'Cung Bóng Tối',
+    emoji: '🌑',
+    type: 'weapon',
+    rarity: 'rare',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung mang năng lượng bóng tối.',
+    stats: { attack: 26, speed: 10 },
+    price: 600,
+    sellPrice: 290
+  },
+  phoenix_bow: {
+    id: 'phoenix_bow',
+    name: 'Cung Phượng Hoàng',
+    emoji: '🔥',
+    type: 'weapon',
+    rarity: 'epic',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung bắn tên lửa phượng hoàng.',
+    stats: { attack: 35, speed: 12 },
+    price: 1500,
+    sellPrice: 750
+  },
+  dragon_bow: {
+    id: 'dragon_bow',
+    name: 'Cung Rồng',
+    emoji: '🐉',
+    type: 'weapon',
+    rarity: 'epic',
+    weaponType: 'physical',
+    classRestriction: ['archer'],
+    description: 'Cung làm từ vảy rồng.',
+    stats: { attack: 40, speed: 10, hp: 30 },
     price: 1800,
     sellPrice: 900
   },

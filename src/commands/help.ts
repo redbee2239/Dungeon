@@ -9,7 +9,7 @@ export const prefixCommand = {
       .setDescription('Dungeon Crawler Bot -.prefix là `,`')
       .addFields(
         { name: '🎮 Cơ Bản', value: [
-          '`,create <class>` - Tạo nhân vật (warrior/mage/rogue/cleric/gladiator)',
+          '`,create <class>` - Tạo nhân vật (warrior/mage/rogue/cleric/gladiator/summoner/archer)',
           '`,profile` - Xem thông tin nhân vật',
           '`,help` - Xem danh sách lệnh'
         ].join('\n') },

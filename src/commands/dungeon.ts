@@ -39,7 +39,9 @@ function getStarterSkill(characterClass: string): string | null {
     mage: 'spark',
     rogue: 'quick_strike',
     cleric: 'holy_smite',
-    gladiator: 'battle_cry'
+    gladiator: 'battle_cry',
+    summoner: 'summon_wolf',
+    archer: 'quick_shot'
   };
   return starters[characterClass] || null;
 }

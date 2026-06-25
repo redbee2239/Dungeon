@@ -92,6 +92,30 @@ export const SKILLS: Skill[] = [
     rarity: 'common',
     gachaRate: 0
   },
+  {
+    id: 'summon_wolf',
+    name: 'Triệu Hồi Sói',
+    emoji: '🐺',
+    description: 'Triệu hồi sói tấn công kẻ thù.',
+    manaCost: 12,
+    damage: 1.6,
+    unlockLevel: 1,
+    class: 'summoner',
+    rarity: 'common',
+    gachaRate: 0
+  },
+  {
+    id: 'quick_shot',
+    name: 'Bắn Nhanh',
+    emoji: '🏹',
+    description: 'Bắn mũi tên nhanh.',
+    manaCost: 8,
+    damage: 1.5,
+    unlockLevel: 1,
+    class: 'archer',
+    rarity: 'common',
+    gachaRate: 0
+  },
 
   // Warrior skills
   {
@@ -342,6 +366,106 @@ export const SKILLS: Skill[] = [
     damage: 2.2,
     unlockLevel: 15,
     class: 'gladiator',
+    rarity: 'epic',
+    gachaRate: 0.08
+  },
+
+  // Summoner skills
+  {
+    id: 'summon_bear',
+    name: 'Triệu Hồi Gấu',
+    emoji: '🐻',
+    description: 'Triệu hồi gấu tấn công mạnh.',
+    manaCost: 20,
+    damage: 2.0,
+    unlockLevel: 3,
+    class: 'summoner',
+    rarity: 'common',
+    gachaRate: 0.4
+  },
+  {
+    id: 'summon_phoenix',
+    name: 'Triệu Hồi Phượng Hoàng',
+    emoji: '🔥',
+    description: 'Triệu hồi phượng hoàng thiêu cháy.',
+    manaCost: 30,
+    damage: 2.5,
+    unlockLevel: 6,
+    class: 'summoner',
+    rarity: 'uncommon',
+    gachaRate: 0.3
+  },
+  {
+    id: 'summon_dragon',
+    name: 'Triệu Hồi Rồng',
+    emoji: '🐉',
+    description: 'Triệu hồi rồng nhỏ tấn công.',
+    manaCost: 45,
+    damage: 3.5,
+    unlockLevel: 10,
+    class: 'summoner',
+    rarity: 'rare',
+    gachaRate: 0.2
+  },
+  {
+    id: 'summon_army',
+    name: 'Quân Đoàn Triệu Hồi',
+    emoji: '⚔️',
+    description: 'Triệu hồi cả đội quân.',
+    manaCost: 60,
+    damage: 5.0,
+    unlockLevel: 15,
+    class: 'summoner',
+    rarity: 'epic',
+    gachaRate: 0.08
+  },
+
+  // Archer skills
+  {
+    id: 'double_shot',
+    name: 'Bắn Đôi',
+    emoji: '🏹',
+    description: 'Bắn 2 mũi tên liên tiếp.',
+    manaCost: 15,
+    damage: 2.0,
+    unlockLevel: 3,
+    class: 'archer',
+    rarity: 'common',
+    gachaRate: 0.4
+  },
+  {
+    id: 'poison_arrow',
+    name: 'Tên Độc',
+    emoji: '☠️',
+    description: 'Tên tẩm độc gây sát thương theo thời gian.',
+    manaCost: 20,
+    damage: 1.8,
+    unlockLevel: 6,
+    class: 'archer',
+    rarity: 'uncommon',
+    gachaRate: 0.3
+  },
+  {
+    id: 'rain_of_arrows',
+    name: 'Mưa Tên',
+    emoji: '🌧️',
+    description: 'Bắn mưa tên xuống kẻ thù.',
+    manaCost: 35,
+    damage: 3.0,
+    unlockLevel: 10,
+    class: 'archer',
+    rarity: 'rare',
+    gachaRate: 0.2
+  },
+  {
+    id: 'snipe',
+    name: 'Bắn Tỉa',
+    emoji: '🎯',
+    description: 'Bắn tỉa chí mạng từ xa.',
+    manaCost: 50,
+    damage: 4.5,
+    unlockLevel: 15,
+    class: 'archer',
     rarity: 'epic',
     gachaRate: 0.08
   },

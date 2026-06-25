@@ -3,8 +3,8 @@ import { Database } from '../game/database';
 import { ITEMS, RARITY_NAMES, ItemRarity, ItemType } from '../game/items';
 import { CLASS_DATA, CharacterClass } from '../game/classes';
 
-const PHYSICAL_CLASSES: CharacterClass[] = ['warrior', 'rogue', 'gladiator'];
-const MAGIC_CLASSES: CharacterClass[] = ['mage', 'cleric'];
+const PHYSICAL_CLASSES: CharacterClass[] = ['warrior', 'rogue', 'gladiator', 'archer'];
+const MAGIC_CLASSES: CharacterClass[] = ['mage', 'cleric', 'summoner'];
 
 export const prefixCommand = {
   name: 'equip',

@@ -106,7 +106,9 @@ export class Database {
       mage: 'spark',
       rogue: 'quick_strike',
       cleric: 'holy_smite',
-      gladiator: 'battle_cry'
+      gladiator: 'battle_cry',
+      summoner: 'summon_wolf',
+      archer: 'quick_shot'
     };
     
     const doc = await PlayerModel.create({

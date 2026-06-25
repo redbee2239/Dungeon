@@ -32,164 +32,229 @@ export interface MonsterTemplate {
 }
 
 export const MONSTER_TEMPLATES: MonsterTemplate[] = [
+  // === NORMAL MONSTERS ===
   {
-    id: 'slime',
-    name: 'Slime',
-    emoji: '🟢',
-    baseLevel: 1,
-    baseHP: 30,
-    baseAttack: 5,
-    baseDefense: 2,
-    baseSpeed: 3,
-    expReward: 15,
-    goldReward: 10,
-    description: 'Quái vật gelatin yếu nhất.',
-    isBoss: false
+    id: 'slime', name: 'Slime', emoji: '🟢',
+    baseLevel: 1, baseHP: 30, baseAttack: 5, baseDefense: 2, baseSpeed: 3,
+    expReward: 15, goldReward: 10,
+    description: 'Quái vật gelatin yếu nhất.', isBoss: false
   },
   {
-    id: 'goblin',
-    name: 'Goblin',
-    emoji: '👺',
-    baseLevel: 2,
-    baseHP: 45,
-    baseAttack: 8,
-    baseDefense: 4,
-    baseSpeed: 6,
-    expReward: 25,
-    goldReward: 15,
-    description: 'Goblin nhỏ nhưng nhanh.',
-    isBoss: false
+    id: 'goblin', name: 'Goblin', emoji: '👺',
+    baseLevel: 2, baseHP: 45, baseAttack: 8, baseDefense: 4, baseSpeed: 6,
+    expReward: 25, goldReward: 15,
+    description: 'Goblin nhỏ nhưng nhanh.', isBoss: false
   },
   {
-    id: 'skeleton',
-    name: 'Bộ Xương',
-    emoji: '💀',
-    baseLevel: 3,
-    baseHP: 60,
-    baseAttack: 12,
-    baseDefense: 6,
-    baseSpeed: 5,
-    expReward: 35,
-    goldReward: 25,
-    description: 'Xương sống tấn công người.',
-    isBoss: false
+    id: 'skeleton', name: 'Bộ Xương', emoji: '💀',
+    baseLevel: 3, baseHP: 60, baseAttack: 12, baseDefense: 6, baseSpeed: 5,
+    expReward: 35, goldReward: 25,
+    description: 'Xương sống tấn công người.', isBoss: false
   },
   {
-    id: 'zombie',
-    name: 'Zombie',
-    emoji: '🧟',
-    baseLevel: 4,
-    baseHP: 80,
-    baseAttack: 10,
-    baseDefense: 3,
-    baseSpeed: 3,
-    expReward: 40,
-    goldReward: 20,
-    description: 'Thây ma slow nhưng dai.',
-    isBoss: false
+    id: 'zombie', name: 'Zombie', emoji: '🧟',
+    baseLevel: 4, baseHP: 80, baseAttack: 10, baseDefense: 3, baseSpeed: 3,
+    expReward: 40, goldReward: 20,
+    description: 'Thây ma slow nhưng dai.', isBoss: false
   },
   {
-    id: 'spider',
-    name: 'Nhện Độc',
-    emoji: '🕷️',
-    baseLevel: 5,
-    baseHP: 55,
-    baseAttack: 15,
-    baseDefense: 5,
-    baseSpeed: 12,
-    expReward: 50,
-    goldReward: 30,
-    description: 'Nhện có nọc độc.',
-    isBoss: false
+    id: 'spider', name: 'Nhện Độc', emoji: '🕷️',
+    baseLevel: 5, baseHP: 55, baseAttack: 15, baseDefense: 5, baseSpeed: 12,
+    expReward: 50, goldReward: 30,
+    description: 'Nhện có nọc độc.', isBoss: false
   },
   {
-    id: 'orc',
-    name: 'Orc',
-    emoji: '👹',
-    baseLevel: 6,
-    baseHP: 100,
-    baseAttack: 18,
-    baseDefense: 10,
-    baseSpeed: 5,
-    expReward: 65,
-    goldReward: 40,
-    description: 'Orc khỏe mạnh và hung dữ.',
-    isBoss: false
+    id: 'orc', name: 'Orc', emoji: '👹',
+    baseLevel: 6, baseHP: 100, baseAttack: 18, baseDefense: 10, baseSpeed: 5,
+    expReward: 65, goldReward: 40,
+    description: 'Orc khỏe mạnh và hung dữ.', isBoss: false
   },
   {
-    id: 'dark_mage',
-    name: 'Pháp Sư Bóng Tối',
-    emoji: '🧙',
-    baseLevel: 8,
-    baseHP: 70,
-    baseAttack: 25,
-    baseDefense: 8,
-    baseSpeed: 10,
-    expReward: 90,
-    goldReward: 60,
-    description: 'Pháp sư使用 dark magic.',
-    isBoss: false
+    id: 'troll', name: 'Troll', emoji: '🧌',
+    baseLevel: 8, baseHP: 130, baseAttack: 22, baseDefense: 12, baseSpeed: 4,
+    expReward: 80, goldReward: 50,
+    description: 'Troll to lớn, hồi phục nhanh.', isBoss: false
   },
   {
-    id: 'minotaur',
-    name: 'Minotaur',
-    emoji: '🐂',
-    baseLevel: 10,
-    baseHP: 150,
-    baseAttack: 30,
-    baseDefense: 15,
-    baseSpeed: 8,
-    expReward: 120,
-    goldReward: 80,
-    description: 'Quái vật nửa người nửa bò.',
-    isBoss: false
+    id: 'dark_mage', name: 'Pháp Sư Bóng Tối', emoji: '🧙',
+    baseLevel: 10, baseHP: 90, baseAttack: 30, baseDefense: 8, baseSpeed: 10,
+    expReward: 100, goldReward: 65,
+    description: 'Pháp sư dùng bóng tối.', isBoss: false
   },
   {
-    id: 'boss_goblin_king',
-    name: 'Vua Goblin',
-    emoji: '👑',
-    baseLevel: 5,
-    baseHP: 150,
-    baseAttack: 12,
-    baseDefense: 8,
-    baseSpeed: 7,
-    expReward: 100,
-    goldReward: 80,
-    description: 'Boss đầu tiên - Vua của bọn Goblin.',
-    isBoss: true
+    id: 'werewolf', name: 'Người Sói', emoji: '🐺',
+    baseLevel: 12, baseHP: 140, baseAttack: 35, baseDefense: 10, baseSpeed: 18,
+    expReward: 130, goldReward: 85,
+    description: 'Người sói nhanh và mạnh.', isBoss: false
   },
   {
-    id: 'boss_dragon',
-    name: 'Rồng Lửa',
-    emoji: '🐉',
-    baseLevel: 15,
-    baseHP: 400,
-    baseAttack: 30,
-    baseDefense: 18,
-    baseSpeed: 12,
-    expReward: 500,
-    goldReward: 300,
-    description: 'Boss cuối - Rồng lửa hùng mạnh.',
-    isBoss: true
+    id: 'minotaur', name: 'Minotaur', emoji: '🐂',
+    baseLevel: 15, baseHP: 180, baseAttack: 38, baseDefense: 18, baseSpeed: 8,
+    expReward: 160, goldReward: 100,
+    description: 'Quái vật nửa người nửa bò.', isBoss: false
   },
   {
-    id: 'boss_lich',
-    name: 'Lich King',
-    emoji: '☠️',
-    baseLevel: 12,
-    baseHP: 300,
-    baseAttack: 25,
-    baseDefense: 12,
-    baseSpeed: 15,
-    expReward: 350,
-    goldReward: 200,
-    description: 'Boss tầng 3 - Vua xác sống.',
-    isBoss: true
+    id: 'vampire', name: 'Ma Cà Rồng', emoji: '🧛',
+    baseLevel: 18, baseHP: 160, baseAttack: 42, baseDefense: 14, baseSpeed: 16,
+    expReward: 200, goldReward: 130,
+    description: 'Ma cà rồng hút máu.', isBoss: false
+  },
+  {
+    id: 'demon', name: 'Quỷ', emoji: '😈',
+    baseLevel: 20, baseHP: 200, baseAttack: 48, baseDefense: 20, baseSpeed: 14,
+    expReward: 250, goldReward: 160,
+    description: 'Quỷ từ địa ngục.', isBoss: false
+  },
+  {
+    id: 'golem', name: 'Đá Khổng Lồ', emoji: '🗿',
+    baseLevel: 25, baseHP: 300, baseAttack: 40, baseDefense: 30, baseSpeed: 3,
+    expReward: 300, goldReward: 200,
+    description: 'Đá sống phòng thủ cao.', isBoss: false
+  },
+  {
+    id: 'hydra', name: 'Hydra', emoji: '🐲',
+    baseLevel: 30, baseHP: 350, baseAttack: 55, baseDefense: 22, baseSpeed: 10,
+    expReward: 400, goldReward: 250,
+    description: 'Rắn nhiều đầu.', isBoss: false
+  },
+  {
+    id: 'reaper', name: 'Thần Chết', emoji: '💀',
+    baseLevel: 40, baseHP: 400, baseAttack: 65, baseDefense: 25, baseSpeed: 20,
+    expReward: 500, goldReward: 350,
+    description: 'Thần chết gặt mạng.', isBoss: false
+  },
+  {
+    id: 'void_lord', name: 'Chúa Tể Hư Không', emoji: '🕳️',
+    baseLevel: 50, baseHP: 500, baseAttack: 80, baseDefense: 30, baseSpeed: 18,
+    expReward: 700, goldReward: 500,
+    description: 'Chúa tể từ hư không.', isBoss: false
+  },
+
+  // === BOSSES (mỗi 5 tầng) ===
+  {
+    id: 'boss_goblin_king', name: 'Vua Goblin', emoji: '👑',
+    baseLevel: 5, baseHP: 150, baseAttack: 12, baseDefense: 8, baseSpeed: 7,
+    expReward: 100, goldReward: 80,
+    description: 'Boss tầng 5 - Vua của bọn Goblin.', isBoss: true
+  },
+  {
+    id: 'boss_skeleton_lord', name: 'Vua Xương', emoji: '💀',
+    baseLevel: 10, baseHP: 250, baseAttack: 22, baseDefense: 14, baseSpeed: 8,
+    expReward: 200, goldReward: 150,
+    description: 'Boss tầng 10 - Vua của bộ xương.', isBoss: true
+  },
+  {
+    id: 'boss_lich', name: 'Lich King', emoji: '☠️',
+    baseLevel: 15, baseHP: 350, baseAttack: 30, baseDefense: 16, baseSpeed: 12,
+    expReward: 350, goldReward: 220,
+    description: 'Boss tầng 15 - Vua xác sống.', isBoss: true
+  },
+  {
+    id: 'boss_demon_lord', name: 'Vua Quỷ', emoji: '😈',
+    baseLevel: 20, baseHP: 450, baseAttack: 38, baseDefense: 20, baseSpeed: 14,
+    expReward: 500, goldReward: 350,
+    description: 'Boss tầng 20 - Vua quỷ dữ.', isBoss: true
+  },
+  {
+    id: 'boss_minotaur_king', name: 'Vua Minotaur', emoji: '🐂',
+    baseLevel: 25, baseHP: 550, baseAttack: 45, baseDefense: 25, baseSpeed: 10,
+    expReward: 650, goldReward: 450,
+    description: 'Boss tầng 25 - Vua Minotaur.', isBoss: true
+  },
+  {
+    id: 'boss_vampire_count', name: ' Bá Tước Ma Cà Rồng', emoji: '🧛',
+    baseLevel: 30, baseHP: 600, baseAttack: 50, baseDefense: 22, baseSpeed: 18,
+    expReward: 800, goldReward: 550,
+    description: 'Boss tầng 30 - Bá tước Ma Cà Rồng.', isBoss: true
+  },
+  {
+    id: 'boss_hydra_king', name: 'Vua Hydra', emoji: '🐲',
+    baseLevel: 35, baseHP: 700, baseAttack: 58, baseDefense: 28, baseSpeed: 12,
+    expReward: 1000, goldReward: 700,
+    description: 'Boss tầng 35 - Vua Hydra.', isBoss: true
+  },
+  {
+    id: 'boss_dragon', name: 'Rồng Lửa', emoji: '🐉',
+    baseLevel: 40, baseHP: 800, baseAttack: 65, baseDefense: 30, baseSpeed: 15,
+    expReward: 1200, goldReward: 850,
+    description: 'Boss tầng 40 - Rồng lửa hùng mạnh.', isBoss: true
+  },
+  {
+    id: 'boss_shadow_king', name: 'Vua Bóng Tối', emoji: '🌑',
+    baseLevel: 45, baseHP: 900, baseAttack: 72, baseDefense: 35, baseSpeed: 20,
+    expReward: 1500, goldReward: 1000,
+    description: 'Boss tầng 45 - Vua bóng tối.', isBoss: true
+  },
+  {
+    id: 'boss_reaper', name: 'Thần Chết', emoji: '💀',
+    baseLevel: 50, baseHP: 1000, baseAttack: 80, baseDefense: 38, baseSpeed: 22,
+    expReward: 1800, goldReward: 1200,
+    description: 'Boss tầng 50 - Thần chết gặt mạng.', isBoss: true
+  },
+  {
+    id: 'boss_void_emperor', name: 'Hoàng Đế Hư Không', emoji: '🕳️',
+    baseLevel: 55, baseHP: 1200, baseAttack: 90, baseDefense: 42, baseSpeed: 18,
+    expReward: 2200, goldReward: 1500,
+    description: 'Boss tầng 55 - Hoàng đế hư không.', isBoss: true
+  },
+  {
+    id: 'boss_chaos_lord', name: 'Chúa Tể Hỗn Độn', emoji: '🌀',
+    baseLevel: 60, baseHP: 1400, baseAttack: 100, baseDefense: 48, baseSpeed: 20,
+    expReward: 2800, goldReward: 2000,
+    description: 'Boss tầng 60 - Chúa tể hỗn độn.', isBoss: true
+  },
+  {
+    id: 'boss_time_king', name: 'Vua Thời Gian', emoji: '⏰',
+    baseLevel: 65, baseHP: 1600, baseAttack: 110, baseDefense: 52, baseSpeed: 25,
+    expReward: 3500, goldReward: 2500,
+    description: 'Boss tầng 65 - Vua kiểm soát thời gian.', isBoss: true
+  },
+  {
+    id: 'boss_space_lord', name: 'Chúa Tể Không Gian', emoji: '🌌',
+    baseLevel: 70, baseHP: 1800, baseAttack: 120, baseDefense: 58, baseSpeed: 22,
+    expReward: 4200, goldReward: 3000,
+    description: 'Boss tầng 70 - Chúa tể không gian.', isBoss: true
+  },
+  {
+    id: 'boss_destiny', name: 'Số Mệnh', emoji: '⚖️',
+    baseLevel: 75, baseHP: 2000, baseAttack: 130, baseDefense: 62, baseSpeed: 28,
+    expReward: 5000, goldReward: 3500,
+    description: 'Boss tầng 75 - Hiện thân số mệnh.', isBoss: true
+  },
+  {
+    id: 'boss_god_slayer', name: 'Thần Sát', emoji: '⚡',
+    baseLevel: 80, baseHP: 2500, baseAttack: 150, baseDefense: 70, baseSpeed: 25,
+    expReward: 6000, goldReward: 4500,
+    description: 'Boss tầng 80 - Sát thần.', isBoss: true
+  },
+  {
+    id: 'boss_abyss_king', name: 'Vua Vực Thẳm', emoji: '🕳️',
+    baseLevel: 85, baseHP: 3000, baseAttack: 170, baseDefense: 80, baseSpeed: 22,
+    expReward: 7500, goldReward: 5500,
+    description: 'Boss tầng 85 - Vua vực thẳm.', isBoss: true
+  },
+  {
+    id: 'boss_eternal', name: 'Bất Tử', emoji: '♾️',
+    baseLevel: 90, baseHP: 3500, baseAttack: 190, baseDefense: 90, baseSpeed: 30,
+    expReward: 9000, goldReward: 7000,
+    description: 'Boss tầng 90 - Sinh vật bất tử.', isBoss: true
+  },
+  {
+    id: 'boss_final', name: 'Kẻ Hủy Diệt', emoji: '💀',
+    baseLevel: 95, baseHP: 5000, baseAttack: 220, baseDefense: 100, baseSpeed: 28,
+    expReward: 15000, goldReward: 10000,
+    description: 'Boss tầng 95 - Kẻ hủy diệt thế giới.', isBoss: true
+  },
+  {
+    id: 'boss_supreme', name: 'Tối Thượng', emoji: '👑',
+    baseLevel: 100, baseHP: 8000, baseAttack: 280, baseDefense: 120, baseSpeed: 35,
+    expReward: 30000, goldReward: 20000,
+    description: 'Boss tầng 100 - Vua tối thượng, kết thúc.', isBoss: true
   }
 ];
 
 export function createMonster(template: MonsterTemplate, floorLevel: number): Monster {
-  const scaling = 1 + (floorLevel - template.baseLevel) * 0.15;
+  const scaling = 1 + (floorLevel - template.baseLevel) * 0.12;
   const level = Math.max(template.baseLevel, floorLevel);
   
   return {
@@ -201,7 +266,7 @@ export function createMonster(template: MonsterTemplate, floorLevel: number): Mo
     maxHP: Math.floor(template.baseHP * scaling),
     attack: Math.floor(template.baseAttack * scaling),
     defense: Math.floor(template.baseDefense * scaling),
-    speed: template.baseSpeed + Math.floor(floorLevel / 5),
+    speed: template.baseSpeed + Math.floor(floorLevel / 10),
     expReward: Math.floor(template.expReward * scaling),
     goldReward: Math.floor(template.goldReward * scaling),
     description: template.description,
@@ -211,11 +276,12 @@ export function createMonster(template: MonsterTemplate, floorLevel: number): Mo
 
 export function getMonstersForFloor(floor: number): MonsterTemplate[] {
   if (floor % 5 === 0 && floor >= 5) {
-    const bossIndex = Math.min(Math.floor(floor / 5) - 1, 2);
-    return [MONSTER_TEMPLATES.filter(m => m.isBoss)[bossIndex]];
+    const bosses = MONSTER_TEMPLATES.filter(m => m.isBoss);
+    const bossIndex = Math.min(Math.floor(floor / 5) - 1, bosses.length - 1);
+    return [bosses[bossIndex]];
   }
   
-  return MONSTER_TEMPLATES.filter(m => !m.isBoss && m.baseLevel <= floor + 2);
+  return MONSTER_TEMPLATES.filter(m => !m.isBoss && m.baseLevel <= floor + 2 && m.baseLevel >= floor - 5);
 }
 
 export function getRandomMonster(floor: number): Monster {
@@ -223,3 +289,5 @@ export function getRandomMonster(floor: number): Monster {
   const template = available[Math.floor(Math.random() * available.length)];
   return createMonster(template, floor);
 }
+
+export const BOSS_FLOORS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];

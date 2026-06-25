@@ -1,6 +1,6 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, StringSelectMenuBuilder } from 'discord.js';
 import { Database } from '../game/database';
-import { getRandomMonster, Monster } from '../game/monsters';
+import { getRandomMonster, Monster, BOSS_FLOORS } from '../game/monsters';
 import { executeCombatRound, useSkillMana } from '../game/combat';
 import { FLOOR_NAMES, FLOOR_DESCRIPTIONS } from '../game/dungeon';
 import { getSkillsForClass, Skill } from '../game/skills';
@@ -75,11 +75,9 @@ export const prefixCommand = {
         return message.reply(`❌ Bạn chỉ có thể lên đến tầng **${player.highestFloor + 1}**!\nHãy chinh phục tầng trước đó trước.`);
       }
 
-      const bossFloors = [5, 10, 15];
-      for (const bossFloor of bossFloors) {
-        if (requestedFloor > bossFloor && player.highestFloor <= bossFloor) {
-          return message.reply(`❌ Bạn phải đánh bại Boss tầng **${bossFloor}** trước khi lên tầng ${requestedFloor}!`);
-        }
+      const prevBossFloor = BOSS_FLOORS.filter(bf => bf < requestedFloor).pop();
+      if (prevBossFloor && player.highestFloor <= prevBossFloor) {
+        return message.reply(`❌ Bạn phải đánh bại Boss tầng **${prevBossFloor}** trước khi lên tầng ${requestedFloor}!`);
       }
 
       floor = requestedFloor;

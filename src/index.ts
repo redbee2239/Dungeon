@@ -135,7 +135,7 @@ client.on('messageCreate', async (message) => {
   
   if (remaining > 0) {
     const msg = await message.reply(`⏰ Vui lòng đợi **${formatCooldown(remaining)}** nữa!`);
-    setTimeout(() => msg.delete().catch(() => {}), remaining * 1000);
+    setTimeout(() => msg.delete().catch(() => {}), 3000);
     return;
   }
 

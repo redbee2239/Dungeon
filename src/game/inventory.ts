@@ -81,14 +81,18 @@ export function calculateBonusStats(inventory: Inventory): {
   let mp = 0;
   let speed = 0;
 
-  for (const invItem of inventory.items) {
-    const item = ITEMS[invItem.itemId];
-    if (item && item.stats) {
-      attack += item.stats.attack || 0;
-      defense += item.stats.defense || 0;
-      hp += item.stats.hp || 0;
-      mp += item.stats.mp || 0;
-      speed += item.stats.speed || 0;
+  const equipped = (inventory as any).equipped;
+  if (equipped) {
+    const equipIds = [equipped.weapon, equipped.armor, equipped.accessory].filter(Boolean);
+    for (const itemId of equipIds) {
+      const item = ITEMS[itemId];
+      if (item && item.stats) {
+        attack += item.stats.attack || 0;
+        defense += item.stats.defense || 0;
+        hp += item.stats.hp || 0;
+        mp += item.stats.mp || 0;
+        speed += item.stats.speed || 0;
+      }
     }
   }
 

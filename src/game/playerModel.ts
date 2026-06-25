@@ -27,6 +27,11 @@ export interface IPlayer extends Document {
       chestId: string;
       quantity: number;
     }[];
+    equipped: {
+      weapon: string | null;
+      armor: string | null;
+      accessory: string | null;
+    };
     maxSlots: number;
   };
   dungeon: {
@@ -78,6 +83,11 @@ const PlayerSchema = new Schema<IPlayer>({
       chestId: String,
       quantity: Number
     }],
+    equipped: {
+      weapon: { type: String, default: null },
+      armor: { type: String, default: null },
+      accessory: { type: String, default: null }
+    },
     maxSlots: { type: Number, default: 20 }
   },
   dungeon: {

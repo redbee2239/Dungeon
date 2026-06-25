@@ -18,6 +18,11 @@ export interface Player {
   inventory: {
     items: InventoryItem[];
     chests: ChestItem[];
+    equipped: {
+      weapon: string | null;
+      armor: string | null;
+      accessory: string | null;
+    };
     maxSlots: number;
   };
   dungeon: {
@@ -58,6 +63,7 @@ function docToPlayer(doc: IPlayer): Player {
     inventory: {
       items: doc.inventory.items || [],
       chests: doc.inventory.chests || [],
+      equipped: doc.inventory.equipped || { weapon: null, armor: null, accessory: null },
       maxSlots: doc.inventory.maxSlots
     },
     dungeon: doc.dungeon,
@@ -100,7 +106,7 @@ export class Database {
       characterClass,
       stats,
       gems: 0,
-      inventory: { items: [], chests: [], maxSlots: 20 },
+      inventory: { items: [], chests: [], equipped: { weapon: null, armor: null, accessory: null }, maxSlots: 20 },
       dungeon: {
         currentFloor: 1,
         roomsExplored: 0,

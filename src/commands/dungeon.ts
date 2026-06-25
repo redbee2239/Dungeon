@@ -142,7 +142,7 @@ export const prefixCommand = {
 
     const collector = reply.createMessageComponentCollector({
       componentType: ComponentType.Button,
-      time: 60000
+      time: 90000
     });
 
     collector.on('collect', async (i: any) => {

@@ -100,6 +100,14 @@ export class Database {
 
   async createPlayer(userId: string, name: string, characterClass: CharacterClass): Promise<Player> {
     const stats = createBaseStats(characterClass);
+    
+    const startingSkills: Record<CharacterClass, string> = {
+      warrior: 'basic_slash',
+      mage: 'spark',
+      rogue: 'quick_strike',
+      cleric: 'holy_smite'
+    };
+    
     const doc = await PlayerModel.create({
       userId,
       name,
@@ -115,7 +123,7 @@ export class Database {
         startTime: 0
       },
       skillPoints: 0,
-      unlockedSkills: [],
+      unlockedSkills: [startingSkills[characterClass]],
       equippedSkill: null,
       totalMonstersKilled: 0,
       totalGoldEarned: 0,

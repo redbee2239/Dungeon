@@ -104,6 +104,118 @@ export const ITEMS: Record<string, Item> = {
     sellPrice: 2500
   },
 
+  // Magic Weapons (Mage/Cleric)
+  magic_wand: {
+    id: 'magic_wand',
+    name: 'Gậy phép Cơ Bản',
+    emoji: '🪄',
+    type: 'weapon',
+    rarity: 'common',
+    description: 'Gậy phép cho người mới.',
+    stats: { attack: 4, mp: 10 },
+    price: 30,
+    sellPrice: 12
+  },
+  oak_staff: {
+    id: 'oak_staff',
+    name: 'Gậy Sồi',
+    emoji: '🪄',
+    type: 'weapon',
+    rarity: 'common',
+    description: 'Gậy làm từ gỗ sồi.',
+    stats: { attack: 6, mp: 15 },
+    price: 60,
+    sellPrice: 25
+  },
+  arcane_rod: {
+    id: 'arcane_rod',
+    name: 'Gậy Bí Thuật',
+    emoji: '✨',
+    type: 'weapon',
+    rarity: 'uncommon',
+    description: 'Gậy mang năng lượng bí thuật.',
+    stats: { attack: 10, mp: 25 },
+    price: 150,
+    sellPrice: 70
+  },
+  crystal_staff: {
+    id: 'crystal_staff',
+    name: 'Gậy Pha Lê',
+    emoji: '🔮',
+    type: 'weapon',
+    rarity: 'uncommon',
+    description: 'Gậy pha lê phát sáng.',
+    stats: { attack: 12, mp: 30 },
+    price: 200,
+    sellPrice: 90
+  },
+  mage_staff: {
+    id: 'mage_staff',
+    name: 'Gậy Pháp Sư',
+    emoji: '🌟',
+    type: 'weapon',
+    rarity: 'rare',
+    description: 'Gậy của pháp sư lão luyện.',
+    stats: { attack: 18, mp: 50 },
+    price: 450,
+    sellPrice: 220
+  },
+  holy_staff: {
+    id: 'holy_staff',
+    name: 'Gậy Thánh',
+    emoji: '✝️',
+    type: 'weapon',
+    rarity: 'rare',
+    description: 'Gậy mang sức mạnh thiêng liêng.',
+    stats: { attack: 15, mp: 40, hp: 20 },
+    price: 500,
+    sellPrice: 240
+  },
+  arcane_staff: {
+    id: 'arcane_staff',
+    name: 'Gậy Nguyên Tố',
+    emoji: '⚡',
+    type: 'weapon',
+    rarity: 'epic',
+    description: 'Gậy kiểm soát nguyên tố.',
+    stats: { attack: 25, mp: 80 },
+    price: 1200,
+    sellPrice: 600
+  },
+  divine_staff: {
+    id: 'divine_staff',
+    name: 'Gậy Thần Thánh',
+    emoji: '💫',
+    type: 'weapon',
+    rarity: 'epic',
+    description: 'Gậy của thần linh.',
+    stats: { attack: 22, mp: 60, hp: 40 },
+    price: 1300,
+    sellPrice: 650
+  },
+  archmage_staff: {
+    id: 'archmage_staff',
+    name: 'Gậy Đại Pháp Sư',
+    emoji: '🌌',
+    type: 'weapon',
+    rarity: 'legendary',
+    description: 'Gậy của đại pháp sư.',
+    stats: { attack: 40, mp: 120, speed: 5 },
+    price: 4500,
+    sellPrice: 2200
+  },
+  staff_of_eternity: {
+    id: 'staff_of_eternity',
+    name: 'Gậy Vĩnh Hằng',
+    emoji: '∞',
+    type: 'weapon',
+    rarity: 'legendary',
+    description: 'Gậy bất tử từ thời cổ đại.',
+    stats: { attack: 35, mp: 150, hp: 50 },
+    price: 5000,
+    sellPrice: 2500
+  },
+
   cloth_armor: {
     id: 'cloth_armor',
     name: 'Áo Vải',

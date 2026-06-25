@@ -31,6 +31,56 @@ export const SKILL_RARITY_COLORS: Record<SkillRarity, number> = {
 };
 
 export const SKILLS: Skill[] = [
+  // Starting Skills (Level 1)
+  {
+    id: 'basic_slash',
+    name: 'Chém Cơ Bản',
+    emoji: '⚔️',
+    description: 'Đòn chém cơ bản.',
+    manaCost: 5,
+    damage: 1.2,
+    unlockLevel: 1,
+    class: 'warrior',
+    rarity: 'common',
+    gachaRate: 0
+  },
+  {
+    id: 'spark',
+    name: 'Tia Sét',
+    emoji: '⚡',
+    description: 'Bắn tia sét nhỏ.',
+    manaCost: 8,
+    damage: 1.3,
+    unlockLevel: 1,
+    class: 'mage',
+    rarity: 'common',
+    gachaRate: 0
+  },
+  {
+    id: 'quick_strike',
+    name: 'Đánh Nhanh',
+    emoji: '🗡️',
+    description: 'Đòn đánh nhanh.',
+    manaCost: 6,
+    damage: 1.1,
+    unlockLevel: 1,
+    class: 'rogue',
+    rarity: 'common',
+    gachaRate: 0
+  },
+  {
+    id: 'holy_smite',
+    name: 'Đánh Thánh',
+    emoji: '✨',
+    description: 'Đánh bằng sức mạnh thánh.',
+    manaCost: 7,
+    damage: 1.2,
+    unlockLevel: 1,
+    class: 'cleric',
+    rarity: 'common',
+    gachaRate: 0
+  },
+
   // Warrior skills
   {
     id: 'power_strike',

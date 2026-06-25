@@ -11,10 +11,13 @@ const classMap: Record<string, CharacterClass> = {
   'sátthủ': 'rogue',
   'cleric': 'cleric',
   'tusĩ': 'cleric',
+  'gladiator': 'gladiator',
+  'đausĩ': 'gladiator',
   '1': 'warrior',
   '2': 'mage',
   '3': 'rogue',
-  '4': 'cleric'
+  '4': 'cleric',
+  '5': 'gladiator'
 };
 
 export const prefixCommand = {
@@ -32,7 +35,7 @@ export const prefixCommand = {
     if (!classInput || !classMap[classInput]) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Chọn lớp nhân vật')
-        .setDescription('Cách dùng: `,create <lớp>`\n\n**Lớp có sẵn:**\n⚔️ `warrior` - Chiến Binh\n🔮 `mage` - Pháp Sư\n🗡️ `rogue` - Sát Thủ\n✝️ `cleric` - Tu Sĩ')
+        .setDescription('Cách dùng: `,create <lớp>`\n\n**Lớp có sẵn:**\n⚔️ `warrior` - Chiến Binh\n🔮 `mage` - Pháp Sư\n🗡️ `rogue` - Sát Thủ\n✝️ `cleric` - Tu Sĩ\n🏟️ `gladiator` - Đấu Sĩ')
         .setColor(0xFF0000);
       return message.reply({ embeds: [embed] });
     }

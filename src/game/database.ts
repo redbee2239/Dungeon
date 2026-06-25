@@ -105,7 +105,8 @@ export class Database {
       warrior: 'basic_slash',
       mage: 'spark',
       rogue: 'quick_strike',
-      cleric: 'holy_smite'
+      cleric: 'holy_smite',
+      gladiator: 'battle_cry'
     };
     
     const doc = await PlayerModel.create({

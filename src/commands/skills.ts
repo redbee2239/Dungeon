@@ -27,7 +27,7 @@ export const prefixCommand = {
         name: '✅ Đã Mở Khóa',
         value: unlocked.map(s => {
           const learned = player.unlockedSkills.includes(s.id) ? ' [ĐÃ HỌC]' : '';
-          return `${s.emoji} **${s.name}** (Lv.${s.unlockLevel}) - MP: ${s.manaCost}${learned}\n> ${s.description}`;
+          return `${s.emoji} **${s.name}** \`${s.id}\` (Lv.${s.unlockLevel}) - MP: ${s.manaCost}${learned}\n> ${s.description}`;
         }).join('\n\n')
       });
     }
@@ -36,7 +36,7 @@ export const prefixCommand = {
       embed.addFields({
         name: '🔒 Chưa Mở',
         value: locked.map(s =>
-          `${s.emoji} **${s.name}** (Cần Lv.${s.unlockLevel})\n> ${s.description}`
+          `${s.emoji} **${s.name}** \`${s.id}\` (Cần Lv.${s.unlockLevel})\n> ${s.description}`
         ).join('\n\n')
       });
     }

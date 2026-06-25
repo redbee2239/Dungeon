@@ -1,4 +1,4 @@
-export type CharacterClass = 'warrior' | 'mage' | 'rogue' | 'cleric';
+export type CharacterClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator';
 
 export interface ClassStats {
   name: string;
@@ -51,6 +51,16 @@ export const CLASS_DATA: Record<CharacterClass, ClassStats> = {
     baseDefense: 10,
     baseSpeed: 9,
     description: 'Có khả năng hồi phục, hỗ trợ đồng đội.'
+  },
+  gladiator: {
+    name: 'Đấu Sĩ',
+    emoji: '🏟️',
+    baseHP: 130,
+    baseMP: 20,
+    baseAttack: 18,
+    baseDefense: 10,
+    baseSpeed: 7,
+    description: 'Sức mạnh tấn công cực cao, chuyên dùng vũ khí sát thương.'
   }
 };
 

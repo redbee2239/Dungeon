@@ -1,13 +1,41 @@
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
-import { getRandomSkill, getSkillById, SKILL_RARITY_NAMES, SKILL_RARITY_COLORS, Skill } from '../game/skills';
+import { ITEMS, RARITY_NAMES, RARITY_COLORS, ItemRarity, Item } from '../game/items';
 
 const GACHA_COST = 50;
 const MULTI_COST = 450;
 
+const RARITY_WEIGHTS: Record<ItemRarity, number> = {
+  common: 40,
+  uncommon: 30,
+  rare: 20,
+  epic: 8,
+  legendary: 2
+};
+
+const GACHA_ITEMS = Object.values(ITEMS).filter(item => item.type !== 'potion');
+
+function rollRarity(): ItemRarity {
+  const total = Object.values(RARITY_WEIGHTS).reduce((a, b) => a + b, 0);
+  let roll = Math.random() * total;
+  
+  for (const [rarity, weight] of Object.entries(RARITY_WEIGHTS)) {
+    roll -= weight;
+    if (roll <= 0) return rarity as ItemRarity;
+  }
+  return 'common';
+}
+
+function rollItem(): Item {
+  const rarity = rollRarity();
+  const pool = GACHA_ITEMS.filter(i => i.rarity === rarity);
+  if (pool.length === 0) return GACHA_ITEMS[0];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 export const prefixCommand = {
   name: 'gacha',
-  description: 'Quay gacha kỹ năng',
+  description: 'Quay gacha trang bị',
   execute: async (message: any, args: string[], db: Database) => {
     const userId = message.author.id;
     const player = await db.getPlayer(userId);
@@ -20,15 +48,15 @@ export const prefixCommand = {
 
     if (!action || !['1', '10', 'single', 'multi', 'roll', 'history'].includes(action)) {
       const embed = new EmbedBuilder()
-        .setTitle('🎰 Gacha Kỹ Năng')
+        .setTitle('🎰 Gacha Trang Bị')
         .setDescription(`Chi phí:\n- 1 lần: **${GACHA_COST}** 💎\n- 10 lần: **${MULTI_COST}** 💎 (-10%)\n\nGem của bạn: **${player.gems}** 💎`)
         .addFields(
           { name: '📊 Tỷ Lệ', value: [
-            '⚪ Common: 40%',
-            '🟢 Uncommon: 30%',
-            '🔵 Rare: 20%',
-            '🟣 Epic: 8%',
-            '🟠 Legendary: 2%'
+            '⚪ Phổ Thông: 40%',
+            '🟢 Thông Thường: 30%',
+            '🔵 Hiếm: 20%',
+            '🟣 Sử Thi: 8%',
+            '🟠 Huyền Thoại: 2%'
           ].join('\n') },
           { name: '💡 Cách Dùng', value: [
             ',gacha 1 - Quay 1 lần',
@@ -50,8 +78,8 @@ export const prefixCommand = {
       const embed = new EmbedBuilder()
         .setTitle('📜 Lịch Sử Gacha (10 gần nhất)')
         .setDescription(history.map(h => {
-          const skill = getSkillById(h.skillId);
-          return `${skill?.emoji || '?'} ${skill?.name || h.skillId} (${SKILL_RARITY_NAMES[h.rarity as keyof typeof SKILL_RARITY_NAMES]})`;
+          const item = ITEMS[h.skillId];
+          return `${item?.emoji || '?'} ${item?.name || h.skillId} (${RARITY_NAMES[h.rarity as keyof typeof RARITY_NAMES] || h.rarity})`;
         }).join('\n'))
         .setColor(0x0099FF);
 
@@ -67,22 +95,26 @@ export const prefixCommand = {
 
     await db.removeGems(player, cost);
 
-    const results: { skill: Skill; isNew: boolean }[] = [];
+    const results: { item: Item; isNew: boolean }[] = [];
     const rollCount = isMulti ? 10 : 1;
 
     for (let i = 0; i < rollCount; i++) {
-      const skill = getRandomSkill();
-      const isNew = !player.unlockedSkills.includes(skill.id);
-      results.push({ skill, isNew });
+      const item = rollItem();
+      const existing = player.inventory.items.find((inv: any) => inv.itemId === item.id);
+      const isNew = !existing || existing.quantity === 0;
+      results.push({ item, isNew });
 
-      if (isNew) {
-        player.unlockedSkills.push(skill.id);
-        player.gachaHistory.push({
-          skillId: skill.id,
-          rarity: skill.rarity,
-          date: new Date()
-        });
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        player.inventory.items.push({ itemId: item.id, quantity: 1 });
       }
+
+      player.gachaHistory.push({
+        skillId: item.id,
+        rarity: item.rarity,
+        date: new Date()
+      });
     }
 
     await db.updatePlayer(player);
@@ -94,35 +126,44 @@ export const prefixCommand = {
 
     if (isMulti) {
       const grouped = results.reduce((acc, r) => {
-        const rarity = r.skill.rarity;
+        const rarity = r.item.rarity;
         if (!acc[rarity]) acc[rarity] = [];
         acc[rarity].push(r);
         return acc;
-      }, {} as Record<string, { skill: Skill; isNew: boolean }[]>);
+      }, {} as Record<string, { item: Item; isNew: boolean }[]>);
 
       let desc = '';
       for (const rarity of ['legendary', 'epic', 'rare', 'uncommon', 'common'] as const) {
         const items = grouped[rarity];
         if (items && items.length > 0) {
-          desc += `\n**${SKILL_RARITY_NAMES[rarity]}:**\n`;
+          desc += `\n**${RARITY_NAMES[rarity]}:**\n`;
           items.forEach(r => {
-            desc += `${r.skill.emoji} ${r.skill.name}${r.isNew ? ' ✨' : ''}\n`;
+            desc += `${r.item.emoji} ${r.item.name}${r.isNew ? ' ✨' : ''}\n`;
           });
         }
       }
 
       embed.setDescription(desc || 'Không có gì mới...');
     } else {
-      const { skill, isNew } = results[0];
+      const { item, isNew } = results[0];
+      let statsText = '';
+      if (item.stats) {
+        statsText = Object.entries(item.stats)
+          .filter(([_, v]) => v && v !== 0)
+          .map(([k, v]) => `${k.toUpperCase()}: +${v}`)
+          .join('\n');
+      }
+
       embed.setDescription(
-        `${skill.emoji} **${skill.name}**\n` +
-        `Rarity: ${SKILL_RARITY_NAMES[skill.rarity]}\n` +
-        `Class: ${skill.class}\n` +
-        `MP: ${skill.manaCost} | Damage: ${skill.damage * 100}%\n` +
-        `${skill.description}\n\n` +
-        `${isNew ? '✨ Kỹ năng mới!' : '⚠️ Đã có kỹ năng này'}`
+        `${item.emoji} **${item.name}**\n` +
+        `Rarity: ${RARITY_NAMES[item.rarity]}\n` +
+        `Type: ${item.type === 'weapon' ? '⚔️ Vũ khí' : item.type === 'armor' ? '🛡️ Giáp' : '💍 Phụ kiện'}\n` +
+        `${statsText ? `Stats:\n${statsText}\n` : ''}` +
+        `${item.description}\n\n` +
+        `${isNew ? '✨ Trang bị mới!' : '⚠️ Đã có trang bị này (+1)'}` +
+        `\nID: \`${item.id}\``
       );
-      embed.setColor(SKILL_RARITY_COLORS[skill.rarity]);
+      embed.setColor(RARITY_COLORS[item.rarity]);
     }
 
     embed.setFooter({ text: `Gem còn lại: ${player.gems} 💎` });

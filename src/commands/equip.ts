@@ -1,6 +1,10 @@
 import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
 import { ITEMS, RARITY_NAMES, ItemRarity, ItemType } from '../game/items';
+import { CLASS_DATA, CharacterClass } from '../game/classes';
+
+const PHYSICAL_CLASSES: CharacterClass[] = ['warrior', 'rogue', 'gladiator'];
+const MAGIC_CLASSES: CharacterClass[] = ['mage', 'cleric'];
 
 export const prefixCommand = {
   name: 'equip',
@@ -42,6 +46,27 @@ export const prefixCommand = {
       const invItem = player.inventory.items.find((i: any) => i.itemId === itemId);
       if (!invItem || invItem.quantity <= 0) {
         return message.reply('❌ Bạn không có vật phẩm này!');
+      }
+
+      if (item.type === 'weapon') {
+        const isPhysical = PHYSICAL_CLASSES.includes(player.characterClass);
+        const isMagic = MAGIC_CLASSES.includes(player.characterClass);
+
+        if (item.classRestriction && !item.classRestriction.includes(player.characterClass)) {
+          const className = CLASS_DATA[player.characterClass].name;
+          return message.reply(`❌ Class **${className}** không thể dùng vũ khí này!`);
+        }
+
+        if (!item.classRestriction) {
+          if (item.weaponType === 'physical' && !isPhysical) {
+            const className = CLASS_DATA[player.characterClass].name;
+            return message.reply(`❌ Class **${className}** chỉ dùng được vũ khí phép!`);
+          }
+          if (item.weaponType === 'magic' && !isMagic) {
+            const className = CLASS_DATA[player.characterClass].name;
+            return message.reply(`❌ Class **${className}** chỉ dùng được vũ khí sát thương!`);
+          }
+        }
       }
 
       const equipType = item.type as 'weapon' | 'armor' | 'accessory';

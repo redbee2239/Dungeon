@@ -16,8 +16,24 @@ function generateProgressBar(current: number, max: number, length: number): stri
 }
 
 function getAvailableSkills(player: any): Skill[] {
+  let unlocked = player.unlockedSkills || [];
+  const starterSkill = getStarterSkill(player.characterClass);
+  if (starterSkill && !unlocked.includes(starterSkill)) {
+    unlocked = [starterSkill, ...unlocked];
+  }
   const skills = getSkillsForClass(player.characterClass, player.stats.level);
-  return skills.filter(s => player.unlockedSkills.includes(s.id) && player.stats.mp >= s.manaCost);
+  return skills.filter(s => unlocked.includes(s.id) && player.stats.mp >= s.manaCost);
+}
+
+function getStarterSkill(characterClass: string): string | null {
+  const starters: Record<string, string> = {
+    warrior: 'basic_slash',
+    mage: 'spark',
+    rogue: 'quick_strike',
+    cleric: 'holy_smite',
+    gladiator: 'battle_cry'
+  };
+  return starters[characterClass] || null;
 }
 
 export const prefixCommand = {
@@ -96,8 +112,9 @@ export const prefixCommand = {
       new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
     );
 
+    const starterSkill = getStarterSkill(player.characterClass);
     const hasAnySkills = getSkillsForClass(player.characterClass, player.stats.level)
-      .some(s => player.unlockedSkills.includes(s.id));
+      .some(s => (player.unlockedSkills.includes(s.id) || s.id === starterSkill));
     
     if (hasAnySkills) {
       row.addComponents(
@@ -322,8 +339,9 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
     )
     .setColor(0xFF6600);
 
+  const starterSkill = getStarterSkill(player.characterClass);
   const hasAnySkills = getSkillsForClass(player.characterClass, player.stats.level)
-    .some(s => player.unlockedSkills.includes(s.id) && player.stats.mp >= s.manaCost);
+    .some(s => (player.unlockedSkills.includes(s.id) || s.id === starterSkill) && player.stats.mp >= s.manaCost);
 
   const row = new ActionRowBuilder<ButtonBuilder>();
   row.addComponents(

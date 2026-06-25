@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, EmbedBuilder } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, Events, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { config } from 'dotenv';
 import express from 'express';
 import * as fs from 'fs';
@@ -11,13 +11,19 @@ config();
 const PREFIX = ',';
 const db = new Database();
 
-interface Command {
+interface PrefixCommand {
   name: string;
   description: string;
   execute: (message: any, args: string[], db: Database) => Promise<void>;
 }
 
-const commands = new Map<string, Command>();
+interface SlashCommand {
+  data: SlashCommandBuilder;
+  execute: (interaction: any, db: Database) => Promise<void>;
+}
+
+const prefixCommands = new Map<string, PrefixCommand>();
+const slashCommands = new Collection<string, SlashCommand>();
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -25,9 +31,15 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
   const command = require(filePath);
+  
   if (command.prefixCommand) {
-    commands.set(command.prefixCommand.name, command.prefixCommand);
-    console.log(`✅ Loaded: ${PREFIX}${command.prefixCommand.name}`);
+    prefixCommands.set(command.prefixCommand.name, command.prefixCommand);
+    console.log(`✅ Prefix: ${PREFIX}${command.prefixCommand.name}`);
+  }
+  
+  if (command.data && command.execute) {
+    slashCommands.set(command.data.name, command);
+    console.log(`✅ Slash: /${command.data.name}`);
   }
 }
 
@@ -39,8 +51,44 @@ const client = new Client({
   ]
 });
 
-client.once('ready', (readyClient) => {
+client.once(Events.ClientReady, async (readyClient) => {
   console.log(`✅ Bot ready! Logged in as ${readyClient.user.tag}`);
+  
+  const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN!);
+  
+  try {
+    console.log('🔄 Registering slash commands...');
+    const commandsData = slashCommands.map(cmd => cmd.data.toJSON());
+    
+    if (process.env.CLIENT_ID) {
+      await rest.put(
+        Routes.applicationCommands(process.env.CLIENT_ID),
+        { body: commandsData }
+      );
+      console.log('✅ Slash commands registered!');
+    }
+  } catch (error) {
+    console.error('Error registering commands:', error);
+  }
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  const command = slashCommands.get(interaction.commandName);
+  if (!command) return;
+
+  try {
+    await command.execute(interaction, db);
+  } catch (error) {
+    console.error(`Error executing ${interaction.commandName}:`, error);
+    const reply = { content: '❌ Có lỗi xảy ra!', ephemeral: true };
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(reply);
+    } else {
+      await interaction.reply(reply);
+    }
+  }
 });
 
 client.on('messageCreate', async (message) => {
@@ -55,7 +103,7 @@ client.on('messageCreate', async (message) => {
 
   if (!commandName) return;
 
-  const command = commands.get(commandName);
+  const command = prefixCommands.get(commandName);
   if (!command) return;
 
   try {

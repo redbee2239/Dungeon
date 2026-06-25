@@ -5,20 +5,25 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import { Database } from './game/database';
+import { setCooldown, getCooldown, hasCooldown, formatCooldown } from './utils/cooldown';
 
 config();
 
 const PREFIX = ',';
 const db = new Database();
 
+const COOLDOWN_SECONDS = 5;
+
 interface PrefixCommand {
   name: string;
   description: string;
+  cooldown?: number;
   execute: (message: any, args: string[], db: Database) => Promise<void>;
 }
 
 interface SlashCommand {
   data: SlashCommandBuilder;
+  cooldown?: number;
   execute: (interaction: any, db: Database) => Promise<void>;
 }
 
@@ -86,7 +91,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const command = slashCommands.get(interaction.commandName);
   if (!command) return;
 
+  const cooldownTime = command.cooldown || COOLDOWN_SECONDS;
+  const remaining = getCooldown(interaction.user.id, interaction.commandName);
+  
+  if (remaining > 0) {
+    return interaction.reply({
+      content: `⏰ Vui lòng đợi **${formatCooldown(remaining)}** nữa!`,
+      ephemeral: true
+    });
+  }
+
   try {
+    setCooldown(interaction.user.id, interaction.commandName, cooldownTime);
     await command.execute(interaction, db);
   } catch (error) {
     console.error(`Error executing ${interaction.commandName}:`, error);
@@ -114,7 +130,17 @@ client.on('messageCreate', async (message) => {
   const command = prefixCommands.get(commandName);
   if (!command) return;
 
+  const cooldownTime = command.cooldown || COOLDOWN_SECONDS;
+  const remaining = getCooldown(message.author.id, commandName);
+  
+  if (remaining > 0) {
+    const msg = await message.reply(`⏰ Vui lòng đợi **${formatCooldown(remaining)}** nữa!`);
+    setTimeout(() => msg.delete().catch(() => {}), remaining * 1000);
+    return;
+  }
+
   try {
+    setCooldown(message.author.id, commandName, cooldownTime);
     await command.execute(message, args, db);
   } catch (error) {
     console.error(`Error executing ${commandName}:`, error);

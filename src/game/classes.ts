@@ -96,7 +96,7 @@ export function createBaseStats(characterClass: CharacterClass): PlayerStats {
 }
 
 export function getExpToNextLevel(level: number): number {
-  return Math.floor(100 * Math.pow(1.5, level - 1));
+  return Math.floor(50 + level * 30);
 }
 
 export function levelUp(stats: PlayerStats): PlayerStats {

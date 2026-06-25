@@ -12,3 +12,7 @@ services:
         sync: false
       - key: PORT
         value: 3000
+      - key: SELF_PING_URL
+        sync: false
+      - key: CHANNEL_ID
+        sync: false

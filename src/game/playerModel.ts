@@ -23,6 +23,10 @@ export interface IPlayer extends Document {
       itemId: string;
       quantity: number;
     }[];
+    chests: {
+      chestId: string;
+      quantity: number;
+    }[];
     maxSlots: number;
   };
   dungeon: {
@@ -68,6 +72,10 @@ const PlayerSchema = new Schema<IPlayer>({
   inventory: {
     items: [{
       itemId: String,
+      quantity: Number
+    }],
+    chests: [{
+      chestId: String,
       quantity: Number
     }],
     maxSlots: { type: Number, default: 20 }

@@ -17,6 +17,7 @@ export interface Player {
   gems: number;
   inventory: {
     items: InventoryItem[];
+    chests: ChestItem[];
     maxSlots: number;
   };
   dungeon: {
@@ -41,6 +42,11 @@ export interface Player {
   lastActive: Date;
 }
 
+export interface ChestItem {
+  chestId: string;
+  quantity: number;
+}
+
 function docToPlayer(doc: IPlayer): Player {
   return {
     id: doc._id.toString(),
@@ -49,7 +55,11 @@ function docToPlayer(doc: IPlayer): Player {
     characterClass: doc.characterClass as CharacterClass,
     stats: doc.stats as PlayerStats,
     gems: doc.gems || 0,
-    inventory: doc.inventory,
+    inventory: {
+      items: doc.inventory.items || [],
+      chests: doc.inventory.chests || [],
+      maxSlots: doc.inventory.maxSlots
+    },
     dungeon: doc.dungeon,
     skillPoints: doc.skillPoints,
     unlockedSkills: doc.unlockedSkills,
@@ -90,7 +100,7 @@ export class Database {
       characterClass,
       stats,
       gems: 0,
-      inventory: { items: [], maxSlots: 20 },
+      inventory: { items: [], chests: [], maxSlots: 20 },
       dungeon: {
         currentFloor: 1,
         roomsExplored: 0,
@@ -166,6 +176,32 @@ export class Database {
   async removeGems(player: Player, gems: number): Promise<boolean> {
     if (player.gems < gems) return false;
     player.gems -= gems;
+    await this.updatePlayer(player);
+    return true;
+  }
+
+  async addChest(player: Player, chestId: string, quantity: number = 1): Promise<void> {
+    const existing = player.inventory.chests.find(c => c.chestId === chestId);
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      player.inventory.chests.push({ chestId, quantity });
+    }
+    await this.updatePlayer(player);
+  }
+
+  async removeChest(player: Player, chestId: string, quantity: number = 1): Promise<boolean> {
+    const index = player.inventory.chests.findIndex(c => c.chestId === chestId);
+    if (index === -1) return false;
+    
+    const chest = player.inventory.chests[index];
+    if (chest.quantity < quantity) return false;
+    
+    chest.quantity -= quantity;
+    if (chest.quantity <= 0) {
+      player.inventory.chests.splice(index, 1);
+    }
+    
     await this.updatePlayer(player);
     return true;
   }

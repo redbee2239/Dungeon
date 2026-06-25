@@ -5,6 +5,7 @@ import { executeCombatRound, useSkillMana } from '../game/combat';
 import { FLOOR_NAMES, FLOOR_DESCRIPTIONS } from '../game/dungeon';
 import { getSkillsForClass, Skill } from '../game/skills';
 import { addItem, calculateBonusStats } from '../game/inventory';
+import { rollChest, CHEST_RARITY_NAMES, CHEST_RARITY_COLORS } from '../game/chests';
 
 const activeCombats = new Map<string, { monster: Monster; floor: number; active: boolean }>();
 
@@ -268,6 +269,15 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
     gemsEarned += gemBonus;
   }
 
+  let chestMsg = '';
+  if (combatData.monster.isBoss) {
+    const chest = rollChest(combatData.floor);
+    if (chest) {
+      await db.addChest(player, chest.id);
+      chestMsg = `\n${chest.emoji} Nhận được: **${chest.name}** (${CHEST_RARITY_NAMES[chest.rarity]})`;
+    }
+  }
+
   if (combatData.floor >= player.highestFloor) {
     player.highestFloor = combatData.floor + 1;
     player.dungeon.currentFloor = combatData.floor + 1;
@@ -278,6 +288,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
 
   let msg = `⚔️ **CHIẾN THẮNG!**\n${result.message}`;
   msg += `\n💎 +${gemsEarned} Gem`;
+  msg += chestMsg;
   if (expResult.leveled) {
     const levelGems = expResult.levelsGained * 5;
     await db.addGems(player, levelGems);

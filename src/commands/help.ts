@@ -25,7 +25,8 @@ export const prefixCommand = {
         ].join('\n') },
         { name: '🎯 Kỹ Năng', value: [
           '`,skills` - Xem kỹ năng',
-          '`,learn <id>` - Học kỹ năng'
+          '`,learn <id>` - Học kỹ năng',
+          '`,stat` - Xem/nâng chỉ số'
         ].join('\n') },
         { name: '⚔️ Trang Bị', value: [
           '`,equip <id>` - Trang bị',

@@ -74,6 +74,14 @@ export const prefixCommand = {
       if (requestedFloor > player.highestFloor + 1) {
         return message.reply(`❌ Bạn chỉ có thể lên đến tầng **${player.highestFloor + 1}**!\nHãy chinh phục tầng trước đó trước.`);
       }
+
+      const bossFloors = [5, 10, 15];
+      for (const bossFloor of bossFloors) {
+        if (requestedFloor > bossFloor && player.highestFloor <= bossFloor) {
+          return message.reply(`❌ Bạn phải đánh bại Boss tầng **${bossFloor}** trước khi lên tầng ${requestedFloor}!`);
+        }
+      }
+
       floor = requestedFloor;
     }
 

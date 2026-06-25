@@ -144,6 +144,12 @@ export const prefixCommand = {
 
       if (i.customId === 'skill') {
         const limitedSkills = skillOptions.slice(0, 25);
+        
+        if (limitedSkills.length === 0) {
+          await i.editReply({ content: '❌ Không có kỹ năng nào khả dụng!' });
+          return;
+        }
+
         const skillRow = new ActionRowBuilder<StringSelectMenuBuilder>();
         skillRow.addComponents(
           new StringSelectMenuBuilder()
@@ -151,9 +157,9 @@ export const prefixCommand = {
             .setPlaceholder('Chọn kỹ năng...')
             .addOptions(
               limitedSkills.map(s => ({
-                label: `${s.name} (${s.manaCost} MP)`,
+                label: `${s.name} (${s.manaCost} MP)`.substring(0, 100),
                 value: s.id,
-                description: s.description,
+                description: s.description.substring(0, 100),
                 emoji: s.emoji
               }))
             )

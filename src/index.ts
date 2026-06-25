@@ -47,6 +47,9 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(PREFIX)) return;
 
+  const allowedChannelId = process.env.CHANNEL_ID;
+  if (allowedChannelId && message.channel.id !== allowedChannelId) return;
+
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift()?.toLowerCase();
 

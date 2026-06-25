@@ -215,6 +215,267 @@ export const ITEMS: Record<string, Item> = {
     stats: { attack: 10, hp: 25 },
     price: 400,
     sellPrice: 180
+  },
+
+  // More Weapons
+  bronze_axe: {
+    id: 'bronze_axe',
+    name: 'Rìu Đồng',
+    emoji: '🪓',
+    type: 'weapon',
+    rarity: 'common',
+    description: 'Rìu đồng bền bỉ.',
+    stats: { attack: 6 },
+    price: 50,
+    sellPrice: 20
+  },
+  silver_blade: {
+    id: 'silver_blade',
+    name: 'Kiếm Bạc',
+    emoji: '⚔️',
+    type: 'weapon',
+    rarity: 'uncommon',
+    description: 'Kiếm bạc sáng bóng.',
+    stats: { attack: 12 },
+    price: 150,
+    sellPrice: 70
+  },
+  crystal_wand: {
+    id: 'crystal_wand',
+    name: 'Gậy Pha Lê',
+    emoji: '🪄',
+    type: 'weapon',
+    rarity: 'uncommon',
+    description: 'Gậy phép thuật pha lê.',
+    stats: { attack: 10, mp: 20 },
+    price: 180,
+    sellPrice: 85
+  },
+  thunder_hammer: {
+    id: 'thunder_hammer',
+    name: 'Búa Sấm Sét',
+    emoji: '🔨',
+    type: 'weapon',
+    rarity: 'rare',
+    description: 'Búa mang sức mạnh sấm sét.',
+    stats: { attack: 28, speed: -2 },
+    price: 550,
+    sellPrice: 270
+  },
+  ice_staff: {
+    id: 'ice_staff',
+    name: 'Gậy Băng Giá',
+    emoji: '🧊',
+    type: 'weapon',
+    rarity: 'rare',
+    description: 'Gậy phép thuật băng giá.',
+    stats: { attack: 22, mp: 40 },
+    price: 600,
+    sellPrice: 290
+  },
+  void_scythe: {
+    id: 'void_scythe',
+    name: 'Liềm Hư Không',
+    emoji: '💀',
+    type: 'weapon',
+    rarity: 'epic',
+    description: 'Liềm từ hư không.',
+    stats: { attack: 40, speed: 5 },
+    price: 1500,
+    sellPrice: 750
+  },
+  holy_lance: {
+    id: 'holy_lance',
+    name: 'Thương Thánh',
+    emoji: '⚜️',
+    type: 'weapon',
+    rarity: 'epic',
+    description: 'Thương mang sức mạnh thiêng liêng.',
+    stats: { attack: 38, hp: 30 },
+    price: 1400,
+    sellPrice: 700
+  },
+  celestial_bow: {
+    id: 'celestial_bow',
+    name: 'Cung Thiên Hà',
+    emoji: '🏹',
+    type: 'weapon',
+    rarity: 'legendary',
+    description: 'Cung bắn tên từ thiên hà.',
+    stats: { attack: 45, speed: 10 },
+    price: 4800,
+    sellPrice: 2400
+  },
+
+  // More Armor
+  chain_vest: {
+    id: 'chain_vest',
+    name: 'Áo Xích Ngắn',
+    emoji: '🦺',
+    type: 'armor',
+    rarity: 'common',
+    description: 'Áo xích nhẹ.',
+    stats: { defense: 5 },
+    price: 45,
+    sellPrice: 18
+  },
+  knight_armor: {
+    id: 'knight_armor',
+    name: 'Giáp Hiệp Sĩ',
+    emoji: '🛡️',
+    type: 'armor',
+    rarity: 'uncommon',
+    description: 'Giáp của hiệp sĩ.',
+    stats: { defense: 12, hp: 10 },
+    price: 160,
+    sellPrice: 75
+  },
+  mithril_armor: {
+    id: 'mithril_armor',
+    name: 'Giáp Mithril',
+    emoji: '🛡️',
+    type: 'armor',
+    rarity: 'rare',
+    description: 'Giáp làm từ mithril.',
+    stats: { defense: 22, speed: -1 },
+    price: 420,
+    sellPrice: 200
+  },
+  obsidian_plate: {
+    id: 'obsidian_plate',
+    name: 'Giáp Obsidian',
+    emoji: '🖤',
+    type: 'armor',
+    rarity: 'epic',
+    description: 'Giáp làm từ đá obsidian.',
+    stats: { defense: 35, hp: 40, speed: -4 },
+    price: 1100,
+    sellPrice: 550
+  },
+  phoenix_robe: {
+    id: 'phoenix_robe',
+    name: 'Áo Choàng Phượng Hoàng',
+    emoji: '🔥',
+    type: 'armor',
+    rarity: 'legendary',
+    description: 'Áo choàng bất tử.',
+    stats: { defense: 45, hp: 80, speed: 5 },
+    price: 5500,
+    sellPrice: 2700
+  },
+
+  // More Accessories
+  iron_ring: {
+    id: 'iron_ring',
+    name: 'Nhẫn Sắt',
+    emoji: '💍',
+    type: 'accessory',
+    rarity: 'common',
+    description: 'Nhẫn sắt đơn giản.',
+    stats: { defense: 2 },
+    price: 30,
+    sellPrice: 12
+  },
+  lucky_charm: {
+    id: 'lucky_charm',
+    name: 'Bùa May Mắn',
+    emoji: '🍀',
+    type: 'accessory',
+    rarity: 'uncommon',
+    description: 'Tăng khả năng né tránh.',
+    stats: { speed: 8 },
+    price: 200,
+    sellPrice: 90
+  },
+  life_pendant: {
+    id: 'life_pendant',
+    name: 'Dây Chuyền Sự Sống',
+    emoji: '💚',
+    type: 'accessory',
+    rarity: 'rare',
+    description: 'Tăng HP đáng kể.',
+    stats: { hp: 50 },
+    price: 500,
+    sellPrice: 240
+  },
+  mana_crystal: {
+    id: 'mana_crystal',
+    name: 'Pha Lê Mana',
+    emoji: '🔮',
+    type: 'accessory',
+    rarity: 'rare',
+    description: 'Tăng MP đáng kể.',
+    stats: { mp: 50 },
+    price: 480,
+    sellPrice: 230
+  },
+  warrior_emblem: {
+    id: 'warrior_emblem',
+    name: 'Huy Hiệu Chiến Binh',
+    emoji: '🎖️',
+    type: 'accessory',
+    rarity: 'epic',
+    description: 'Tăng ATK và HP.',
+    stats: { attack: 15, hp: 40 },
+    price: 1200,
+    sellPrice: 600
+  },
+  shadow_cloak: {
+    id: 'shadow_cloak',
+    name: 'Áo Choàng Bóng Tối',
+    emoji: '🌑',
+    type: 'accessory',
+    rarity: 'epic',
+    description: 'Tăng SPD đáng kể.',
+    stats: { speed: 15, attack: 5 },
+    price: 1300,
+    sellPrice: 650
+  },
+  divine_crown: {
+    id: 'divine_crown',
+    name: 'Vương Miện Thiêng Liêng',
+    emoji: '👑',
+    type: 'accessory',
+    rarity: 'legendary',
+    description: 'Vương miện của thần linh.',
+    stats: { attack: 20, defense: 15, hp: 60, mp: 30 },
+    price: 6000,
+    sellPrice: 3000
+  },
+
+  // More Potions
+  mana_mega: {
+    id: 'mana_mega',
+    name: 'Bình Mana Lớn',
+    emoji: '💧',
+    type: 'potion',
+    rarity: 'uncommon',
+    description: 'Hồi 80 MP.',
+    healAmount: 80,
+    price: 80,
+    sellPrice: 35
+  },
+  elixir: {
+    id: 'elixir',
+    name: 'Elixir',
+    emoji: '✨',
+    type: 'potion',
+    rarity: 'rare',
+    description: 'Hồi 200 HP và 100 MP.',
+    healAmount: 200,
+    price: 250,
+    sellPrice: 120
+  },
+  phoenix_tear: {
+    id: 'phoenix_tear',
+    name: 'Nước Mắt Phượng Hoàng',
+    emoji: '🩸',
+    type: 'potion',
+    rarity: 'epic',
+    description: 'Hồi full HP.',
+    healAmount: 9999,
+    price: 800,
+    sellPrice: 400
   }
 };
 

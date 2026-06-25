@@ -49,7 +49,7 @@ export const prefixCommand = {
       if (items.length === 0) continue;
       const value = items.map((i: any) => {
         const rarity = RARITY_NAMES[i.rarity as ItemRarity];
-        return `${i.emoji} **${i.name}** x${i.quantity} (${rarity})`;
+        return `${i.emoji} **${i.name}** x${i.quantity} (${rarity}) | ID: \`${i.id}\``;
       }).join('\n');
       embed.addFields({ name: typeNames[type], value, inline: false });
     }

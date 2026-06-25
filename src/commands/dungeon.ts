@@ -14,6 +14,11 @@ function generateProgressBar(current: number, max: number, length: number): stri
   return '█'.repeat(filled) + '░'.repeat(empty);
 }
 
+function getAvailableSkills(player: any): Skill[] {
+  const skills = getSkillsForClass(player.characterClass, player.stats.level);
+  return skills.filter(s => player.unlockedSkills.includes(s.id) && player.stats.mp >= s.manaCost);
+}
+
 export const prefixCommand = {
   name: 'dungeon',
   description: 'Khám phá hầm ngục',
@@ -84,16 +89,16 @@ export const prefixCommand = {
       )
       .setColor(monster.isBoss ? 0xFF0000 : 0xFF6600);
 
-    const skills = getSkillsForClass(player.characterClass, player.stats.level);
-    const skillOptions = skills.filter(s => useSkillMana(player.stats, s));
-
     const row = new ActionRowBuilder<ButtonBuilder>();
     row.addComponents(
       new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
       new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
     );
 
-    if (skillOptions.length > 0) {
+    const hasAnySkills = getSkillsForClass(player.characterClass, player.stats.level)
+      .some(s => player.unlockedSkills.includes(s.id));
+    
+    if (hasAnySkills) {
       row.addComponents(
         new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary)
       );
@@ -143,13 +148,14 @@ export const prefixCommand = {
       }
 
       if (i.customId === 'skill') {
-        const limitedSkills = skillOptions.slice(0, 25);
+        const availableSkills = getAvailableSkills(player);
         
-        if (limitedSkills.length === 0) {
-          await i.editReply({ content: '❌ Không có kỹ năng nào khả dụng!' });
+        if (availableSkills.length === 0) {
+          await showCombatStatus(i, player, combatData.monster, '❌ Không có kỹ năng nào khả dụng (hết MP hoặc chưa học)!');
           return;
         }
 
+        const limitedSkills = availableSkills.slice(0, 25);
         const skillRow = new ActionRowBuilder<StringSelectMenuBuilder>();
         skillRow.addComponents(
           new StringSelectMenuBuilder()
@@ -159,8 +165,7 @@ export const prefixCommand = {
               limitedSkills.map(s => ({
                 label: `${s.name} (${s.manaCost} MP)`.substring(0, 100),
                 value: s.id,
-                description: s.description.substring(0, 100),
-                emoji: s.emoji
+                description: s.description.substring(0, 100)
               }))
             )
         );
@@ -185,7 +190,7 @@ export const prefixCommand = {
           await si.deferUpdate();
 
           const skillId = si.values[0];
-          const skill = skillOptions.find(s => s.id === skillId);
+          const skill = availableSkills.find(s => s.id === skillId);
 
           if (skill && player.stats.mp >= skill.manaCost) {
             player.stats.mp -= skill.manaCost;
@@ -198,7 +203,7 @@ export const prefixCommand = {
             collector.stop();
           }
 
-          await processResult(i, player, combatData, db, result);
+          await processResult(si, player, combatData, db, result);
           skillCollector.stop();
         });
 
@@ -306,10 +311,21 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
     )
     .setColor(0xFF6600);
 
+  const hasAnySkills = getSkillsForClass(player.characterClass, player.stats.level)
+    .some(s => player.unlockedSkills.includes(s.id) && player.stats.mp >= s.manaCost);
+
   const row = new ActionRowBuilder<ButtonBuilder>();
   row.addComponents(
-    new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
-    new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger)
+  );
+
+  if (hasAnySkills) {
+    row.addComponents(
+      new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary)
+    );
+  }
+
+  row.addComponents(
     new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
   );
 

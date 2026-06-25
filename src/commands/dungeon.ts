@@ -2,11 +2,11 @@ import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentTy
 import { Database } from '../game/database';
 import { getRandomMonster, Monster } from '../game/monsters';
 import { executeCombatRound, useSkillMana } from '../game/combat';
-import { getFloorInfo, FLOOR_NAMES, FLOOR_DESCRIPTIONS } from '../game/dungeon';
+import { FLOOR_NAMES, FLOOR_DESCRIPTIONS } from '../game/dungeon';
 import { getSkillsForClass, Skill } from '../game/skills';
 import { addItem, calculateBonusStats } from '../game/inventory';
 
-const activeCombats = new Map<string, { monster: Monster; floor: number }>();
+const activeCombats = new Map<string, { monster: Monster; floor: number; active: boolean }>();
 
 function generateProgressBar(current: number, max: number, length: number): string {
   const filled = Math.floor((current / max) * length);
@@ -29,10 +29,14 @@ export const prefixCommand = {
       return message.reply('❌ Bạn đã chết! Dùng `,heal` để hồi phục.');
     }
 
+    if (activeCombats.has(userId)) {
+      return message.reply('❌ Bạn đang có battle chưa xong! Đợi hết hoặc bỏ chạy.');
+    }
+
     const floor = player.dungeon.currentFloor;
     const monster = getRandomMonster(floor);
 
-    activeCombats.set(userId, { monster, floor });
+    activeCombats.set(userId, { monster, floor, active: true });
 
     const bonus = calculateBonusStats(player.inventory);
     const totalHP = player.stats.maxHP + bonus.hp;
@@ -95,22 +99,28 @@ export const prefixCommand = {
       }
 
       const combatData = activeCombats.get(userId);
-      if (!combatData) return;
+      if (!combatData || !combatData.active) return;
 
       await i.deferUpdate();
 
       if (i.customId === 'flee') {
         const fleeChance = player.stats.speed / (player.stats.speed + combatData.monster.speed);
         if (Math.random() < fleeChance) {
+          combatData.active = false;
           activeCombats.delete(userId);
+          collector.stop();
           await i.editReply({ content: '🏃 Chạy trốn thành công!', embeds: [], components: [] });
         } else {
           const result = executeCombatRound(player.stats, combatData.monster);
           if (result.playerDied) {
+            combatData.active = false;
             activeCombats.delete(userId);
+            collector.stop();
             await db.updatePlayer(player);
             await i.editReply({ content: `💀 Bị tiêu diệt!\n${result.message}`, embeds: [], components: [] });
           } else if (result.monsterDied) {
+            combatData.active = false;
+            collector.stop();
             await handleVictory(i, player, combatData, db, result);
           } else {
             await showCombatStatus(i, player, combatData.monster, `🏃 Không chạy được!\n${result.message}`);
@@ -162,27 +172,37 @@ export const prefixCommand = {
           }
 
           const result = executeCombatRound(player.stats, combatData.monster, skill);
+
+          if (result.monsterDied || result.playerDied) {
+            combatData.active = false;
+            collector.stop();
+          }
+
           await processResult(i, player, combatData, db, result);
           skillCollector.stop();
         });
 
-        skillCollector.on('end', async (_collected: any, reason: string) => {
-          if (reason === 'time') {
-            const result = executeCombatRound(player.stats, combatData.monster);
-            await processResult(i, player, combatData, db, result);
-          }
-        });
         return;
       }
 
       const result = executeCombatRound(player.stats, combatData.monster);
+
+      if (result.monsterDied || result.playerDied) {
+        combatData.active = false;
+        collector.stop();
+      }
+
       await processResult(i, player, combatData, db, result);
     });
 
     collector.on('end', async (_collected: any, reason: string) => {
-      if (reason === 'time') {
+      const combatData = activeCombats.get(userId);
+      if (combatData && combatData.active && reason === 'time') {
+        combatData.active = false;
         activeCombats.delete(userId);
         await message.reply('⏰ Hết thời gian! Battle kết thúc.');
+      } else {
+        activeCombats.delete(userId);
       }
     });
   }
@@ -192,7 +212,6 @@ async function processResult(i: any, player: any, combatData: any, db: Database,
   if (result.monsterDied) {
     await handleVictory(i, player, combatData, db, result);
   } else if (result.playerDied) {
-    activeCombats.delete(player.userId);
     await db.updatePlayer(player);
     await i.editReply({ content: `💀 **GAME OVER**\n${result.message}`, embeds: [], components: [] });
   } else {
@@ -201,8 +220,6 @@ async function processResult(i: any, player: any, combatData: any, db: Database,
 }
 
 async function handleVictory(i: any, player: any, combatData: any, db: Database, result: any) {
-  activeCombats.delete(player.userId);
-
   const expResult = await db.addExp(player, result.expGained);
   await db.addGold(player, result.goldGained);
 

@@ -85,8 +85,17 @@ export function useSkillMana(playerStats: PlayerStats, skill: Skill): boolean {
 export function executeCombatRound(
   playerStats: PlayerStats,
   monster: Monster,
-  skill?: Skill
+  skill?: Skill,
+  bonusStats?: { attack: number; defense: number; hp: number; mp: number; speed: number }
 ): CombatResult {
+  const effectiveStats = bonusStats ? {
+    ...playerStats,
+    attack: playerStats.attack + bonusStats.attack,
+    defense: playerStats.defense + bonusStats.defense,
+    maxHP: playerStats.maxHP + bonusStats.hp,
+    maxMP: playerStats.maxMP + bonusStats.mp,
+    speed: playerStats.speed + bonusStats.speed
+  } : playerStats;
   let message = '';
   let playerDamage = 0;
   let monsterDamage = 0;
@@ -98,10 +107,10 @@ export function executeCombatRound(
   let goldGained = 0;
   let itemDropped: Item | null = null;
 
-  const playerFirst = playerStats.speed >= monster.speed;
+  const playerFirst = effectiveStats.speed >= monster.speed;
 
   if (playerFirst) {
-    const pResult = playerAttack(playerStats, monster, skill);
+    const pResult = playerAttack(effectiveStats, monster, skill);
     playerDamage = pResult.damage;
     playerCrit = pResult.isCrit;
     monsterDodged = pResult.damage === 0;
@@ -129,7 +138,7 @@ export function executeCombatRound(
       };
     }
 
-    const mResult = monsterAttack(monster, playerStats);
+    const mResult = monsterAttack(monster, effectiveStats);
     monsterDamage = mResult.damage;
     monsterCrit = mResult.isCrit;
     playerDodged = mResult.damage === 0;
@@ -141,7 +150,7 @@ export function executeCombatRound(
       message += `\n${mResult.message}`;
     }
   } else {
-    const mResult = monsterAttack(monster, playerStats);
+    const mResult = monsterAttack(monster, effectiveStats);
     monsterDamage = mResult.damage;
     monsterCrit = mResult.isCrit;
     playerDodged = mResult.damage === 0;
@@ -162,7 +171,7 @@ export function executeCombatRound(
       };
     }
 
-    const pResult = playerAttack(playerStats, monster, skill);
+    const pResult = playerAttack(effectiveStats, monster, skill);
     playerDamage = pResult.damage;
     playerCrit = pResult.isCrit;
     monsterDodged = pResult.damage === 0;

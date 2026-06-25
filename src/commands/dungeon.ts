@@ -130,7 +130,7 @@ export const prefixCommand = {
           collector.stop();
           await i.editReply({ content: '🏃 Chạy trốn thành công!', embeds: [], components: [] });
         } else {
-          const result = executeCombatRound(player.stats, combatData.monster);
+          const result = executeCombatRound(player.stats, combatData.monster, undefined, bonus);
           if (result.playerDied) {
             combatData.active = false;
             activeCombats.delete(userId);
@@ -197,7 +197,7 @@ export const prefixCommand = {
             player.stats.mp -= skill.manaCost;
           }
 
-          const result = executeCombatRound(player.stats, combatData.monster, skill);
+          const result = executeCombatRound(player.stats, combatData.monster, skill, bonus);
 
           if (result.monsterDied || result.playerDied) {
             combatData.active = false;
@@ -211,7 +211,7 @@ export const prefixCommand = {
         return;
       }
 
-      const result = executeCombatRound(player.stats, combatData.monster);
+      const result = executeCombatRound(player.stats, combatData.monster, undefined, bonus);
 
       if (result.monsterDied || result.playerDied) {
         combatData.active = false;

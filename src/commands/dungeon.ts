@@ -33,7 +33,20 @@ export const prefixCommand = {
       return message.reply('❌ Bạn đang có battle chưa xong! Đợi hết hoặc bỏ chạy.');
     }
 
-    const floor = player.dungeon.currentFloor;
+    let floor = player.dungeon.currentFloor;
+    const floorArg = args[0];
+
+    if (floorArg) {
+      const requestedFloor = parseInt(floorArg);
+      if (isNaN(requestedFloor) || requestedFloor < 1) {
+        return message.reply('❌ Số tầng không hợp lệ!');
+      }
+      if (requestedFloor > player.highestFloor + 1) {
+        return message.reply(`❌ Bạn chỉ có thể lên đến tầng **${player.highestFloor + 1}**!\nHãy chinh phục tầng trước đó trước.`);
+      }
+      floor = requestedFloor;
+    }
+
     const monster = getRandomMonster(floor);
 
     activeCombats.set(userId, { monster, floor, active: true });
@@ -241,6 +254,11 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
     const gemBonus = Math.floor(Math.random() * 10) + 5;
     await db.addGems(player, gemBonus);
     gemsEarned += gemBonus;
+  }
+
+  if (combatData.floor >= player.highestFloor) {
+    player.highestFloor = combatData.floor + 1;
+    player.dungeon.currentFloor = combatData.floor + 1;
   }
 
   player.totalMonstersKilled += 1;

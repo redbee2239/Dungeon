@@ -12,6 +12,8 @@ export const data = new SlashCommandBuilder()
       .setRequired(true)
   );
 
+export const cooldown = 600;
+
 export async function execute(interaction: ChatInputCommandInteraction, db: Database) {
   const suggestion = interaction.options.getString('noidung');
 

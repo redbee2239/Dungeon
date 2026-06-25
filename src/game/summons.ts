@@ -9,11 +9,11 @@ export interface Summon {
 }
 
 export const SUMMON_DATA: Record<string, { name: string; emoji: string; baseHP: number; baseAttack: number; baseDefense: number; baseSpeed: number }> = {
-  summon_wolf: { name: 'Sói', emoji: '🐺', baseHP: 80, baseAttack: 12, baseDefense: 5, baseSpeed: 10 },
-  summon_bear: { name: 'Gấu', emoji: '🐻', baseHP: 150, baseAttack: 18, baseDefense: 10, baseSpeed: 5 },
-  summon_phoenix: { name: 'Phượng Hoàng', emoji: '🔥', baseHP: 120, baseAttack: 25, baseDefense: 8, baseSpeed: 15 },
-  summon_dragon: { name: 'Rồng', emoji: '🐉', baseHP: 200, baseAttack: 35, baseDefense: 15, baseSpeed: 12 },
-  summon_army: { name: 'Quân Đoàn', emoji: '⚔️', baseHP: 300, baseAttack: 50, baseDefense: 20, baseSpeed: 10 }
+  summon_wolf: { name: 'Sói', emoji: '🐺', baseHP: 40, baseAttack: 12, baseDefense: 5, baseSpeed: 10 },
+  summon_bear: { name: 'Gấu', emoji: '🐻', baseHP: 75, baseAttack: 18, baseDefense: 10, baseSpeed: 5 },
+  summon_phoenix: { name: 'Phượng Hoàng', emoji: '🔥', baseHP: 60, baseAttack: 25, baseDefense: 8, baseSpeed: 15 },
+  summon_dragon: { name: 'Rồng', emoji: '🐉', baseHP: 100, baseAttack: 35, baseDefense: 15, baseSpeed: 12 },
+  summon_army: { name: 'Quân Đoàn', emoji: '⚔️', baseHP: 150, baseAttack: 50, baseDefense: 20, baseSpeed: 10 }
 };
 
 export function createSummon(skillId: string, playerLevel: number): Summon | null {

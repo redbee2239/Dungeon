@@ -12,7 +12,7 @@ config();
 const PREFIX = ',';
 const db = new Database();
 
-const COOLDOWN_SECONDS = 5;
+const COOLDOWN_SECONDS = 7;
 
 interface PrefixCommand {
   name: string;

@@ -161,7 +161,7 @@ export class Database {
     while (player.stats.exp >= player.stats.expToNext) {
       player.stats.exp -= player.stats.expToNext;
       player.stats = levelUp(player.stats);
-      player.skillPoints += 1;
+      player.skillPoints += 3;
       leveled = true;
       levelsGained++;
     }

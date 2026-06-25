@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import express from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as https from 'https';
 import { Database } from './game/database';
 
 config();
@@ -78,6 +79,21 @@ app.get('/health', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
+function startSelfPing() {
+  const selfPingUrl = process.env.SELF_PING_URL;
+  if (!selfPingUrl) return;
+
+  console.log(`🔄 Self-ping enabled: ${selfPingUrl}`);
+  
+  setInterval(() => {
+    https.get(selfPingUrl, (res) => {
+      console.log(`Ping: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.error('Ping error:', err.message);
+    });
+  }, 4 * 60 * 1000);
+}
+
 async function start() {
   const mongoUri = process.env.MONGODB_URI;
   if (!mongoUri) {
@@ -95,6 +111,7 @@ async function start() {
 
   app.listen(PORT, () => {
     console.log(`🌐 Web server running on port ${PORT}`);
+    startSelfPing();
   });
 
   await client.login(token);

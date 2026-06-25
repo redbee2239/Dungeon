@@ -91,7 +91,7 @@ function startSelfPing() {
     }).on('error', (err) => {
       console.error('Ping error:', err.message);
     });
-  }, 4 * 60 * 1000);
+  }, 5 * 60 * 1000);
 }
 
 async function start() {

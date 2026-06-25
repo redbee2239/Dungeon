@@ -7,7 +7,15 @@ import { getSkillsForClass, Skill } from '../game/skills';
 import { addItem, calculateBonusStats } from '../game/inventory';
 import { rollChest, CHEST_RARITY_NAMES, CHEST_RARITY_COLORS } from '../game/chests';
 
-const activeCombats = new Map<string, { monster: Monster; floor: number; active: boolean }>();
+interface CombatData {
+  monster: Monster;
+  floor: number;
+  active: boolean;
+  skillUsage: Record<string, number>;
+}
+
+const SKILL_LIMIT = 3;
+const activeCombats = new Map<string, CombatData>();
 
 function generateProgressBar(current: number, max: number, length: number): string {
   const filled = Math.floor((current / max) * length);
@@ -71,7 +79,7 @@ export const prefixCommand = {
 
     const monster = getRandomMonster(floor);
 
-    activeCombats.set(userId, { monster, floor, active: true });
+    activeCombats.set(userId, { monster, floor, active: true, skillUsage: {} });
 
     const bonus = calculateBonusStats(player.inventory);
     const totalHP = player.stats.maxHP + bonus.hp;
@@ -159,7 +167,7 @@ export const prefixCommand = {
             collector.stop();
             await handleVictory(i, player, combatData, db, result);
           } else {
-            await showCombatStatus(i, player, combatData.monster, `🏃 Không chạy được!\n${result.message}`);
+            await showCombatStatus(i, player, combatData.monster, `🏃 Không chạy được!\n${result.message}`, combatData.skillUsage);
           }
         }
         return;
@@ -169,22 +177,35 @@ export const prefixCommand = {
         const availableSkills = getAvailableSkills(player);
         
         if (availableSkills.length === 0) {
-          await showCombatStatus(i, player, combatData.monster, '❌ Không có kỹ năng nào khả dụng (hết MP hoặc chưa học)!');
+          await showCombatStatus(i, player, combatData.monster, '❌ Không có kỹ năng nào khả dụng (hết MP hoặc chưa học)!', combatData.skillUsage);
           return;
         }
 
-        const limitedSkills = availableSkills.slice(0, 25);
+        const usableSkills = availableSkills.filter(s => {
+          const used = combatData.skillUsage[s.id] || 0;
+          return used < SKILL_LIMIT;
+        });
+
+        if (usableSkills.length === 0) {
+          await showCombatStatus(i, player, combatData.monster, '❌ Hết lượt sử dụng kỹ năng trong lượt này!', combatData.skillUsage);
+          return;
+        }
+
+        const limitedSkills = usableSkills.slice(0, 25);
         const skillRow = new ActionRowBuilder<StringSelectMenuBuilder>();
         skillRow.addComponents(
           new StringSelectMenuBuilder()
             .setCustomId('skill_select')
             .setPlaceholder('Chọn kỹ năng...')
             .addOptions(
-              limitedSkills.map(s => ({
-                label: `${s.name} (${s.manaCost} MP)`.substring(0, 100),
-                value: s.id,
-                description: s.description.substring(0, 100)
-              }))
+              limitedSkills.map(s => {
+                const used = combatData.skillUsage[s.id] || 0;
+                return {
+                  label: `${s.name} (${s.manaCost} MP) [${SKILL_LIMIT - used}]`.substring(0, 100),
+                  value: s.id,
+                  description: s.description.substring(0, 100)
+                };
+              })
             )
         );
 
@@ -212,6 +233,7 @@ export const prefixCommand = {
 
           if (skill && player.stats.mp >= skill.manaCost) {
             player.stats.mp -= skill.manaCost;
+            combatData.skillUsage[skillId] = (combatData.skillUsage[skillId] || 0) + 1;
           }
 
           const result = executeCombatRound(player.stats, combatData.monster, skill, bonus);
@@ -251,14 +273,14 @@ export const prefixCommand = {
   }
 };
 
-async function processResult(i: any, player: any, combatData: any, db: Database, result: any) {
+async function processResult(i: any, player: any, combatData: CombatData, db: Database, result: any) {
   if (result.monsterDied) {
     await handleVictory(i, player, combatData, db, result);
   } else if (result.playerDied) {
     await db.updatePlayer(player);
     await i.editReply({ content: `💀 **GAME OVER**\n${result.message}`, embeds: [], components: [] });
   } else {
-    await showCombatStatus(i, player, combatData.monster, result.message);
+    await showCombatStatus(i, player, combatData.monster, result.message, combatData.skillUsage);
   }
 }
 
@@ -322,7 +344,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   await i.editReply({ embeds: [embed], components: [] });
 }
 
-async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string) {
+async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>) {
   const bonus = calculateBonusStats(player.inventory);
   const totalHP = player.stats.maxHP + bonus.hp;
   const totalMP = player.stats.maxMP + bonus.mp;
@@ -340,8 +362,13 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
     .setColor(0xFF6600);
 
   const starterSkill = getStarterSkill(player.characterClass);
-  const hasAnySkills = getSkillsForClass(player.characterClass, player.stats.level)
-    .some(s => (player.unlockedSkills.includes(s.id) || s.id === starterSkill) && player.stats.mp >= s.manaCost);
+  const allSkills = getSkillsForClass(player.characterClass, player.stats.level);
+  const hasAnySkills = allSkills.some(s => {
+    const unlocked = player.unlockedSkills.includes(s.id) || s.id === starterSkill;
+    const hasMP = player.stats.mp >= s.manaCost;
+    const hasUses = !skillUsage || (skillUsage[s.id] || 0) < SKILL_LIMIT;
+    return unlocked && hasMP && hasUses;
+  });
 
   const row = new ActionRowBuilder<ButtonBuilder>();
   row.addComponents(

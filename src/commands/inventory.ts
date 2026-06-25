@@ -106,7 +106,7 @@ export const prefixCommand = {
         const rarity = i.rarity as ItemRarity;
         const rarityEmoji = RARITY_EMOJI[rarity];
         const rarityName = RARITY_NAMES[rarity];
-        return `${rarityEmoji} **${i.name}** x${i.quantity} (${rarityName}) | ID: \`${i.id}\``;
+        return `${rarityEmoji} ${i.emoji} **${i.name}** x${i.quantity} (${rarityName}) | ID: \`${i.id}\``;
       }).join('\n');
       embed.addFields({ name: typeNames[type], value, inline: false });
     }

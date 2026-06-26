@@ -57,7 +57,7 @@ export const CLASS_DATA: Record<CharacterClass, ClassStats> = {
     emoji: '🏟️',
     baseHP: 220,
     baseMP: 40,
-    baseAttack: 32,
+    baseAttack: 38,
     baseDefense: 14,
     baseSpeed: 9,
     description: 'Sức mạnh tấn công cực cao, chuyên dùng vũ khí sát thương.'

@@ -27,7 +27,7 @@ export const prefixCommand = {
 
     const action = args[0]?.toLowerCase();
 
-    if (!action || !['hp', 'mp', 'attack', 'defense', 'speed', 'str', 'dex', 'int', 'vit', 'agi'].includes(action)) {
+    if (!action || !['hp', 'mp', 'attack', 'defense', 'speed', 'str', 'dex', 'int', 'vit', 'agi', 'atk', 'def', 'spd'].includes(action)) {
       const embed = new EmbedBuilder()
         .setTitle('📊 Bảng Chỉ Số')
         .setDescription(`⭐ Skill Points: **${player.skillPoints}**\n💡 Mỗi lần nâng: **${STAT_COST}** Skill Point`)
@@ -51,8 +51,7 @@ export const prefixCommand = {
               ',stat def - Nâng DEF (+1)',
               ',stat spd - Nâng SPD (+1)',
               '',
-              '**Khi nâng 1 stat, tất cả stat khác cũng +1**',
-              ',stat atk 3 - Nâng ATK +6, các stat khác +1'
+              ',stat atk 3 - Nâng ATK +6'
             ].join('\n')
           }
         )
@@ -63,9 +62,12 @@ export const prefixCommand = {
 
     const statMap: Record<string, string> = {
       str: 'attack',
+      atk: 'attack',
       int: 'mp',
       vit: 'hp',
-      agi: 'speed'
+      agi: 'speed',
+      def: 'defense',
+      spd: 'speed'
     };
     const stat = statMap[action] || action;
     const points = parseInt(args[1]) || 1;

@@ -3,7 +3,7 @@ import { Database } from '../game/database';
 
 const STAT_COST = 1;
 const STAT_LIMITS: Record<string, number> = {
-  speed: 130
+  speed: 120
 };
 
 const STAT_INFO: Record<string, { name: string; emoji: string; base: number }> = {
@@ -84,7 +84,7 @@ export const prefixCommand = {
       return message.reply('❌ Chỉ số không hợp lệ!');
     }
 
-    const limit = STAT_LIMITS[stat] || (stat === 'speed' && player.characterClass === 'rogue' ? 150 : 0);
+    const limit = stat === 'speed' && player.characterClass === 'rogue' ? 150 : STAT_LIMITS[stat];
     if (limit && (player.stats as any)[stat] >= limit) {
       return message.reply(`❌ **${info.name}** đã đạt giới hạn **${limit}**!`);
     }

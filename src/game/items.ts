@@ -19,6 +19,7 @@ export interface Item {
     mp?: number;
     speed?: number;
   };
+  summonBoost?: number;
   healAmount?: number;
   price: number;
   sellPrice: number;
@@ -453,6 +454,120 @@ export const ITEMS: Record<string, Item> = {
     stats: { attack: 45, speed: 10 },
     price: 4800,
     sellPrice: 2400
+  },
+
+  // === SUMMONER WEAPONS ===
+  basic_staff: {
+    id: 'basic_staff',
+    name: 'Gậy Triệu Hồi Cơ Bản',
+    emoji: '🔮',
+    type: 'weapon',
+    rarity: 'common',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy triệu hồi cho người mới.',
+    stats: { attack: 4, mp: 10 },
+    summonBoost: 5,
+    price: 35,
+    sellPrice: 14
+  },
+  wolf_staff: {
+    id: 'wolf_staff',
+    name: 'Gậy Sói',
+    emoji: '🐺',
+    type: 'weapon',
+    rarity: 'common',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy triệu hồi sói.',
+    stats: { attack: 6, mp: 15 },
+    summonBoost: 10,
+    price: 60,
+    sellPrice: 25
+  },
+  beast_staff: {
+    id: 'beast_staff',
+    name: 'Gậy Thú Rừng',
+    emoji: '🐻',
+    type: 'weapon',
+    rarity: 'uncommon',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy triệu hồi thú rừng.',
+    stats: { attack: 10, mp: 25 },
+    summonBoost: 15,
+    price: 150,
+    sellPrice: 70
+  },
+  spirit_staff: {
+    id: 'spirit_staff',
+    name: 'Gậy Tinh Linh',
+    emoji: '✨',
+    type: 'weapon',
+    rarity: 'uncommon',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy mang năng lượng tinh linh.',
+    stats: { attack: 12, mp: 30 },
+    summonBoost: 20,
+    price: 200,
+    sellPrice: 90
+  },
+  beastmaster_staff: {
+    id: 'beastmaster_staff',
+    name: 'Gậy Thuần Thú',
+    emoji: '🐾',
+    type: 'weapon',
+    rarity: 'rare',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy của bậc thầy thuần thú.',
+    stats: { attack: 18, mp: 40 },
+    summonBoost: 30,
+    price: 500,
+    sellPrice: 240
+  },
+  void_staff_summon: {
+    id: 'void_staff_summon',
+    name: 'Gậy Hư Không Triệu Hồi',
+    emoji: '🕳️',
+    type: 'weapon',
+    rarity: 'rare',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy hút năng lượng từ hư không.',
+    stats: { attack: 22, mp: 50 },
+    summonBoost: 35,
+    price: 650,
+    sellPrice: 320
+  },
+  dragon_staff: {
+    id: 'dragon_staff',
+    name: 'Gậy Rồng Thiêng',
+    emoji: '🐉',
+    type: 'weapon',
+    rarity: 'epic',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy triệu hồi rồng thiêng.',
+    stats: { attack: 28, mp: 60 },
+    summonBoost: 45,
+    price: 1500,
+    sellPrice: 750
+  },
+  eternal_staff: {
+    id: 'eternal_staff',
+    name: 'Gậy Vĩnh Hằng Triệu Hồi',
+    emoji: '♾️',
+    type: 'weapon',
+    rarity: 'legendary',
+    weaponType: 'magic',
+    classRestriction: ['summoner'],
+    description: 'Gậy triệu hồi từ thời cổ đại.',
+    stats: { attack: 35, mp: 80 },
+    summonBoost: 60,
+    price: 5000,
+    sellPrice: 2500
   },
 
   // More Armor

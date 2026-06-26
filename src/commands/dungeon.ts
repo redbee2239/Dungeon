@@ -258,7 +258,7 @@ export const prefixCommand = {
             // Handle summon creation
             if (SUMMON_SKILL_IDS.includes(skillId)) {
               if (!combatData.summon || combatData.summon.hp <= 0) {
-                combatData.summon = createSummon(skillId, player.stats.level);
+                combatData.summon = createSummon(skillId, player.stats.level, bonus.summonBoost);
                 if (combatData.summon) {
                   await showCombatStatus(i, player, combatData.monster, `${combatData.summon.emoji} **${combatData.summon.name}** đã được triệu hồi!\n❤️ HP: ${combatData.summon.hp}/${combatData.summon.maxHP}`, combatData.skillUsage);
                   skillCollector.stop();

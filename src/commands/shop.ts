@@ -20,6 +20,9 @@ const shopItems: Item[] = [
   ITEMS.short_bow,
   ITEMS.hunting_bow,
   ITEMS.long_bow,
+  // Weapons - Summoner
+  ITEMS.basic_staff,
+  ITEMS.wolf_staff,
   // Armor
   ITEMS.cloth_armor,
   ITEMS.leather_armor,

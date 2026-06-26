@@ -74,12 +74,14 @@ export function calculateBonusStats(inventory: Inventory): {
   hp: number;
   mp: number;
   speed: number;
+  summonBoost: number;
 } {
   let attack = 0;
   let defense = 0;
   let hp = 0;
   let mp = 0;
   let speed = 0;
+  let summonBoost = 0;
 
   const equipped = (inventory as any).equipped;
   if (equipped) {
@@ -93,10 +95,13 @@ export function calculateBonusStats(inventory: Inventory): {
         mp += item.stats.mp || 0;
         speed += item.stats.speed || 0;
       }
+      if (item && item.summonBoost) {
+        summonBoost += item.summonBoost;
+      }
     }
   }
 
-  return { attack, defense, hp, mp, speed };
+  return { attack, defense, hp, mp, speed, summonBoost };
 }
 
 export function sellItem(inventory: Inventory, itemId: string, quantity: number = 1): { success: boolean; gold: number; message: string } {

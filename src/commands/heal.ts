@@ -13,7 +13,7 @@ export const prefixCommand = {
       return message.reply('❌ Bạn chưa có nhân vật! Dùng `,create` để tạo.');
     }
 
-    const bonus = calculateBonusStats(player.inventory);
+    const bonus = calculateBonusStats(player.inventory, player.equippedPet);
     const totalHP = player.stats.maxHP + bonus.hp;
     const totalMP = player.stats.maxMP + bonus.mp;
 

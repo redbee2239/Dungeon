@@ -110,7 +110,7 @@ export const prefixCommand = {
 
     activeCombats.set(userId, { monster, monsterQueue, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [], potionUsed: 0 });
 
-    const bonus = calculateBonusStats(player.inventory);
+    const bonus = calculateBonusStats(player.inventory, player.equippedPet);
     const totalHP = player.stats.maxHP + bonus.hp;
     const totalMP = player.stats.maxMP + bonus.mp;
 
@@ -629,7 +629,7 @@ function buildCombatButtons(): ActionRowBuilder<ButtonBuilder> {
 }
 
 function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]): EmbedBuilder {
-  const bonus = calculateBonusStats(player.inventory);
+  const bonus = calculateBonusStats(player.inventory, player.equippedPet);
   const totalHP = player.stats.maxHP + bonus.hp;
   const totalMP = player.stats.maxMP + bonus.mp;
 

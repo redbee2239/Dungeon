@@ -68,13 +68,14 @@ export function getEquippedItems(inventory: Inventory, type: 'weapon' | 'armor' 
   return null;
 }
 
-export function calculateBonusStats(inventory: Inventory): {
+export function calculateBonusStats(inventory: Inventory, equippedPet?: string | null): {
   attack: number;
   defense: number;
   hp: number;
   mp: number;
   speed: number;
   summonBoost: number;
+  crit: number;
 } {
   let attack = 0;
   let defense = 0;
@@ -82,6 +83,7 @@ export function calculateBonusStats(inventory: Inventory): {
   let mp = 0;
   let speed = 0;
   let summonBoost = 0;
+  let crit = 0;
 
   const equipped = (inventory as any).equipped;
   if (equipped) {
@@ -101,7 +103,21 @@ export function calculateBonusStats(inventory: Inventory): {
     }
   }
 
-  return { attack, defense, hp, mp, speed, summonBoost };
+  if (equippedPet) {
+    const { PETS } = require('./pets');
+    const pet = PETS.find((p: any) => p.id === equippedPet);
+    if (pet && pet.bonus) {
+      attack += pet.bonus.attack || 0;
+      defense += pet.bonus.defense || 0;
+      hp += pet.bonus.hp || 0;
+      mp += pet.bonus.mp || 0;
+      speed += pet.bonus.speed || 0;
+      crit += pet.bonus.crit || 0;
+      summonBoost += pet.bonus.summonBoost || 0;
+    }
+  }
+
+  return { attack, defense, hp, mp, speed, summonBoost, crit };
 }
 
 export function sellItem(inventory: Inventory, itemId: string, quantity: number = 1): { success: boolean; gold: number; message: string } {

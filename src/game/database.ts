@@ -48,6 +48,9 @@ export interface Player {
     epic: number;
     legendary: number;
   };
+  petGachaPity: number;
+  equippedPet: string | null;
+  ownedPets: { petId: string; quantity: number }[];
   expBoostCharges: number;
   createdAt: Date;
   lastActive: Date;
@@ -81,6 +84,9 @@ function docToPlayer(doc: IPlayer): Player {
     highestFloor: doc.highestFloor,
     gachaHistory: doc.gachaHistory || [],
     gachaPity: doc.gachaPity || { epic: 0, legendary: 0 },
+    petGachaPity: doc.petGachaPity || 0,
+    equippedPet: doc.equippedPet || null,
+    ownedPets: doc.ownedPets || [],
     expBoostCharges: doc.expBoostCharges || 0,
     createdAt: doc.createdAt,
     lastActive: doc.lastActive

@@ -21,7 +21,7 @@ export const prefixCommand = {
     }
 
     const cls = CLASS_DATA[player.characterClass];
-    const bonus = calculateBonusStats(player.inventory);
+    const bonus = calculateBonusStats(player.inventory, player.equippedPet);
     const totalAttack = player.stats.attack + bonus.attack;
     const totalDefense = player.stats.defense + bonus.defense;
     const totalHP = player.stats.maxHP + bonus.hp;

@@ -846,6 +846,16 @@ export const ITEMS: Record<string, Item> = {
     price: 400,
     sellPrice: 200
   },
+  exp_boost_potion: {
+    id: 'exp_boost_potion',
+    name: 'Thuốc Kinh Nghiệm',
+    emoji: '📘',
+    type: 'potion',
+    rarity: 'epic',
+    description: 'x2 kinh nghiệm trong 3 lần đánh. Thua không mất.',
+    price: 500,
+    sellPrice: 250
+  },
 
   // === NEW PHYSICAL WEAPONS ===
   rusty_dagger: {

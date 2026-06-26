@@ -285,6 +285,9 @@ export const prefixCommand = {
               player.stats.hp += healAmt;
               potionMsg = `❤️ Hồi **${healAmt}** HP!`;
             }
+          } else if (potionItem.id === 'exp_boost_potion') {
+            player.expBoostCharges += 3;
+            potionMsg = `📘 x2 Kinh Nghiệm trong **3** lần đánh tiếp theo! (Còn ${player.expBoostCharges} lần)`;
           } else if (potionItem.buffStat) {
             combatData.buffs.push({ stat: potionItem.buffStat, amount: potionItem.buffAmount || 0 });
             potionMsg = `⬆️ Tăng **${potionItem.buffStat.toUpperCase()} +${potionItem.buffAmount}** trong combat!`;
@@ -510,8 +513,15 @@ async function processResult(i: any, player: any, combatData: CombatData, db: Da
 
 async function handleVictory(i: any, player: any, combatData: any, db: Database, result: any) {
   const monstersKilled = 1 + combatData.monsterQueue.length;
-  const totalExp = result.expGained * monstersKilled;
+  let totalExp = result.expGained * monstersKilled;
   const totalGold = result.goldGained * monstersKilled;
+
+  let expBoostMsg = '';
+  if (player.expBoostCharges > 0) {
+    totalExp *= 2;
+    player.expBoostCharges--;
+    expBoostMsg = ` (x2 EXP, còn ${player.expBoostCharges} lần)`;
+  }
 
   const expResult = await db.addExp(player, totalExp);
   await db.addGold(player, totalGold);
@@ -558,7 +568,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   if (monstersKilled > 1) {
     msg += `\nĐánh bại **${monstersKilled}** quái!`;
   }
-  msg += `\n+${totalExp} EXP, +${totalGold} Gold`;
+  msg += `\n+${totalExp} EXP, +${totalGold} Gold${expBoostMsg}`;
   msg += `\n💎 +${gemsEarned} Gem`;
   msg += chestMsg;
   if (expResult.leveled) {

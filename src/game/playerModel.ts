@@ -56,6 +56,7 @@ export interface IPlayer extends Document {
     epic: number;
     legendary: number;
   };
+  expBoostCharges: number;
   createdAt: Date;
   lastActive: Date;
 }
@@ -116,6 +117,7 @@ const PlayerSchema = new Schema<IPlayer>({
     epic: { type: Number, default: 0 },
     legendary: { type: Number, default: 0 }
   },
+  expBoostCharges: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   lastActive: { type: Date, default: Date.now }
 });

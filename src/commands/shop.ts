@@ -149,7 +149,7 @@ export const prefixCommand = {
           new ButtonBuilder().setCustomId('shop_back').setLabel('🔙 Quay Lại').setStyle(ButtonStyle.Secondary)
         );
 
-        await i.editReply({ embeds: [categoryEmbed], components: [buyRow, backRow] });
+        await i.message.edit({ embeds: [categoryEmbed], components: [buyRow, backRow] });
 
         const buyCollector = reply.createMessageComponentCollector({
           componentType: ComponentType.StringSelect,
@@ -167,14 +167,14 @@ export const prefixCommand = {
           if (!selectedItem) return;
 
           if (player.stats.gold < selectedItem.price) {
-            await bi.editReply({ content: `❌ Không đủ gold! Cần **${selectedItem.price}** gold.`, embeds: [], components: [] });
+            await bi.message.edit({ content: `❌ Không đủ gold! Cần **${selectedItem.price}** gold.`, embeds: [], components: [] });
             buyCollector.stop();
             return;
           }
 
           const result = addItem(player.inventory, selectedItem);
           if (!result.success) {
-            await bi.editReply({ content: `❌ ${result.message}`, embeds: [], components: [] });
+            await bi.message.edit({ content: `❌ ${result.message}`, embeds: [], components: [] });
             buyCollector.stop();
             return;
           }
@@ -187,13 +187,13 @@ export const prefixCommand = {
             .setDescription(`${selectedItem.emoji} **${selectedItem.name}**\n\n💰 Gold còn lại: **${player.stats.gold}**`)
             .setColor(0x00FF00);
 
-          await bi.editReply({ embeds: [successEmbed], components: [] });
+          await bi.message.edit({ embeds: [successEmbed], components: [] });
           buyCollector.stop();
         });
 
         buyCollector.on('end', async (_collected: any, reason: string) => {
           if (reason === 'time') {
-            await i.editReply({ content: '⏰ Hết thời gian!', embeds: [], components: [] });
+            await i.message.edit({ content: '⏰ Hết thời gian!', embeds: [], components: [] });
           }
         });
       });

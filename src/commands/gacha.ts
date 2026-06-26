@@ -6,11 +6,11 @@ const GACHA_COST = 50;
 const MULTI_COST = 450;
 
 const RARITY_WEIGHTS: Record<ItemRarity, number> = {
-  common: 45,
+  common: 40,
   uncommon: 30,
-  rare: 18,
-  epic: 6,
-  legendary: 1
+  rare: 20,
+  epic: 8,
+  legendary: 2
 };
 
 const GACHA_ITEMS = Object.values(ITEMS).filter(item => item.type !== 'potion');

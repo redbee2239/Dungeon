@@ -15,7 +15,13 @@ const RARITY_WEIGHTS: Record<ItemRarity, number> = {
 
 const GACHA_ITEMS = Object.values(ITEMS).filter(item => item.type !== 'potion');
 
-function rollRarity(): ItemRarity {
+const EPIC_PITY = 50;
+const LEGENDARY_PITY = 150;
+
+function rollRarity(pityEpic: number, pityLegendary: number): ItemRarity {
+  if (pityLegendary >= LEGENDARY_PITY) return 'legendary';
+  if (pityEpic >= EPIC_PITY) return 'epic';
+
   const total = Object.values(RARITY_WEIGHTS).reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
   
@@ -26,8 +32,8 @@ function rollRarity(): ItemRarity {
   return 'common';
 }
 
-function rollItem(): Item {
-  const rarity = rollRarity();
+function rollItem(pityEpic: number, pityLegendary: number): Item {
+  const rarity = rollRarity(pityEpic, pityLegendary);
   const pool = GACHA_ITEMS.filter(i => i.rarity === rarity);
   if (pool.length === 0) return GACHA_ITEMS[0];
   return pool[Math.floor(Math.random() * pool.length)];
@@ -55,8 +61,8 @@ export const prefixCommand = {
             '⚪ Phổ Thông: 40%',
             '🟢 Thông Thường: 30%',
             '🔵 Hiếm: 20%',
-            '🟣 Sử Thi: 8%',
-            '🟠 Huyền Thoại: 2%'
+            '🟣 Sử Thi: 8% (pity: 50)',
+            '🟠 Huyền Thoại: 2% (pity: 150)'
           ].join('\n') },
           { name: '💡 Cách Dùng', value: [
             ',gacha 1 - Quay 1 lần',
@@ -99,7 +105,7 @@ export const prefixCommand = {
     const rollCount = isMulti ? 10 : 1;
 
     for (let i = 0; i < rollCount; i++) {
-      const item = rollItem();
+      const item = rollItem(player.gachaPity.epic, player.gachaPity.legendary);
       const existing = player.inventory.items.find((inv: any) => inv.itemId === item.id);
       const isNew = !existing || existing.quantity === 0;
       results.push({ item, isNew });
@@ -115,6 +121,18 @@ export const prefixCommand = {
         rarity: item.rarity,
         date: new Date()
       });
+
+      // Update pity
+      if (item.rarity === 'legendary') {
+        player.gachaPity.legendary = 0;
+        player.gachaPity.epic = 0;
+      } else if (item.rarity === 'epic') {
+        player.gachaPity.legendary += 1;
+        player.gachaPity.epic = 0;
+      } else {
+        player.gachaPity.legendary += 1;
+        player.gachaPity.epic += 1;
+      }
     }
 
     await db.updatePlayer(player);

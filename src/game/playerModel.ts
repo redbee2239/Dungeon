@@ -52,6 +52,10 @@ export interface IPlayer extends Document {
     rarity: string;
     date: Date;
   }[];
+  gachaPity: {
+    epic: number;
+    legendary: number;
+  };
   createdAt: Date;
   lastActive: Date;
 }
@@ -108,6 +112,10 @@ const PlayerSchema = new Schema<IPlayer>({
     rarity: String,
     date: { type: Date, default: Date.now }
   }],
+  gachaPity: {
+    epic: { type: Number, default: 0 },
+    legendary: { type: Number, default: 0 }
+  },
   createdAt: { type: Date, default: Date.now },
   lastActive: { type: Date, default: Date.now }
 });

@@ -43,6 +43,10 @@ export interface Player {
     rarity: string;
     date: Date;
   }[];
+  gachaPity: {
+    epic: number;
+    legendary: number;
+  };
   createdAt: Date;
   lastActive: Date;
 }
@@ -74,6 +78,7 @@ function docToPlayer(doc: IPlayer): Player {
     totalGoldEarned: doc.totalGoldEarned,
     highestFloor: doc.highestFloor,
     gachaHistory: doc.gachaHistory || [],
+    gachaPity: doc.gachaPity || { epic: 0, legendary: 0 },
     createdAt: doc.createdAt,
     lastActive: doc.lastActive
   };
@@ -150,6 +155,7 @@ export class Database {
         totalGoldEarned: player.totalGoldEarned,
         highestFloor: player.highestFloor,
         gachaHistory: player.gachaHistory,
+        gachaPity: player.gachaPity,
         lastActive: new Date()
       }
     );

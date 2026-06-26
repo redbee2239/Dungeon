@@ -94,7 +94,7 @@ export function summonAttack(
   }
 
   const isCrit = isCritical(summon.speed);
-  let baseDamage = Math.floor(summon.attack * 1.5);
+  let baseDamage = Math.floor(summon.attack * 2.2);
   if (isCrit) baseDamage = Math.floor(baseDamage * 1.5);
 
   const defMult = getMonsterDefenseMultiplier(events || { events: [] });

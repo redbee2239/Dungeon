@@ -27,10 +27,12 @@ interface CombatData {
   stunTurns: number;
   buffs: CombatBuff[];
   debuffs: CombatBuff[];
+  potionUsed: number;
 }
 
 const SKILL_LIMIT = 3;
 const SUMMONER_SKILL_LIMIT = 1;
+const POTION_LIMIT = 2;
 const activeCombats = new Map<string, CombatData>();
 
 function generateProgressBar(current: number, max: number, length: number): string {
@@ -103,7 +105,7 @@ export const prefixCommand = {
 
     const monster = getRandomMonster(floor);
 
-    activeCombats.set(userId, { monster, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [] });
+    activeCombats.set(userId, { monster, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [], potionUsed: 0 });
 
     const bonus = calculateBonusStats(player.inventory);
     const totalHP = player.stats.maxHP + bonus.hp;
@@ -197,6 +199,11 @@ export const prefixCommand = {
       await i.deferUpdate();
 
       if (i.customId === 'potion') {
+        if (combatData.potionUsed >= POTION_LIMIT) {
+          await showCombatStatus(i, player, combatData.monster, `❌ Đã dùng tối đa **${POTION_LIMIT}** thuốc trong combat này!`, combatData.skillUsage, combatData.summon, combatData.events);
+          return;
+        }
+
         const potions = player.inventory.items.filter((inv: any) => {
           const item = ITEMS[inv.itemId];
           return item && item.type === 'potion' && inv.quantity > 0;
@@ -255,6 +262,7 @@ export const prefixCommand = {
           }
 
           removeItem(player.inventory, potionId, 1);
+          combatData.potionUsed++;
 
           let potionMsg = '';
 

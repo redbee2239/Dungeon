@@ -117,36 +117,12 @@ export const prefixCommand = {
         break;
     }
 
-    for (const other of otherStats) {
-      const otherInfo = STAT_INFO[other];
-      switch (other) {
-        case 'hp':
-          player.stats.maxHP += otherInfo.base;
-          player.stats.hp += otherInfo.base;
-          break;
-        case 'mp':
-          player.stats.maxMP += otherInfo.base;
-          player.stats.mp += otherInfo.base;
-          break;
-        case 'attack':
-          player.stats.attack += otherInfo.base;
-          break;
-        case 'defense':
-          player.stats.defense += otherInfo.base;
-          break;
-        case 'speed':
-          player.stats.speed += otherInfo.base;
-          break;
-      }
-    }
-
     await db.updatePlayer(player);
 
     const embed = new EmbedBuilder()
       .setTitle('✅ Nâng Chỉ Số Thành Công!')
       .setDescription(
-        `${info.emoji} **${info.name}** +${info.base * points}\n` +
-        `📊 Tất cả stat khác +1\n\n` +
+        `${info.emoji} **${info.name}** +${info.base * points}\n\n` +
         `📊 Chỉ số mới:\n` +
         `❤️ HP: ${player.stats.hp}/${player.stats.maxHP}\n` +
         `💧 MP: ${player.stats.mp}/${player.stats.maxMP}\n` +

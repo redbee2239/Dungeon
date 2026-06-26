@@ -2,6 +2,9 @@ import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
 
 const STAT_COST = 1;
+const STAT_LIMITS: Record<string, number> = {
+  speed: 130
+};
 
 const STAT_INFO: Record<string, { name: string; emoji: string; base: number }> = {
   hp: { name: 'HP', emoji: '❤️', base: 10 },
@@ -79,6 +82,15 @@ export const prefixCommand = {
     const info = STAT_INFO[stat];
     if (!info) {
       return message.reply('❌ Chỉ số không hợp lệ!');
+    }
+
+    const limit = STAT_LIMITS[stat];
+    if (limit && (player.stats as any)[stat] >= limit) {
+      return message.reply(`❌ **${info.name}** đã đạt giới hạn **${limit}**!`);
+    }
+
+    if (limit && (player.stats as any)[stat] + info.base * points > limit) {
+      return message.reply(`❌ **${info.name}** sẽ vượt giới hạn **${limit}**! Chỉ có thể thêm **${limit - (player.stats as any)[stat]}** điểm.`);
     }
 
     player.skillPoints -= totalCost;

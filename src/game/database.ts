@@ -170,6 +170,11 @@ export class Database {
         highestFloor: player.highestFloor,
         gachaHistory: player.gachaHistory,
         gachaPity: player.gachaPity,
+        petGachaPity: player.petGachaPity,
+        equippedPet: player.equippedPet,
+        ownedPets: player.ownedPets,
+        afk: player.afk,
+        expBoostCharges: player.expBoostCharges,
         lastActive: new Date()
       }
     );

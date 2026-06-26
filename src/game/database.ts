@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { PlayerModel, IPlayer } from './playerModel';
+import { CodeModel } from './codeModel';
 import { PlayerStats, CharacterClass, createBaseStats, getExpToNextLevel, levelUp } from './classes';
 import { Item, ITEMS } from './items';
 

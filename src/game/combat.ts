@@ -167,7 +167,7 @@ export function executeCombatRound(
         message += pResult.message;
       }
     } else {
-      // Normal attack - summon attacks if available, otherwise player
+      // Normal attack - both summon and player attack if summon exists
       if (summon) {
         const sResult = summonAttack(summon, monster);
         summonDamage = sResult.damage;
@@ -178,6 +178,20 @@ export function executeCombatRound(
           message += `${summon.emoji} ${summon.name} tấn công gây **${summonDamage}** sát thương${sResult.isCrit ? ' (CHÍ MẠNG!)' : ''}!`;
         } else {
           message += `${summon.emoji} ${sResult.message}`;
+        }
+
+        if (monster.hp > 0) {
+          const pResult = playerAttack(effectiveStats, monster);
+          playerDamage = pResult.damage;
+          playerCrit = pResult.isCrit;
+          monsterDodged = pResult.damage === 0;
+
+          if (playerDamage > 0) {
+            monster.hp = Math.max(0, monster.hp - playerDamage);
+            message += `\nBạn tấn công gây **${playerDamage}** sát thương${playerCrit ? ' (CHÍ MẠNG!)' : ''}!`;
+          } else {
+            message += `\n${pResult.message}`;
+          }
         }
       } else {
         const pResult = playerAttack(effectiveStats, monster);
@@ -316,6 +330,20 @@ export function executeCombatRound(
           message += `\n${summon.emoji} ${summon.name} tấn công gây **${summonDamage}** sát thương${sResult.isCrit ? ' (CHÍ MẠNG!)' : ''}!`;
         } else {
           message += `\n${summon.emoji} ${sResult.message}`;
+        }
+
+        if (monster.hp > 0) {
+          const pResult = playerAttack(effectiveStats, monster);
+          playerDamage = pResult.damage;
+          playerCrit = pResult.isCrit;
+          monsterDodged = pResult.damage === 0;
+
+          if (playerDamage > 0) {
+            monster.hp = Math.max(0, monster.hp - playerDamage);
+            message += `\nBạn tấn công gây **${playerDamage}** sát thương${playerCrit ? ' (CHÍ MẠNG!)' : ''}!`;
+          } else {
+            message += `\n${pResult.message}`;
+          }
         }
       } else {
         const pResult = playerAttack(effectiveStats, monster);

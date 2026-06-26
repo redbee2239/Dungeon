@@ -211,7 +211,7 @@ export const prefixCommand = {
 
         const potions = player.inventory.items.filter((inv: any) => {
           const item = ITEMS[inv.itemId];
-          return item && item.type === 'potion' && inv.quantity > 0;
+          return item && item.type === 'potion' && inv.quantity > 0 && item.id !== 'exp_boost_potion';
         });
 
         if (potions.length === 0) {
@@ -285,9 +285,6 @@ export const prefixCommand = {
               player.stats.hp += healAmt;
               potionMsg = `❤️ Hồi **${healAmt}** HP!`;
             }
-          } else if (potionItem.id === 'exp_boost_potion') {
-            player.expBoostCharges += 3;
-            potionMsg = `📘 x2 Kinh Nghiệm trong **3** lần đánh tiếp theo! (Còn ${player.expBoostCharges} lần)`;
           } else if (potionItem.buffStat) {
             combatData.buffs.push({ stat: potionItem.buffStat, amount: potionItem.buffAmount || 0 });
             potionMsg = `⬆️ Tăng **${potionItem.buffStat.toUpperCase()} +${potionItem.buffAmount}** trong combat!`;

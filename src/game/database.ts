@@ -51,6 +51,10 @@ export interface Player {
   petGachaPity: number;
   equippedPet: string | null;
   ownedPets: { petId: string; quantity: number }[];
+  afk: {
+    isAfk: boolean;
+    startTime: number;
+  };
   expBoostCharges: number;
   createdAt: Date;
   lastActive: Date;
@@ -87,6 +91,7 @@ function docToPlayer(doc: IPlayer): Player {
     petGachaPity: doc.petGachaPity || 0,
     equippedPet: doc.equippedPet || null,
     ownedPets: doc.ownedPets || [],
+    afk: doc.afk || { isAfk: false, startTime: 0 },
     expBoostCharges: doc.expBoostCharges || 0,
     createdAt: doc.createdAt,
     lastActive: doc.lastActive

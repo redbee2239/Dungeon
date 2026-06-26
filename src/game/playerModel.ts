@@ -59,6 +59,10 @@ export interface IPlayer extends Document {
   petGachaPity: number;
   equippedPet: string | null;
   ownedPets: { petId: string; quantity: number }[];
+  afk: {
+    isAfk: boolean;
+    startTime: number;
+  };
   expBoostCharges: number;
   createdAt: Date;
   lastActive: Date;
@@ -126,6 +130,10 @@ const PlayerSchema = new Schema<IPlayer>({
     petId: String,
     quantity: { type: Number, default: 1 }
   }],
+  afk: {
+    isAfk: { type: Boolean, default: false },
+    startTime: { type: Number, default: 0 }
+  },
   expBoostCharges: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   lastActive: { type: Date, default: Date.now }

@@ -418,7 +418,7 @@ export const prefixCommand = {
               if (!combatData.summon || combatData.summon.hp <= 0) {
                 combatData.summon = createSummon(skillId, player.stats.level, bonus.summonBoost);
                 if (combatData.summon) {
-                  await showCombatStatus(i, player, combatData.monster, `${combatData.summon.emoji} **${combatData.summon.name}** đã được triệu hồi!\n❤️ HP: ${combatData.summon.hp}/${combatData.summon.maxHP}`, combatData.skillUsage, combatData.summon, combatData.events);
+                  await showCombatStatus(i, player, combatData.monster, `${combatData.summon.emoji} **${combatData.summon.name}** (Lv.${combatData.summon.level}) đã được triệu hồi!\n❤️ HP: ${combatData.summon.hp}/${combatData.summon.maxHP} | ⚔️ ATK: ${combatData.summon.attack}`, combatData.skillUsage, combatData.summon, combatData.events);
                   skillCollector.stop();
                   return;
                 }
@@ -607,8 +607,8 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
   if (summon && summon.hp > 0) {
     const summonBar = generateProgressBar(summon.hp, summon.maxHP, 15);
     embed.addFields({
-      name: `${summon.emoji} ${summon.name} (Triệu Hồi)`,
-      value: `❤️ ${summon.hp}/${summon.maxHP}\n${summonBar}`,
+      name: `${summon.emoji} ${summon.name} (Lv.${summon.level} Triệu Hồi)`,
+      value: `❤️ ${summon.hp}/${summon.maxHP}\n⚔️ ATK: ${summon.attack} | 🛡️ DEF: ${summon.defense}\n${summonBar}`,
       inline: true
     });
   }

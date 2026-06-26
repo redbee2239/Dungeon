@@ -1,6 +1,7 @@
 export interface Summon {
   name: string;
   emoji: string;
+  level: number;
   hp: number;
   maxHP: number;
   attack: number;
@@ -26,6 +27,7 @@ export function createSummon(skillId: string, playerLevel: number, summonBoost: 
   return {
     name: data.name,
     emoji: data.emoji,
+    level: playerLevel,
     hp: Math.floor(data.baseHP * scaling * boost),
     maxHP: Math.floor(data.baseHP * scaling * boost),
     attack: Math.floor(data.baseAttack * scaling * boost),

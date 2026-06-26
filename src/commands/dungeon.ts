@@ -314,16 +314,35 @@ export const prefixCommand = {
               combatData.skillUsage = {};
               const nextMsg = `${fullMsg}\n\n⚔️ **Quái tiếp theo:** ${combatData.monster.emoji} ${combatData.monster.name} (${combatData.monster.hp}/${combatData.monster.maxHP} HP)`;
               const embed = buildCombatEmbed(player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events);
-              await pi.update({ embeds: [embed], components: buildCombatButtons() });
+              await pi.update({ embeds: [embed], components: [buildCombatButtons()] });
             } else {
-              await handleVictory(pi, player, combatData, db, result);
+              const totalExp = result.expGained;
+              const totalGold = result.goldGained;
+              let expBoostMsg = '';
+              if (player.expBoostCharges > 0) {
+                player.expBoostCharges--;
+                expBoostMsg = ` (x2 EXP, còn ${player.expBoostCharges} lượt)`;
+              }
+              const expResult = await db.addExp(player, totalExp);
+              await db.addGold(player, totalGold);
+              let gemsEarned = combatData.monster.isBoss ? 10 + Math.floor(Math.random() * 40) : combatData.monster.level >= 10 ? 5 + Math.floor(Math.random() * 10) : Math.floor(Math.random() * 3);
+              if (gemsEarned > 0) await db.addGems(player, gemsEarned);
+              if (result.itemDropped) { addItem(player.inventory, result.itemDropped); const gemBonus = Math.floor(Math.random() * 10) + 5; await db.addGems(player, gemBonus); gemsEarned += gemBonus; }
+              if (combatData.monster.isBoss) { const chest = rollChest(combatData.floor); if (chest) { await db.addChest(player, chest.id); } }
+              if (combatData.floor >= player.highestFloor) { player.highestFloor = combatData.floor + 1; player.dungeon.currentFloor = combatData.floor + 1; }
+              player.totalMonstersKilled += 1;
+              await db.updatePlayer(player);
+              let msg = `⚔️ **CHIẾN THẮNG!**\n🧪 Dùng ${potionItem.emoji} **${potionItem.name}**\n${potionMsg}\n\n+${totalExp * (result.expGained > 0 ? 1 : 1)} EXP, +${totalGold} Gold${expBoostMsg}\n💎 +${gemsEarned} Gem`;
+              if (expResult.leveled) { const levelGems = expResult.levelsGained * 5; await db.addGems(player, levelGems); msg += `\n\n🎉 **LEVEL UP!** Level ${player.stats.level} (+${expResult.levelsGained})`; }
+              const victoryEmbed = new EmbedBuilder().setTitle('🏆 Chiến Thắng!').setDescription(msg).setColor(0x00FF00);
+              await pi.update({ embeds: [victoryEmbed], components: [] });
             }
           } else if (result.playerDied) {
             await db.updatePlayer(player);
             await pi.update({ content: `💀 **GAME OVER**\n${fullMsg}`, embeds: [], components: [] });
           } else {
-            const embed = buildCombatEmbed(player, combatData.monster, fullMsg, combatData.skillUsage, combatData.summon, combatData.events);
-            await pi.update({ embeds: [embed], components: buildCombatButtons() });
+            const embed = buildCombatEmbed(player, combatData.monster, fullMsg, combatData.skillUsage, combatData.summon, combatData.events, combatData.buffs);
+            await pi.update({ embeds: [embed], components: [buildCombatButtons()] });
           }
           potionCollector.stop();
         });

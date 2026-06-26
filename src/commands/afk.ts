@@ -14,8 +14,8 @@ export const prefixCommand = {
       return message.reply('❌ Bạn chưa có nhân vật! Dùng `,create` để tạo.');
     }
 
-    if (player.afk.isAfk) {
-      const elapsed = Date.now() - player.afk.startTime;
+    if (player.afk?.isAfk) {
+      const elapsed = Date.now() - (player.afk.startTime || 0);
       const intervals = Math.floor(elapsed / AFK_INTERVAL_MS);
       const spEarned = intervals;
 
@@ -41,6 +41,7 @@ export const prefixCommand = {
       return message.reply('❌ Bạn đang trong dungeon! Hãy thoát dungeon trước khi AFK.');
     }
 
+    if (!player.afk) player.afk = { isAfk: false, startTime: 0 };
     player.afk.isAfk = true;
     player.afk.startTime = Date.now();
 

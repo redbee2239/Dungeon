@@ -84,7 +84,7 @@ export const prefixCommand = {
       return message.reply('❌ Bạn đang có battle chưa xong! Đợi hết hoặc bỏ chạy.');
     }
 
-    if (player.afk.isAfk) {
+    if (player.afk?.isAfk) {
       return message.reply('❌ Bạn đang AFK! Dùng `,afk` để tắt AFK trước khi đánh dungeon.');
     }
 

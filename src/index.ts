@@ -80,8 +80,8 @@ client.once(Events.ClientReady, async (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  const allowedChannelId = process.env.CHANNEL_ID;
-  if (allowedChannelId && interaction.channelId !== allowedChannelId) {
+  const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
+  if (allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(interaction.channelId)) {
     return interaction.reply({
       content: '❌ Chỉ có thể sử dụng lệnh trong kênh được chỉ định!',
       ephemeral: true
@@ -119,8 +119,8 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(PREFIX)) return;
 
-  const allowedChannelId = process.env.CHANNEL_ID;
-  if (allowedChannelId && message.channel.id !== allowedChannelId) return;
+  const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
+  if (allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(message.channel.id)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift()?.toLowerCase();

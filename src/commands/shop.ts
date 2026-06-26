@@ -4,17 +4,42 @@ import { ITEMS, RARITY_NAMES, Item } from '../game/items';
 import { addItem, sellItem } from '../game/inventory';
 
 const shopItems: Item[] = [
+  // Weapons - Physical
   ITEMS.wooden_sword,
   ITEMS.iron_sword,
   ITEMS.steel_sword,
+  ITEMS.bronze_axe,
+  ITEMS.silver_blade,
+  ITEMS.battle_axe,
+  // Weapons - Magic
+  ITEMS.magic_wand,
+  ITEMS.oak_staff,
+  ITEMS.arcane_rod,
+  ITEMS.crystal_staff,
+  // Weapons - Bow
+  ITEMS.short_bow,
+  ITEMS.hunting_bow,
+  ITEMS.long_bow,
+  // Armor
   ITEMS.cloth_armor,
   ITEMS.leather_armor,
+  ITEMS.chain_vest,
   ITEMS.chain_mail,
+  ITEMS.knight_armor,
+  ITEMS.mage_robe,
+  // Accessories
+  ITEMS.iron_ring,
+  ITEMS.speed_ring,
+  ITEMS.power_amulet,
+  ITEMS.attack_ring,
+  ITEMS.defense_ring,
+  ITEMS.lucky_charm,
+  // Potions
   ITEMS.health_potion,
   ITEMS.mega_health,
   ITEMS.mana_potion,
-  ITEMS.speed_ring,
-  ITEMS.power_amulet
+  ITEMS.mana_mega,
+  ITEMS.elixir
 ];
 
 export const prefixCommand = {

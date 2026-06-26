@@ -45,11 +45,11 @@ export function calculateDamage(attacker: number, defender: number): number {
 }
 
 export function isCritical(speed: number, bonus: number = 0): boolean {
-  return Math.random() < (speed * 0.008 + bonus);
+  return Math.random() < (speed * 0.001 + bonus);
 }
 
 export function isDodged(attackerSpeed: number, defenderSpeed: number): boolean {
-  const dodgeChance = Math.max(0, (defenderSpeed - attackerSpeed) * 0.02);
+  const dodgeChance = Math.max(0, (defenderSpeed - attackerSpeed) * 0.003);
   return Math.random() < dodgeChance;
 }
 

@@ -328,6 +328,10 @@ export function getMonstersForFloor(floor: number): MonsterTemplate[] {
 
 export function getRandomMonster(floor: number): Monster {
   const available = getMonstersForFloor(floor);
+  if (available.length === 0) {
+    const fallback = MONSTER_TEMPLATES.filter(m => !m.isBoss).sort((a, b) => Math.abs(a.baseLevel - floor) - Math.abs(b.baseLevel - floor));
+    return createMonster(fallback[0], floor);
+  }
   const template = available[Math.floor(Math.random() * available.length)];
   return createMonster(template, floor);
 }

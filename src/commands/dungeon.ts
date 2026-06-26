@@ -255,13 +255,13 @@ export const prefixCommand = {
 
         potionCollector.on('collect', async (pi: any) => {
           if (pi.user.id !== userId) return;
-          await pi.deferUpdate();
 
           const potionId = pi.values[0];
           const potionItem = ITEMS[potionId];
           const invItem = player.inventory.items.find((inv: any) => inv.itemId === potionId);
 
           if (!potionItem || !invItem || invItem.quantity <= 0) {
+            await pi.deferUpdate();
             potionCollector.stop();
             return;
           }
@@ -294,10 +294,6 @@ export const prefixCommand = {
             }
           }
 
-          combatData.active = false;
-          collector.stop();
-          potionCollector.stop();
-
           const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns);
           combatData.stunTurns = result.stunTurns;
 
@@ -311,7 +307,25 @@ export const prefixCommand = {
           }
 
           const fullMsg = `🧪 Dùng ${potionItem.emoji} **${potionItem.name}**\n${potionMsg}\n\n${result.message}`;
-          await processResult(pi, player, combatData, db, result, fullMsg);
+
+          if (result.monsterDied) {
+            if (combatData.monsterQueue.length > 0) {
+              combatData.monster = combatData.monsterQueue.shift()!;
+              combatData.skillUsage = {};
+              const nextMsg = `${fullMsg}\n\n⚔️ **Quái tiếp theo:** ${combatData.monster.emoji} ${combatData.monster.name} (${combatData.monster.hp}/${combatData.monster.maxHP} HP)`;
+              const embed = buildCombatEmbed(player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events);
+              await pi.update({ embeds: [embed], components: buildCombatButtons() });
+            } else {
+              await handleVictory(pi, player, combatData, db, result);
+            }
+          } else if (result.playerDied) {
+            await db.updatePlayer(player);
+            await pi.update({ content: `💀 **GAME OVER**\n${fullMsg}`, embeds: [], components: [] });
+          } else {
+            const embed = buildCombatEmbed(player, combatData.monster, fullMsg, combatData.skillUsage, combatData.summon, combatData.events);
+            await pi.update({ embeds: [embed], components: buildCombatButtons() });
+          }
+          potionCollector.stop();
         });
 
         return;
@@ -584,7 +598,18 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   await i.message.edit({ embeds: [embed], components: [] });
 }
 
-async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]) {
+function buildCombatButtons(): ActionRowBuilder<ButtonBuilder> {
+  const row = new ActionRowBuilder<ButtonBuilder>();
+  row.addComponents(
+    new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('potion').setLabel('🧪 Thuốc').setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
+  );
+  return row;
+}
+
+function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]): EmbedBuilder {
   const bonus = calculateBonusStats(player.inventory);
   const totalHP = player.stats.maxHP + bonus.hp;
   const totalMP = player.stats.maxMP + bonus.mp;
@@ -620,23 +645,11 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
     });
   }
 
-  const isSummoner = player.characterClass === 'summoner';
-  const starterSkill = getStarterSkill(player.characterClass);
-  const allSkills = getSkillsForClass(player.characterClass, player.stats.level);
-  const hasAnySkills = allSkills.some(s => {
-    const unlocked = player.unlockedSkills.includes(s.id) || s.id === starterSkill;
-    const limit = isSummoner ? SUMMONER_SKILL_LIMIT : SKILL_LIMIT;
-    const hasUses = !skillUsage || (skillUsage[s.id] || 0) < limit;
-    return unlocked && hasUses;
-  });
+  return embed;
+}
 
-  const row = new ActionRowBuilder<ButtonBuilder>();
-  row.addComponents(
-    new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
-    new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId('potion').setLabel('🧪 Thuốc').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
-  );
-
+async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]) {
+  const embed = buildCombatEmbed(player, monster, extraMessage, skillUsage, summon, events, buffs);
+  const row = buildCombatButtons();
   await i.message.edit({ embeds: [embed], components: [row] });
 }

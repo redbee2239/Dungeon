@@ -3,6 +3,20 @@ import { Monster } from './monsters';
 import { Item, getRandomDrop } from './items';
 import { Skill } from './skills';
 import { Summon } from './summons';
+import {
+  ActiveEvents,
+  hasEffect,
+  getEffectStacks,
+  getMonsterDamageMultiplier,
+  getPlayerDamageMultiplier,
+  getMonsterDefenseMultiplier,
+  getPlayerSpeedMultiplier,
+  getMonsterCritBonus,
+  getHealAmount,
+  getPoisonDamage,
+  getLifestealAmount,
+  tickEvents
+} from './dungeonEvents';
 
 export interface CombatResult {
   playerDamage: number;
@@ -16,6 +30,8 @@ export interface CombatResult {
   monsterDied: boolean;
   playerDied: boolean;
   summonDied: boolean;
+  stunned: boolean;
+  stunTurns: number;
   expGained: number;
   goldGained: number;
   itemDropped: Item | null;
@@ -28,8 +44,8 @@ export function calculateDamage(attacker: number, defender: number): number {
   return Math.floor(baseDamage * variance);
 }
 
-export function isCritical(speed: number): boolean {
-  return Math.random() < speed * 0.008;
+export function isCritical(speed: number, bonus: number = 0): boolean {
+  return Math.random() < (speed * 0.008 + bonus);
 }
 
 export function isDodged(attackerSpeed: number, defenderSpeed: number): boolean {
@@ -40,9 +56,11 @@ export function isDodged(attackerSpeed: number, defenderSpeed: number): boolean 
 export function playerAttack(
   playerStats: PlayerStats,
   monster: Monster,
-  skill?: Skill
+  skill?: Skill,
+  events?: ActiveEvents
 ): { damage: number; message: string; isCrit: boolean } {
-  if (isDodged(playerStats.speed, monster.speed)) {
+  const noDodge = events ? hasEffect(events, 'no_dodge') : false;
+  if (!noDodge && isDodged(playerStats.speed, monster.speed)) {
     return { damage: 0, message: 'Bạn đã bị né!', isCrit: false };
   }
 
@@ -53,11 +71,14 @@ export function playerAttack(
     multiplier = skill.damage;
   }
 
+  multiplier *= getPlayerDamageMultiplier(events || { events: [] });
+
   const isCrit = isCritical(playerStats.speed);
   if (isCrit) multiplier *= 1.5;
 
+  const defMult = getMonsterDefenseMultiplier(events || { events: [] });
   const damage = Math.floor(
-    Math.max(1, baseDamage * multiplier - monster.defense / 2) * (0.8 + Math.random() * 0.4)
+    Math.max(1, baseDamage * multiplier - (monster.defense * defMult) / 2) * (0.8 + Math.random() * 0.4)
   );
 
   return { damage, message: '', isCrit };
@@ -65,7 +86,8 @@ export function playerAttack(
 
 export function summonAttack(
   summon: Summon,
-  monster: Monster
+  monster: Monster,
+  events?: ActiveEvents
 ): { damage: number; message: string; isCrit: boolean } {
   if (isDodged(summon.speed, monster.speed)) {
     return { damage: 0, message: `${summon.name} đã bị né!`, isCrit: false };
@@ -75,8 +97,9 @@ export function summonAttack(
   let baseDamage = Math.floor(summon.attack * 1.5);
   if (isCrit) baseDamage = Math.floor(baseDamage * 1.5);
 
+  const defMult = getMonsterDefenseMultiplier(events || { events: [] });
   const damage = Math.floor(
-    Math.max(1, baseDamage - monster.defense / 2) * (0.8 + Math.random() * 0.4)
+    Math.max(1, baseDamage - (monster.defense * defMult) / 2) * (0.8 + Math.random() * 0.4)
   );
 
   return { damage, message: '', isCrit };
@@ -85,21 +108,27 @@ export function summonAttack(
 export function monsterAttack(
   monster: Monster,
   targetStats: { speed: number; defense: number },
-  targetName: string
-): { damage: number; message: string; isCrit: boolean } {
-  if (isDodged(monster.speed, targetStats.speed)) {
-    return { damage: 0, message: `${monster.name} đã bị né!`, isCrit: false };
+  targetName: string,
+  events?: ActiveEvents
+): { damage: number; message: string; isCrit: boolean; lifesteal: number } {
+  const eventsData = events || { events: [] };
+  const noDodge = hasEffect(eventsData, 'no_dodge');
+  if (!noDodge && isDodged(monster.speed, targetStats.speed)) {
+    return { damage: 0, message: `${monster.name} đã bị né!`, isCrit: false, lifesteal: 0 };
   }
 
-  const isCrit = isCritical(monster.speed);
-  let baseDamage = monster.attack;
+  const critBonus = getMonsterCritBonus(eventsData);
+  const isCrit = isCritical(monster.speed, critBonus);
+  let baseDamage = Math.floor(monster.attack * getMonsterDamageMultiplier(eventsData));
   if (isCrit) baseDamage = Math.floor(baseDamage * 1.5);
 
   const damage = Math.floor(
     Math.max(1, baseDamage - targetStats.defense / 2) * (0.8 + Math.random() * 0.4)
   );
 
-  return { damage, message: '', isCrit };
+  const lifesteal = hasEffect(eventsData, 'monster_lifesteal') ? getLifestealAmount(damage) : 0;
+
+  return { damage, message: '', isCrit, lifesteal };
 }
 
 export function useSkillMana(playerStats: PlayerStats, skill: Skill, mpMultiplier: number = 1): boolean {
@@ -112,7 +141,9 @@ export function executeCombatRound(
   skill?: Skill,
   bonusStats?: { attack: number; defense: number; hp: number; mp: number; speed: number },
   summon?: Summon | null,
-  mpMultiplier: number = 1
+  mpMultiplier: number = 1,
+  events?: ActiveEvents,
+  stunTurns: number = 0
 ): CombatResult {
   const effectiveStats = bonusStats ? {
     ...playerStats,
@@ -120,8 +151,11 @@ export function executeCombatRound(
     defense: playerStats.defense + bonusStats.defense,
     maxHP: playerStats.maxHP + bonusStats.hp,
     maxMP: playerStats.maxMP + bonusStats.mp,
-    speed: playerStats.speed + bonusStats.speed
-  } : playerStats;
+    speed: Math.floor((playerStats.speed + bonusStats.speed) * getPlayerSpeedMultiplier(events || { events: [] }))
+  } : {
+    ...playerStats,
+    speed: Math.floor(playerStats.speed * getPlayerSpeedMultiplier(events || { events: [] }))
+  };
   
   let message = '';
   let playerDamage = 0;
@@ -133,17 +167,36 @@ export function executeCombatRound(
   let monsterDodged = false;
   let summonDodged = false;
   let summonDied = false;
+  let newStunTurns = stunTurns;
   let expGained = 0;
   let goldGained = 0;
   let itemDropped: Item | null = null;
+
+  const eventsData = events || { events: [] };
+
+  // Poison damage
+  if (hasEffect(eventsData, 'poison')) {
+    const poisonDmg = getPoisonDamage(playerStats.maxHP);
+    playerStats.hp = Math.max(1, playerStats.hp - poisonDmg);
+    message += `☠️ Bạn mất **${poisonDmg}** HP do độc!\n`;
+  }
+
+  // Monster heal
+  if (hasEffect(eventsData, 'monster_heal') && monster.hp > 0 && monster.hp < monster.maxHP) {
+    const healAmt = getHealAmount(monster.maxHP);
+    monster.hp = Math.min(monster.maxHP, monster.hp + healAmt);
+    message += `💚 ${monster.name} hồi **${healAmt}** HP!\n`;
+  }
 
   const playerFirst = effectiveStats.speed >= monster.speed;
 
   if (playerFirst) {
     // Player/Summon attacks first
-    if (skill && summon && SUMMON_SKILLS.includes(skill.id)) {
-      // Summon attacks with skill
-      const sResult = summonAttack(summon, monster);
+    if (stunTurns > 0) {
+      message += `💫 Bạn bị choáng, không thể tấn công! (${stunTurns} lượt còn lại)\n`;
+      newStunTurns = stunTurns - 1;
+    } else if (skill && summon && SUMMON_SKILLS.includes(skill.id)) {
+      const sResult = summonAttack(summon, monster, eventsData);
       summonDamage = sResult.damage;
       summonDodged = sResult.damage === 0;
 
@@ -154,8 +207,7 @@ export function executeCombatRound(
         message += `${summon.emoji} ${sResult.message}`;
       }
     } else if (skill) {
-      // Player uses skill
-      const pResult = playerAttack(effectiveStats, monster, skill);
+      const pResult = playerAttack(effectiveStats, monster, skill, eventsData);
       playerDamage = pResult.damage;
       playerCrit = pResult.isCrit;
       monsterDodged = pResult.damage === 0;
@@ -167,9 +219,8 @@ export function executeCombatRound(
         message += pResult.message;
       }
     } else {
-      // Normal attack - both summon and player attack if summon exists
       if (summon) {
-        const sResult = summonAttack(summon, monster);
+        const sResult = summonAttack(summon, monster, eventsData);
         summonDamage = sResult.damage;
         summonDodged = sResult.damage === 0;
 
@@ -181,7 +232,7 @@ export function executeCombatRound(
         }
 
         if (monster.hp > 0) {
-          const pResult = playerAttack(effectiveStats, monster);
+          const pResult = playerAttack(effectiveStats, monster, undefined, eventsData);
           playerDamage = pResult.damage;
           playerCrit = pResult.isCrit;
           monsterDodged = pResult.damage === 0;
@@ -194,7 +245,7 @@ export function executeCombatRound(
           }
         }
       } else {
-        const pResult = playerAttack(effectiveStats, monster);
+        const pResult = playerAttack(effectiveStats, monster, undefined, eventsData);
         playerDamage = pResult.damage;
         playerCrit = pResult.isCrit;
         monsterDodged = pResult.damage === 0;
@@ -220,13 +271,14 @@ export function executeCombatRound(
       return {
         playerDamage, monsterDamage: 0, summonDamage: 0, playerCrit, monsterCrit: false,
         playerDodged: false, monsterDodged, summonDodged: false, monsterDied: true, playerDied: false, summonDied: false,
+        stunned: false, stunTurns: 0,
         expGained, goldGained, itemDropped, message
       };
     }
 
     // Monster attacks - prioritize summon
     if (summon && summon.hp > 0) {
-      const mResult = monsterAttack(monster, { speed: summon.speed, defense: summon.defense }, summon.name);
+      const mResult = monsterAttack(monster, { speed: summon.speed, defense: summon.defense }, summon.name, eventsData);
       monsterDamage = mResult.damage;
       monsterCrit = mResult.isCrit;
       summonDodged = mResult.damage === 0;
@@ -234,6 +286,10 @@ export function executeCombatRound(
       if (monsterDamage > 0) {
         summon.hp = Math.max(0, summon.hp - monsterDamage);
         message += `\n${monster.emoji} ${monster.name} tấn công ${summon.emoji} ${summon.name} gây **${monsterDamage}** sát thương${monsterCrit ? ' (CHÍ MẠNG!)' : ''}!`;
+        if (mResult.lifesteal > 0) {
+          monster.hp = Math.min(monster.maxHP, monster.hp + mResult.lifesteal);
+          message += ` (Hút **${mResult.lifesteal}** HP)`;
+        }
         if (summon.hp <= 0) {
           summonDied = true;
           message += `\n${summon.emoji} **${summon.name}** đã bị tiêu diệt!`;
@@ -242,7 +298,7 @@ export function executeCombatRound(
         message += `\n${mResult.message}`;
       }
     } else {
-      const mResult = monsterAttack(monster, { speed: effectiveStats.speed, defense: effectiveStats.defense }, 'bạn');
+      const mResult = monsterAttack(monster, { speed: effectiveStats.speed, defense: effectiveStats.defense }, 'bạn', eventsData);
       monsterDamage = mResult.damage;
       monsterCrit = mResult.isCrit;
       playerDodged = mResult.damage === 0;
@@ -250,6 +306,16 @@ export function executeCombatRound(
       if (monsterDamage > 0) {
         playerStats.hp = Math.max(0, playerStats.hp - monsterDamage);
         message += `\n${monster.emoji} ${monster.name} tấn công gây **${monsterDamage}** sát thương${monsterCrit ? ' (CHÍ MẠNG!)' : ''}!`;
+        if (mResult.lifesteal > 0) {
+          monster.hp = Math.min(monster.maxHP, monster.hp + mResult.lifesteal);
+          message += ` (Hút **${mResult.lifesteal}** HP)`;
+        }
+
+        // Stun check
+        if (hasEffect(eventsData, 'stun') && Math.random() < 0.3 * getEffectStacks(eventsData, 'stun')) {
+          newStunTurns = 2;
+          message += `\n💫 Bạn bị **CHOÁNG** 2 lượt!`;
+        }
       } else {
         message += `\n${mResult.message}`;
       }
@@ -257,7 +323,7 @@ export function executeCombatRound(
   } else {
     // Monster attacks first
     if (summon && summon.hp > 0) {
-      const mResult = monsterAttack(monster, { speed: summon.speed, defense: summon.defense }, summon.name);
+      const mResult = monsterAttack(monster, { speed: summon.speed, defense: summon.defense }, summon.name, eventsData);
       monsterDamage = mResult.damage;
       monsterCrit = mResult.isCrit;
       summonDodged = mResult.damage === 0;
@@ -265,6 +331,10 @@ export function executeCombatRound(
       if (monsterDamage > 0) {
         summon.hp = Math.max(0, summon.hp - monsterDamage);
         message += `${monster.emoji} ${monster.name} tấn công ${summon.emoji} ${summon.name} gây **${monsterDamage}** sát thương${monsterCrit ? ' (CHÍ MẠNG!)' : ''}!`;
+        if (mResult.lifesteal > 0) {
+          monster.hp = Math.min(monster.maxHP, monster.hp + mResult.lifesteal);
+          message += ` (Hút **${mResult.lifesteal}** HP)`;
+        }
         if (summon.hp <= 0) {
           summonDied = true;
           message += `\n${summon.emoji} **${summon.name}** đã bị tiêu diệt!`;
@@ -273,7 +343,7 @@ export function executeCombatRound(
         message += mResult.message;
       }
     } else {
-      const mResult = monsterAttack(monster, { speed: effectiveStats.speed, defense: effectiveStats.defense }, 'bạn');
+      const mResult = monsterAttack(monster, { speed: effectiveStats.speed, defense: effectiveStats.defense }, 'bạn', eventsData);
       monsterDamage = mResult.damage;
       monsterCrit = mResult.isCrit;
       playerDodged = mResult.damage === 0;
@@ -281,8 +351,18 @@ export function executeCombatRound(
       if (monsterDamage > 0) {
         playerStats.hp = Math.max(0, playerStats.hp - monsterDamage);
         message += `${monster.emoji} ${monster.name} tấn công gây **${monsterDamage}** sát thương${monsterCrit ? ' (CHÍ MẠNG!)' : ''}!`;
+        if (mResult.lifesteal > 0) {
+          monster.hp = Math.min(monster.maxHP, monster.hp + mResult.lifesteal);
+          message += ` (Hút **${mResult.lifesteal}** HP)`;
+        }
+
+        // Stun check
+        if (hasEffect(eventsData, 'stun') && Math.random() < 0.3 * getEffectStacks(eventsData, 'stun')) {
+          newStunTurns = 2;
+          message += `\n💫 Bạn bị **CHOÁNG** 2 lượt!`;
+        }
       } else {
-        message += mResult.message;
+        message += `\n${mResult.message}`;
       }
     }
 
@@ -290,14 +370,18 @@ export function executeCombatRound(
       return {
         playerDamage: 0, monsterDamage, summonDamage: 0, playerCrit: false, monsterCrit,
         playerDodged, monsterDodged: false, summonDodged: false, monsterDied: false, playerDied: true, summonDied: false,
+        stunned: false, stunTurns: 0,
         expGained: 0, goldGained: 0, itemDropped: null,
         message: message + `\n💀 Bạn đã bị ${monster.name} tiêu diệt!`
       };
     }
 
     // Player/Summon attacks
-    if (skill && summon && SUMMON_SKILLS.includes(skill.id)) {
-      const sResult = summonAttack(summon, monster);
+    if (stunTurns > 0) {
+      message += `\n💫 Bạn bị choáng, không thể tấn công! (${stunTurns} lượt còn lại)`;
+      newStunTurns = stunTurns - 1;
+    } else if (skill && summon && SUMMON_SKILLS.includes(skill.id)) {
+      const sResult = summonAttack(summon, monster, eventsData);
       summonDamage = sResult.damage;
       summonDodged = sResult.damage === 0;
 
@@ -308,7 +392,7 @@ export function executeCombatRound(
         message += `\n${summon.emoji} ${sResult.message}`;
       }
     } else if (skill) {
-      const pResult = playerAttack(effectiveStats, monster, skill);
+      const pResult = playerAttack(effectiveStats, monster, skill, eventsData);
       playerDamage = pResult.damage;
       playerCrit = pResult.isCrit;
       monsterDodged = pResult.damage === 0;
@@ -321,7 +405,7 @@ export function executeCombatRound(
       }
     } else {
       if (summon) {
-        const sResult = summonAttack(summon, monster);
+        const sResult = summonAttack(summon, monster, eventsData);
         summonDamage = sResult.damage;
         summonDodged = sResult.damage === 0;
 
@@ -333,7 +417,7 @@ export function executeCombatRound(
         }
 
         if (monster.hp > 0) {
-          const pResult = playerAttack(effectiveStats, monster);
+          const pResult = playerAttack(effectiveStats, monster, undefined, eventsData);
           playerDamage = pResult.damage;
           playerCrit = pResult.isCrit;
           monsterDodged = pResult.damage === 0;
@@ -346,7 +430,7 @@ export function executeCombatRound(
           }
         }
       } else {
-        const pResult = playerAttack(effectiveStats, monster);
+        const pResult = playerAttack(effectiveStats, monster, undefined, eventsData);
         playerDamage = pResult.damage;
         playerCrit = pResult.isCrit;
         monsterDodged = pResult.damage === 0;
@@ -372,9 +456,15 @@ export function executeCombatRound(
     }
   }
 
+  // Tick events at end of round
+  if (events) {
+    tickEvents(events);
+  }
+
   return {
     playerDamage, monsterDamage, summonDamage, playerCrit, monsterCrit,
     playerDodged, monsterDodged, summonDodged, monsterDied: monster.hp <= 0, playerDied: playerStats.hp <= 0, summonDied,
+    stunned: newStunTurns > 0, stunTurns: newStunTurns,
     expGained, goldGained, itemDropped, message
   };
 }

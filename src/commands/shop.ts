@@ -1,58 +1,39 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { Database } from '../game/database';
-import { ITEMS, RARITY_NAMES, Item } from '../game/items';
-import { addItem, sellItem } from '../game/inventory';
+import { ITEMS, RARITY_NAMES, Item, ItemType } from '../game/items';
+import { addItem } from '../game/inventory';
 
 const shopItems: Item[] = [
-  // Weapons - Physical
-  ITEMS.wooden_sword,
-  ITEMS.iron_sword,
-  ITEMS.steel_sword,
-  ITEMS.bronze_axe,
-  ITEMS.silver_blade,
-  ITEMS.battle_axe,
-  // Weapons - Magic
-  ITEMS.magic_wand,
-  ITEMS.oak_staff,
-  ITEMS.arcane_rod,
-  ITEMS.crystal_staff,
-  // Weapons - Bow
-  ITEMS.short_bow,
-  ITEMS.hunting_bow,
-  ITEMS.long_bow,
-  // Weapons - Summoner
-  ITEMS.basic_staff,
-  ITEMS.wolf_staff,
+  // Weapons
+  ITEMS.wooden_sword, ITEMS.iron_sword, ITEMS.steel_sword,
+  ITEMS.bronze_axe, ITEMS.silver_blade, ITEMS.battle_axe,
+  ITEMS.magic_wand, ITEMS.oak_staff, ITEMS.arcane_rod, ITEMS.crystal_staff,
+  ITEMS.short_bow, ITEMS.hunting_bow, ITEMS.long_bow,
+  ITEMS.basic_staff, ITEMS.wolf_staff,
   // Armor
-  ITEMS.cloth_armor,
-  ITEMS.leather_armor,
-  ITEMS.chain_vest,
-  ITEMS.chain_mail,
-  ITEMS.knight_armor,
-  ITEMS.mage_robe,
+  ITEMS.cloth_armor, ITEMS.leather_armor, ITEMS.chain_vest,
+  ITEMS.chain_mail, ITEMS.knight_armor, ITEMS.mage_robe,
   // Accessories
-  ITEMS.iron_ring,
-  ITEMS.speed_ring,
-  ITEMS.power_amulet,
-  ITEMS.attack_ring,
-  ITEMS.defense_ring,
-  ITEMS.lucky_charm,
+  ITEMS.iron_ring, ITEMS.speed_ring, ITEMS.power_amulet,
+  ITEMS.attack_ring, ITEMS.defense_ring, ITEMS.lucky_charm,
   // Potions
-  ITEMS.health_potion,
-  ITEMS.mega_health,
-  ITEMS.mana_potion,
-  ITEMS.mana_mega,
-  ITEMS.elixir,
-  // Buff Potions
-  ITEMS.str_potion,
-  ITEMS.def_potion,
-  ITEMS.spd_potion,
-  ITEMS.hp_potion,
-  ITEMS.berserk_potion,
-  ITEMS.iron_skin,
-  ITEMS.mega_str,
-  ITEMS.mega_def
+  ITEMS.health_potion, ITEMS.mega_health, ITEMS.mana_potion, ITEMS.mana_mega, ITEMS.elixir,
+  ITEMS.str_potion, ITEMS.def_potion, ITEMS.spd_potion, ITEMS.hp_potion,
+  ITEMS.berserk_potion, ITEMS.iron_skin, ITEMS.mega_str, ITEMS.mega_def
 ];
+
+const CATEGORIES = [
+  { id: 'weapon', label: '⚔️ Vũ Khí', emoji: '⚔️', types: ['weapon'] as ItemType[] },
+  { id: 'armor', label: '🛡️ Giáp', emoji: '🛡️', types: ['armor'] as ItemType[] },
+  { id: 'accessory', label: '💍 Phụ Kiện', emoji: '💍', types: ['accessory'] as ItemType[] },
+  { id: 'potion', label: '🧪 Thuốc', emoji: '🧪', types: ['potion'] as ItemType[] }
+];
+
+function getItemsByCategory(categoryId: string): Item[] {
+  const cat = CATEGORIES.find(c => c.id === categoryId);
+  if (!cat) return [];
+  return shopItems.filter(item => cat.types.includes(item.type));
+}
 
 export const prefixCommand = {
   name: 'shop',
@@ -97,19 +78,130 @@ export const prefixCommand = {
 
       const embed = new EmbedBuilder()
         .setTitle('🛒 Mua Đồ')
-        .setDescription(`💰 Gold: **${player.stats.gold}**\n\nDùng \`,shop buy <id>\` để mua:`)
+        .setDescription(`💰 Gold: **${player.stats.gold}**\n\nChọn loại vật phẩm muốn mua:`)
         .setColor(0xFFD700);
 
-      const displayItems = shopItems.slice(0, 25);
-      displayItems.forEach(item => {
-        embed.addFields({
-          name: `${item.emoji} ${item.name}`,
-          value: `💰 ${item.price} Gold\n${RARITY_NAMES[item.rarity]}\nID: \`${item.id}\``,
-          inline: true
+      const row = new ActionRowBuilder<StringSelectMenuBuilder>();
+      row.addComponents(
+        new StringSelectMenuBuilder()
+          .setCustomId('shop_category')
+          .setPlaceholder('Chọn loại...')
+          .addOptions(
+            CATEGORIES.map(cat => ({
+              label: cat.label,
+              value: cat.id,
+              emoji: cat.emoji,
+              description: `Xem ${getItemsByCategory(cat.id).length} vật phẩm`
+            }))
+          )
+      );
+
+      const reply = await message.reply({ embeds: [embed], components: [row] });
+
+      const collector = reply.createMessageComponentCollector({
+        componentType: ComponentType.StringSelect,
+        time: 60000
+      });
+
+      collector.on('collect', async (i: any) => {
+        if (i.user.id !== userId) {
+          return i.reply({ content: 'Đây không phải shop của bạn!', ephemeral: true });
+        }
+
+        await i.deferUpdate();
+        const categoryId = i.values[0];
+        const category = CATEGORIES.find(c => c.id === categoryId);
+        if (!category) return;
+
+        const items = getItemsByCategory(categoryId);
+
+        const categoryEmbed = new EmbedBuilder()
+          .setTitle(`${category.emoji} ${category.label}`)
+          .setDescription(`💰 Gold: **${player.stats.gold}**\n\nChọn vật phẩm muốn mua:`)
+          .setColor(0xFFD700);
+
+        const displayItems = items.slice(0, 25);
+        displayItems.forEach(item => {
+          categoryEmbed.addFields({
+            name: `${item.emoji} ${item.name}`,
+            value: `💰 ${item.price} Gold\n${RARITY_NAMES[item.rarity]}\nID: \`${item.id}\``,
+            inline: true
+          });
+        });
+
+        const buyRow = new ActionRowBuilder<StringSelectMenuBuilder>();
+        buyRow.addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId('shop_buy_item')
+            .setPlaceholder('Chọn vật phẩm...')
+            .addOptions(
+              displayItems.map(item => ({
+                label: `${item.name} - ${item.price} Gold`.substring(0, 100),
+                value: item.id,
+                description: item.description.substring(0, 100)
+              }))
+            )
+        );
+
+        const backRow = new ActionRowBuilder<ButtonBuilder>();
+        backRow.addComponents(
+          new ButtonBuilder().setCustomId('shop_back').setLabel('🔙 Quay Lại').setStyle(ButtonStyle.Secondary)
+        );
+
+        await i.editReply({ embeds: [categoryEmbed], components: [buyRow, backRow] });
+
+        const buyCollector = reply.createMessageComponentCollector({
+          componentType: ComponentType.StringSelect,
+          time: 60000
+        });
+
+        buyCollector.on('collect', async (bi: any) => {
+          if (bi.user.id !== userId) {
+            return bi.reply({ content: 'Đây không phải shop của bạn!', ephemeral: true });
+          }
+
+          await bi.deferUpdate();
+          const selectedItemId = bi.values[0];
+          const selectedItem = shopItems.find(item => item.id === selectedItemId);
+          if (!selectedItem) return;
+
+          if (player.stats.gold < selectedItem.price) {
+            await bi.editReply({ content: `❌ Không đủ gold! Cần **${selectedItem.price}** gold.`, embeds: [], components: [] });
+            buyCollector.stop();
+            return;
+          }
+
+          const result = addItem(player.inventory, selectedItem);
+          if (!result.success) {
+            await bi.editReply({ content: `❌ ${result.message}`, embeds: [], components: [] });
+            buyCollector.stop();
+            return;
+          }
+
+          await db.removeGold(player, selectedItem.price);
+          await db.updatePlayer(player);
+
+          const successEmbed = new EmbedBuilder()
+            .setTitle('✅ Mua Thành Công!')
+            .setDescription(`${selectedItem.emoji} **${selectedItem.name}**\n\n💰 Gold còn lại: **${player.stats.gold}**`)
+            .setColor(0x00FF00);
+
+          await bi.editReply({ embeds: [successEmbed], components: [] });
+          buyCollector.stop();
+        });
+
+        buyCollector.on('end', async (_collected: any, reason: string) => {
+          if (reason === 'time') {
+            await i.editReply({ content: '⏰ Hết thời gian!', embeds: [], components: [] });
+          }
         });
       });
 
-      message.reply({ embeds: [embed] });
+      collector.on('end', async (_collected: any, reason: string) => {
+        if (reason === 'time') {
+          await reply.edit({ content: '⏰ Hết thời gian!', embeds: [], components: [] });
+        }
+      });
 
     } else {
       if (player.inventory.items.length === 0) {

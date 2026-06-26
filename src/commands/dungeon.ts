@@ -236,7 +236,7 @@ export const prefixCommand = {
             )
         );
 
-        await i.editReply({
+        await i.message.edit({
           components: [
             new ActionRowBuilder<ButtonBuilder>().addComponents(
               new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
@@ -323,7 +323,7 @@ export const prefixCommand = {
           combatData.active = false;
           activeCombats.delete(userId);
           collector.stop();
-          await i.editReply({ content: '🏃 Chạy trốn thành công!', embeds: [], components: [] });
+          await i.message.edit({ content: '🏃 Chạy trốn thành công!', embeds: [], components: [] });
         } else {
           const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns);
           combatData.stunTurns = result.stunTurns;
@@ -332,7 +332,7 @@ export const prefixCommand = {
             activeCombats.delete(userId);
             collector.stop();
             await db.updatePlayer(player);
-            await i.editReply({ content: `💀 Bị tiêu diệt!\n${result.message}`, embeds: [], components: [] });
+            await i.message.edit({ content: `💀 Bị tiêu diệt!\n${result.message}`, embeds: [], components: [] });
           } else if (result.monsterDied) {
             combatData.active = false;
             collector.stop();
@@ -386,7 +386,7 @@ export const prefixCommand = {
             )
         );
 
-        await i.editReply({
+        await i.message.edit({
           components: [
             new ActionRowBuilder<ButtonBuilder>().addComponents(
               new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
@@ -502,7 +502,7 @@ async function processResult(i: any, player: any, combatData: CombatData, db: Da
     }
   } else if (result.playerDied) {
     await db.updatePlayer(player);
-    await i.editReply({ content: `💀 **GAME OVER**\n${msg}`, embeds: [], components: [] });
+    await i.message.edit({ content: `💀 **GAME OVER**\n${msg}`, embeds: [], components: [] });
   } else {
     await showCombatStatus(i, player, combatData.monster, msg, combatData.skillUsage, combatData.summon, combatData.events);
   }
@@ -581,7 +581,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
     .setDescription(msg)
     .setColor(0x00FF00);
 
-  await i.editReply({ embeds: [embed], components: [] });
+  await i.message.edit({ embeds: [embed], components: [] });
 }
 
 async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]) {
@@ -638,5 +638,5 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
     new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
   );
 
-  await i.editReply({ embeds: [embed], components: [row] });
+  await i.message.edit({ embeds: [embed], components: [row] });
 }

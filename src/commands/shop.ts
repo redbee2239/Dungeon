@@ -113,17 +113,28 @@ export const prefixCommand = {
         if (!item) {
           return message.reply('❌ Lỗi vật phẩm!');
         }
-        const gold = item.sellPrice * invItem.quantity;
+
+        const quantity = args[2] ? parseInt(args[2]) : invItem.quantity;
+        if (isNaN(quantity) || quantity <= 0) {
+          return message.reply('❌ Số lượng không hợp lệ!');
+        }
+        if (quantity > invItem.quantity) {
+          return message.reply(`❌ Không đủ! Bạn có **${invItem.quantity}** ${item.name}.`);
+        }
+
+        const gold = item.sellPrice * quantity;
+        invItem.quantity -= quantity;
+        if (invItem.quantity <= 0) {
+          player.inventory.items = player.inventory.items.filter((i: any) => i.quantity > 0);
+        }
         await db.addGold(player, gold);
-        invItem.quantity = 0;
-        player.inventory.items = player.inventory.items.filter((i: any) => i.quantity > 0);
         await db.updatePlayer(player);
-        return message.reply(`✅ Bán thành công **${item.name}** (+${gold} Gold)`);
+        return message.reply(`✅ Bán **${quantity}x ${item.name}** (+${gold} Gold)`);
       }
 
       const embed = new EmbedBuilder()
         .setTitle('💰 Bán Đồ')
-        .setDescription(`Gold: **${player.stats.gold}**\n\nDùng \`,shop sell <id>\` để bán:`)
+        .setDescription(`Gold: **${player.stats.gold}**\n\nDùng \`,shop sell <id> [số lượng]\` để bán:\nBỏ trống số lượng = bán hết`)
         .setColor(0xFFD700);
 
       player.inventory.items.forEach((i: any) => {

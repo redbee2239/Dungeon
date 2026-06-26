@@ -4,11 +4,11 @@ import { Database } from '../game/database';
 const STAT_COST = 1;
 
 const STAT_INFO: Record<string, { name: string; emoji: string; base: number }> = {
-  hp: { name: 'HP', emoji: '❤️', base: 20 },
-  mp: { name: 'MP', emoji: '💧', base: 10 },
-  attack: { name: 'ATK', emoji: '⚔️', base: 4 },
-  defense: { name: 'DEF', emoji: '🛡️', base: 3 },
-  speed: { name: 'SPD', emoji: '💨', base: 2 }
+  hp: { name: 'HP', emoji: '❤️', base: 10 },
+  mp: { name: 'MP', emoji: '💧', base: 5 },
+  attack: { name: 'ATK', emoji: '⚔️', base: 2 },
+  defense: { name: 'DEF', emoji: '🛡️', base: 1 },
+  speed: { name: 'SPD', emoji: '💨', base: 1 }
 };
 
 export const prefixCommand = {
@@ -42,13 +42,14 @@ export const prefixCommand = {
           {
             name: '🎯 Cách Nâng',
             value: [
+              ',stat atk - Nâng ATK (+2)',
               ',stat hp - Nâng HP (+10)',
               ',stat mp - Nâng MP (+5)',
-              ',stat attack - Nâng ATK (+2)',
-              ',stat defense - Nâng DEF (+1)',
-              ',stat speed - Nâng SPD (+1)',
+              ',stat def - Nâng DEF (+1)',
+              ',stat spd - Nâng SPD (+1)',
               '',
-              'Alias: ,stat str/int/vit/agi'
+              '**Khi nâng 1 stat, tất cả stat khác cũng +1**',
+              ',stat atk 3 - Nâng ATK +6, các stat khác +1'
             ].join('\n')
           }
         )
@@ -64,9 +65,15 @@ export const prefixCommand = {
       agi: 'speed'
     };
     const stat = statMap[action] || action;
+    const points = parseInt(args[1]) || 1;
 
-    if (player.skillPoints < STAT_COST) {
-      return message.reply(`❌ Không đủ Skill Points! Cần **${STAT_COST}** (Bạn có **${player.skillPoints}**)`);
+    if (points < 1 || points > 100) {
+      return message.reply('❌ Số điểm phải từ 1 đến 100!');
+    }
+
+    const totalCost = points * STAT_COST;
+    if (player.skillPoints < totalCost) {
+      return message.reply(`❌ Không đủ Skill Points! Cần **${totalCost}** (Bạn có **${player.skillPoints}**)`);
     }
 
     const info = STAT_INFO[stat];
@@ -74,26 +81,51 @@ export const prefixCommand = {
       return message.reply('❌ Chỉ số không hợp lệ!');
     }
 
-    player.skillPoints -= STAT_COST;
+    player.skillPoints -= totalCost;
+
+    const otherStats = Object.keys(STAT_INFO).filter(s => s !== stat);
 
     switch (stat) {
       case 'hp':
-        player.stats.maxHP += info.base;
-        player.stats.hp += info.base;
+        player.stats.maxHP += info.base * points;
+        player.stats.hp += info.base * points;
         break;
       case 'mp':
-        player.stats.maxMP += info.base;
-        player.stats.mp += info.base;
+        player.stats.maxMP += info.base * points;
+        player.stats.mp += info.base * points;
         break;
       case 'attack':
-        player.stats.attack += info.base;
+        player.stats.attack += info.base * points;
         break;
       case 'defense':
-        player.stats.defense += info.base;
+        player.stats.defense += info.base * points;
         break;
       case 'speed':
-        player.stats.speed += info.base;
+        player.stats.speed += info.base * points;
         break;
+    }
+
+    for (const other of otherStats) {
+      const otherInfo = STAT_INFO[other];
+      switch (other) {
+        case 'hp':
+          player.stats.maxHP += otherInfo.base;
+          player.stats.hp += otherInfo.base;
+          break;
+        case 'mp':
+          player.stats.maxMP += otherInfo.base;
+          player.stats.mp += otherInfo.base;
+          break;
+        case 'attack':
+          player.stats.attack += otherInfo.base;
+          break;
+        case 'defense':
+          player.stats.defense += otherInfo.base;
+          break;
+        case 'speed':
+          player.stats.speed += otherInfo.base;
+          break;
+      }
     }
 
     await db.updatePlayer(player);
@@ -101,7 +133,8 @@ export const prefixCommand = {
     const embed = new EmbedBuilder()
       .setTitle('✅ Nâng Chỉ Số Thành Công!')
       .setDescription(
-        `${info.emoji} **${info.name}** +${info.base}\n\n` +
+        `${info.emoji} **${info.name}** +${info.base * points}\n` +
+        `📊 Tất cả stat khác +1\n\n` +
         `📊 Chỉ số mới:\n` +
         `❤️ HP: ${player.stats.hp}/${player.stats.maxHP}\n` +
         `💧 MP: ${player.stats.mp}/${player.stats.maxMP}\n` +

@@ -108,7 +108,8 @@ export const prefixCommand = {
         const rarityName = RARITY_NAMES[rarity];
         return `${rarityEmoji} ${i.emoji} **${i.name}** x${i.quantity} (${rarityName}) | ID: \`${i.id}\``;
       }).join('\n');
-      embed.addFields({ name: typeNames[type], value, inline: false });
+      if (!value) continue;
+      embed.addFields({ name: typeNames[type] || type, value: value.substring(0, 1024), inline: false });
     }
 
     embed.setFooter({ text: 'Dùng ,inventory equip để xem trang bị đang mang' });

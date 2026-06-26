@@ -76,6 +76,7 @@ export const prefixCommand = {
         }
         await db.removeGold(player, item.price);
         addItem(player.inventory, item);
+        await db.updatePlayer(player);
         return message.reply(`✅ Mua thành công **${item.name}** (-${item.price} Gold)`);
       }
 

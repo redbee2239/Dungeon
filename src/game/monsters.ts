@@ -333,3 +333,23 @@ export function getRandomMonster(floor: number): Monster {
 }
 
 export const BOSS_FLOORS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+
+export function getMonsterCount(floor: number): number {
+  if (floor < 20) return 1;
+  if (floor % 5 === 0) return 1;
+  const maxMonsters = Math.min(6, 2 + Math.floor((floor - 20) / 10));
+  const chance = 0.3 + (floor - 20) * 0.015;
+  if (Math.random() < chance) {
+    return Math.min(maxMonsters, 2 + Math.floor(Math.random() * (maxMonsters - 1)));
+  }
+  return 1;
+}
+
+export function getMultipleRandomMonsters(floor: number): Monster[] {
+  const count = getMonsterCount(floor);
+  const monsters: Monster[] = [];
+  for (let i = 0; i < count; i++) {
+    monsters.push(getRandomMonster(floor));
+  }
+  return monsters;
+}

@@ -1,6 +1,6 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, StringSelectMenuBuilder } from 'discord.js';
 import { Database } from '../game/database';
-import { getRandomMonster, Monster, BOSS_FLOORS } from '../game/monsters';
+import { getRandomMonster, getMultipleRandomMonsters, Monster, BOSS_FLOORS } from '../game/monsters';
 import { executeCombatRound, useSkillMana } from '../game/combat';
 import { FLOOR_NAMES, FLOOR_DESCRIPTIONS } from '../game/dungeon';
 import { getSkillsForClass, Skill } from '../game/skills';
@@ -19,6 +19,7 @@ interface CombatBuff {
 
 interface CombatData {
   monster: Monster;
+  monsterQueue: Monster[];
   floor: number;
   active: boolean;
   skillUsage: Record<string, number>;
@@ -103,9 +104,11 @@ export const prefixCommand = {
       floor = requestedFloor;
     }
 
-    const monster = getRandomMonster(floor);
+    const monsters = getMultipleRandomMonsters(floor);
+    const monster = monsters[0];
+    const monsterQueue = monsters.slice(1);
 
-    activeCombats.set(userId, { monster, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [], potionUsed: 0 });
+    activeCombats.set(userId, { monster, monsterQueue, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [], potionUsed: 0 });
 
     const bonus = calculateBonusStats(player.inventory);
     const totalHP = player.stats.maxHP + bonus.hp;
@@ -146,13 +149,15 @@ export const prefixCommand = {
 
     const floorName = FLOOR_NAMES[floor] || `Tầng ${floor}`;
     const floorDesc = FLOOR_DESCRIPTIONS[floor] || 'Hầm ngục bí ẩn.';
+    const totalMonsters = 1 + monsterQueue.length;
+    const monsterTitle = totalMonsters > 1 ? `${monster.emoji} ${monster.name} + ${monsterQueue.length} quái khác (${totalMonsters} quái)` : `${monster.emoji} ${monster.name}${monster.isBoss ? ' (BOSS!)' : ''}`;
 
     const embed = new EmbedBuilder()
       .setTitle(`🏰 Dungeon - Tầng ${floor}: ${floorName}`)
       .setDescription(floorDesc)
       .addFields(
         {
-          name: `${monster.emoji} ${monster.name}${monster.isBoss ? ' (BOSS!)' : ''}`,
+          name: monsterTitle,
           value: [
             `❤️ HP: ${monster.hp}/${monster.maxHP}`,
             `⚔️ ATK: ${monster.attack} | 🛡️ DEF: ${monster.defense}`,
@@ -487,7 +492,14 @@ export const prefixCommand = {
 async function processResult(i: any, player: any, combatData: CombatData, db: Database, result: any, extraMsg?: string) {
   const msg = extraMsg ? `${extraMsg}\n\n${result.message}` : result.message;
   if (result.monsterDied) {
-    await handleVictory(i, player, combatData, db, result);
+    if (combatData.monsterQueue.length > 0) {
+      combatData.monster = combatData.monsterQueue.shift()!;
+      combatData.skillUsage = {};
+      const nextMsg = `${msg}\n\n⚔️ **Quái tiếp theo:** ${combatData.monster.emoji} ${combatData.monster.name} (${combatData.monster.hp}/${combatData.monster.maxHP} HP)`;
+      await showCombatStatus(i, player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events);
+    } else {
+      await handleVictory(i, player, combatData, db, result);
+    }
   } else if (result.playerDied) {
     await db.updatePlayer(player);
     await i.editReply({ content: `💀 **GAME OVER**\n${msg}`, embeds: [], components: [] });
@@ -497,8 +509,12 @@ async function processResult(i: any, player: any, combatData: CombatData, db: Da
 }
 
 async function handleVictory(i: any, player: any, combatData: any, db: Database, result: any) {
-  const expResult = await db.addExp(player, result.expGained);
-  await db.addGold(player, result.goldGained);
+  const monstersKilled = 1 + combatData.monsterQueue.length;
+  const totalExp = result.expGained * monstersKilled;
+  const totalGold = result.goldGained * monstersKilled;
+
+  const expResult = await db.addExp(player, totalExp);
+  await db.addGold(player, totalGold);
 
   let gemsEarned = 0;
   if (combatData.monster.isBoss) {
@@ -508,6 +524,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   } else {
     gemsEarned = Math.floor(Math.random() * 3);
   }
+  gemsEarned *= monstersKilled;
 
   if (gemsEarned > 0) {
     await db.addGems(player, gemsEarned);
@@ -534,10 +551,14 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
     player.dungeon.currentFloor = combatData.floor + 1;
   }
 
-  player.totalMonstersKilled += 1;
+  player.totalMonstersKilled += monstersKilled;
   await db.updatePlayer(player);
 
-  let msg = `⚔️ **CHIẾN THẮNG!**\n${result.message}`;
+  let msg = `⚔️ **CHIẾN THẮNG!**`;
+  if (monstersKilled > 1) {
+    msg += `\nĐánh bại **${monstersKilled}** quái!`;
+  }
+  msg += `\n+${totalExp} EXP, +${totalGold} Gold`;
   msg += `\n💎 +${gemsEarned} Gem`;
   msg += chestMsg;
   if (expResult.leveled) {

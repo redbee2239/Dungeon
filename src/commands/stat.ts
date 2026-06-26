@@ -84,7 +84,7 @@ export const prefixCommand = {
       return message.reply('❌ Chỉ số không hợp lệ!');
     }
 
-    const limit = STAT_LIMITS[stat];
+    const limit = STAT_LIMITS[stat] || (stat === 'speed' && player.characterClass === 'rogue' ? 150 : 0);
     if (limit && (player.stats as any)[stat] >= limit) {
       return message.reply(`❌ **${info.name}** đã đạt giới hạn **${limit}**!`);
     }

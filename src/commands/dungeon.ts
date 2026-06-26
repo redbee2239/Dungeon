@@ -4,12 +4,18 @@ import { getRandomMonster, Monster, BOSS_FLOORS } from '../game/monsters';
 import { executeCombatRound, useSkillMana } from '../game/combat';
 import { FLOOR_NAMES, FLOOR_DESCRIPTIONS } from '../game/dungeon';
 import { getSkillsForClass, Skill } from '../game/skills';
-import { addItem, calculateBonusStats } from '../game/inventory';
+import { addItem, calculateBonusStats, removeItem } from '../game/inventory';
 import { rollChest, CHEST_RARITY_NAMES, CHEST_RARITY_COLORS } from '../game/chests';
 import { Summon, createSummon, SUMMON_DATA } from '../game/summons';
 import { ActiveEvents, createActiveEvents, rollForEvent, getEventMessages } from '../game/dungeonEvents';
+import { ITEMS } from '../game/items';
 
 const SUMMON_SKILL_IDS = ['summon_wolf', 'summon_bear', 'summon_phoenix', 'summon_dragon', 'summon_army'];
+
+interface CombatBuff {
+  stat: string;
+  amount: number;
+}
 
 interface CombatData {
   monster: Monster;
@@ -19,6 +25,8 @@ interface CombatData {
   summon: Summon | null;
   events: ActiveEvents;
   stunTurns: number;
+  buffs: CombatBuff[];
+  debuffs: CombatBuff[];
 }
 
 const SKILL_LIMIT = 3;
@@ -95,11 +103,44 @@ export const prefixCommand = {
 
     const monster = getRandomMonster(floor);
 
-    activeCombats.set(userId, { monster, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0 });
+    activeCombats.set(userId, { monster, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [] });
 
     const bonus = calculateBonusStats(player.inventory);
     const totalHP = player.stats.maxHP + bonus.hp;
     const totalMP = player.stats.maxMP + bonus.mp;
+
+    function getBuffBonus(): { attack: number; defense: number; hp: number; mp: number; speed: number } {
+      const combatData = activeCombats.get(userId);
+      if (!combatData) return { attack: 0, defense: 0, hp: 0, mp: 0, speed: 0 };
+      let atkBonus = 0, defBonus = 0, hpBonus = 0, mpBonus = 0, spdBonus = 0;
+      for (const b of combatData.buffs) {
+        if (b.stat === 'attack') atkBonus += b.amount;
+        if (b.stat === 'defense') defBonus += b.amount;
+        if (b.stat === 'hp') hpBonus += b.amount;
+        if (b.stat === 'mp') mpBonus += b.amount;
+        if (b.stat === 'speed') spdBonus += b.amount;
+      }
+      for (const d of combatData.debuffs) {
+        if (d.stat === 'attack') atkBonus += d.amount;
+        if (d.stat === 'defense') defBonus += d.amount;
+        if (d.stat === 'hp') hpBonus += d.amount;
+        if (d.stat === 'mp') mpBonus += d.amount;
+        if (d.stat === 'speed') spdBonus += d.amount;
+      }
+      return { attack: atkBonus, defense: defBonus, hp: hpBonus, mp: mpBonus, speed: spdBonus };
+    }
+
+    function getBonusWithBuffs() {
+      const buffBonus = getBuffBonus();
+      return {
+        attack: bonus.attack + buffBonus.attack,
+        defense: bonus.defense + buffBonus.defense,
+        hp: bonus.hp + buffBonus.hp,
+        mp: bonus.mp + buffBonus.mp,
+        speed: bonus.speed + buffBonus.speed,
+        summonBoost: bonus.summonBoost
+      };
+    }
 
     const floorName = FLOOR_NAMES[floor] || `Tầng ${floor}`;
     const floorDesc = FLOOR_DESCRIPTIONS[floor] || 'Hầm ngục bí ẩn.';
@@ -133,18 +174,10 @@ export const prefixCommand = {
     const row = new ActionRowBuilder<ButtonBuilder>();
     row.addComponents(
       new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('potion').setLabel('🧪 Thuốc').setStyle(ButtonStyle.Success),
       new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
     );
-
-    const starterSkill = getStarterSkill(player.characterClass);
-    const hasAnySkills = getSkillsForClass(player.characterClass, player.stats.level)
-      .some(s => (player.unlockedSkills.includes(s.id) || s.id === starterSkill));
-    
-    if (hasAnySkills) {
-      row.addComponents(
-        new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary)
-      );
-    }
 
     const reply = await message.reply({ embeds: [embed], components: [row] });
 
@@ -163,6 +196,114 @@ export const prefixCommand = {
 
       await i.deferUpdate();
 
+      if (i.customId === 'potion') {
+        const potions = player.inventory.items.filter((inv: any) => {
+          const item = ITEMS[inv.itemId];
+          return item && item.type === 'potion' && inv.quantity > 0;
+        });
+
+        if (potions.length === 0) {
+          await showCombatStatus(i, player, combatData.monster, '❌ Không có thuốc nào trong túi!', combatData.skillUsage, combatData.summon, combatData.events);
+          return;
+        }
+
+        const potionRow = new ActionRowBuilder<StringSelectMenuBuilder>();
+        potionRow.addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId('potion_select')
+            .setPlaceholder('Chọn thuốc...')
+            .addOptions(
+              potions.slice(0, 25).map((inv: any) => {
+                const item = ITEMS[inv.itemId];
+                return {
+                  label: `${item.emoji} ${item.name} x${inv.quantity}`.substring(0, 100),
+                  value: item.id,
+                  description: item.description.substring(0, 100)
+                };
+              })
+            )
+        );
+
+        await i.editReply({
+          components: [
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+              new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+              new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary),
+              new ButtonBuilder().setCustomId('potion').setLabel('🧪 Thuốc').setStyle(ButtonStyle.Success),
+              new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
+            ),
+            potionRow
+          ]
+        });
+
+        const potionCollector = reply.createMessageComponentCollector({
+          componentType: ComponentType.StringSelect,
+          time: 30000
+        });
+
+        potionCollector.on('collect', async (pi: any) => {
+          if (pi.user.id !== userId) return;
+          await pi.deferUpdate();
+
+          const potionId = pi.values[0];
+          const potionItem = ITEMS[potionId];
+          const invItem = player.inventory.items.find((inv: any) => inv.itemId === potionId);
+
+          if (!potionItem || !invItem || invItem.quantity <= 0) {
+            potionCollector.stop();
+            return;
+          }
+
+          removeItem(player.inventory, potionId, 1);
+
+          let potionMsg = '';
+
+          if (potionItem.healAmount) {
+            const isHeal = potionItem.id.includes('mana') || potionItem.id === 'elixir';
+            if (potionItem.id === 'elixir') {
+              player.stats.hp = Math.min(player.stats.maxHP + bonus.hp, player.stats.hp + potionItem.healAmount);
+              player.stats.mp = Math.min(player.stats.maxMP + bonus.mp, player.stats.mp + 100);
+              potionMsg = `✨ Elixir hồi **200 HP** và **100 MP**!`;
+            } else if (isHeal) {
+              player.stats.mp = Math.min(player.stats.maxMP + bonus.mp, player.stats.mp + potionItem.healAmount);
+              potionMsg = `💧 Hồi **${potionItem.healAmount}** MP!`;
+            } else {
+              const healAmt = Math.min(potionItem.healAmount, (player.stats.maxHP + bonus.hp) - player.stats.hp);
+              player.stats.hp += healAmt;
+              potionMsg = `❤️ Hồi **${healAmt}** HP!`;
+            }
+          } else if (potionItem.buffStat) {
+            combatData.buffs.push({ stat: potionItem.buffStat, amount: potionItem.buffAmount || 0 });
+            potionMsg = `⬆️ Tăng **${potionItem.buffStat.toUpperCase()} +${potionItem.buffAmount}** trong combat!`;
+            if (potionItem.debuffStat) {
+              combatData.debuffs.push({ stat: potionItem.debuffStat, amount: potionItem.debuffAmount || 0 });
+              potionMsg += `\n⬇️ Giảm **${potionItem.debuffStat.toUpperCase()} ${potionItem.debuffAmount}**`;
+            }
+          }
+
+          combatData.active = false;
+          collector.stop();
+          potionCollector.stop();
+
+          const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns);
+          combatData.stunTurns = result.stunTurns;
+
+          if (result.monsterDied || result.playerDied) {
+            combatData.active = false;
+            collector.stop();
+          }
+
+          if (combatData.summon && result.summonDied) {
+            combatData.summon = null;
+          }
+
+          const fullMsg = `🧪 Dùng ${potionItem.emoji} **${potionItem.name}**\n${potionMsg}\n\n${result.message}`;
+          await processResult(pi, player, combatData, db, result, fullMsg);
+        });
+
+        return;
+      }
+
       if (i.customId === 'flee') {
         const fleeChance = player.stats.speed / (player.stats.speed + combatData.monster.speed);
         if (Math.random() < fleeChance) {
@@ -171,7 +312,7 @@ export const prefixCommand = {
           collector.stop();
           await i.editReply({ content: '🏃 Chạy trốn thành công!', embeds: [], components: [] });
         } else {
-          const result = executeCombatRound(player.stats, combatData.monster, undefined, bonus, combatData.summon, 1, combatData.events, combatData.stunTurns);
+          const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns);
           combatData.stunTurns = result.stunTurns;
           if (result.playerDied) {
             combatData.active = false;
@@ -276,7 +417,7 @@ export const prefixCommand = {
             }
           }
 
-          const result = executeCombatRound(player.stats, combatData.monster, skill, bonus, combatData.summon, mpMultiplier, combatData.events, combatData.stunTurns);
+          const result = executeCombatRound(player.stats, combatData.monster, skill, getBonusWithBuffs(), combatData.summon, mpMultiplier, combatData.events, combatData.stunTurns);
           combatData.stunTurns = result.stunTurns;
 
           if (combatData.floor >= 20 && !result.monsterDied && !result.playerDied) {
@@ -302,7 +443,7 @@ export const prefixCommand = {
 
       const isSummoner = player.characterClass === 'summoner';
       const mpMultiplier = isSummoner ? 3 : 1;
-      const result = executeCombatRound(player.stats, combatData.monster, undefined, bonus, combatData.summon, mpMultiplier, combatData.events, combatData.stunTurns);
+      const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, mpMultiplier, combatData.events, combatData.stunTurns);
       combatData.stunTurns = result.stunTurns;
 
       if (combatData.floor >= 20 && !result.monsterDied && !result.playerDied) {
@@ -335,14 +476,15 @@ export const prefixCommand = {
   }
 };
 
-async function processResult(i: any, player: any, combatData: CombatData, db: Database, result: any) {
+async function processResult(i: any, player: any, combatData: CombatData, db: Database, result: any, extraMsg?: string) {
+  const msg = extraMsg ? `${extraMsg}\n\n${result.message}` : result.message;
   if (result.monsterDied) {
     await handleVictory(i, player, combatData, db, result);
   } else if (result.playerDied) {
     await db.updatePlayer(player);
-    await i.editReply({ content: `💀 **GAME OVER**\n${result.message}`, embeds: [], components: [] });
+    await i.editReply({ content: `💀 **GAME OVER**\n${msg}`, embeds: [], components: [] });
   } else {
-    await showCombatStatus(i, player, combatData.monster, result.message, combatData.skillUsage, combatData.summon, combatData.events);
+    await showCombatStatus(i, player, combatData.monster, msg, combatData.skillUsage, combatData.summon, combatData.events);
   }
 }
 
@@ -406,7 +548,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   await i.editReply({ embeds: [embed], components: [] });
 }
 
-async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents) {
+async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]) {
   const bonus = calculateBonusStats(player.inventory);
   const totalHP = player.stats.maxHP + bonus.hp;
   const totalMP = player.stats.maxMP + bonus.mp;
@@ -418,6 +560,10 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
   if (events && events.events.length > 0) {
     const eventMsgs = getEventMessages(events);
     description += `\n\n⚡ **Sự kiện:**\n${eventMsgs.join('\n')}`;
+  }
+  if (buffs && buffs.length > 0) {
+    const buffMsgs = buffs.map(b => `⬆️ ${b.stat.toUpperCase()} +${b.amount}`);
+    description += `\n\n🧪 **Buff:** ${buffMsgs.join(', ')}`;
   }
 
   const embed = new EmbedBuilder()
@@ -450,16 +596,9 @@ async function showCombatStatus(i: any, player: any, monster: Monster, extraMess
 
   const row = new ActionRowBuilder<ButtonBuilder>();
   row.addComponents(
-    new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger)
-  );
-
-  if (hasAnySkills) {
-    row.addComponents(
-      new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary)
-    );
-  }
-
-  row.addComponents(
+    new ButtonBuilder().setCustomId('attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder().setCustomId('skill').setLabel('✨ Kỹ Năng').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('potion').setLabel('🧪 Thuốc').setStyle(ButtonStyle.Success),
     new ButtonBuilder().setCustomId('flee').setLabel('🏃 Chạy Trốn').setStyle(ButtonStyle.Secondary)
   );
 

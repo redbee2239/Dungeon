@@ -42,7 +42,16 @@ const shopItems: Item[] = [
   ITEMS.mega_health,
   ITEMS.mana_potion,
   ITEMS.mana_mega,
-  ITEMS.elixir
+  ITEMS.elixir,
+  // Buff Potions
+  ITEMS.str_potion,
+  ITEMS.def_potion,
+  ITEMS.spd_potion,
+  ITEMS.hp_potion,
+  ITEMS.berserk_potion,
+  ITEMS.iron_skin,
+  ITEMS.mega_str,
+  ITEMS.mega_def
 ];
 
 export const prefixCommand = {

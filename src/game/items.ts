@@ -21,6 +21,10 @@ export interface Item {
   };
   summonBoost?: number;
   healAmount?: number;
+  buffStat?: string;
+  buffAmount?: number;
+  debuffStat?: string;
+  debuffAmount?: number;
   price: number;
   sellPrice: number;
 }
@@ -739,6 +743,108 @@ export const ITEMS: Record<string, Item> = {
     healAmount: 9999,
     price: 800,
     sellPrice: 400
+  },
+
+  // === BUFF POTIONS ===
+  str_potion: {
+    id: 'str_potion',
+    name: 'Thuốc Lực',
+    emoji: '💪',
+    type: 'potion',
+    rarity: 'uncommon',
+    description: 'Tăng ATK +20 trong combat.',
+    buffStat: 'attack',
+    buffAmount: 20,
+    price: 60,
+    sellPrice: 25
+  },
+  def_potion: {
+    id: 'def_potion',
+    name: 'Thuốc Giáp',
+    emoji: '🛡️',
+    type: 'potion',
+    rarity: 'uncommon',
+    description: 'Tăng DEF +15 trong combat.',
+    buffStat: 'defense',
+    buffAmount: 15,
+    price: 60,
+    sellPrice: 25
+  },
+  spd_potion: {
+    id: 'spd_potion',
+    name: 'Thuốc Nhanh',
+    emoji: '💨',
+    type: 'potion',
+    rarity: 'uncommon',
+    description: 'Tăng SPD +10 trong combat.',
+    buffStat: 'speed',
+    buffAmount: 10,
+    price: 60,
+    sellPrice: 25
+  },
+  hp_potion: {
+    id: 'hp_potion',
+    name: 'Thuốc Bền',
+    emoji: '❤️',
+    type: 'potion',
+    rarity: 'uncommon',
+    description: 'Tăng HP +50 trong combat.',
+    buffStat: 'hp',
+    buffAmount: 50,
+    price: 60,
+    sellPrice: 25
+  },
+  berserk_potion: {
+    id: 'berserk_potion',
+    name: 'Thuốc Điên',
+    emoji: '🔥',
+    type: 'potion',
+    rarity: 'rare',
+    description: 'Tăng ATK +50, giảm DEF -10.',
+    buffStat: 'attack',
+    buffAmount: 50,
+    debuffStat: 'defense',
+    debuffAmount: -10,
+    price: 150,
+    sellPrice: 70
+  },
+  iron_skin: {
+    id: 'iron_skin',
+    name: 'Thuốc Da Sắt',
+    emoji: '⬛',
+    type: 'potion',
+    rarity: 'rare',
+    description: 'Tăng DEF +30, giảm SPD -5.',
+    buffStat: 'defense',
+    buffAmount: 30,
+    debuffStat: 'speed',
+    debuffAmount: -5,
+    price: 150,
+    sellPrice: 70
+  },
+  mega_str: {
+    id: 'mega_str',
+    name: 'Thuốc Lực Cực Mạnh',
+    emoji: '⚡',
+    type: 'potion',
+    rarity: 'epic',
+    description: 'Tăng ATK +100 trong combat.',
+    buffStat: 'attack',
+    buffAmount: 100,
+    price: 400,
+    sellPrice: 200
+  },
+  mega_def: {
+    id: 'mega_def',
+    name: 'Thuốc Giáp Cực Mạnh',
+    emoji: '🏰',
+    type: 'potion',
+    rarity: 'epic',
+    description: 'Tăng DEF +60 trong combat.',
+    buffStat: 'defense',
+    buffAmount: 60,
+    price: 400,
+    sellPrice: 200
   },
 
   // === NEW PHYSICAL WEAPONS ===

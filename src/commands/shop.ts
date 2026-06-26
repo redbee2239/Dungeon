@@ -74,8 +74,11 @@ export const prefixCommand = {
         if (player.stats.gold < item.price) {
           return message.reply(`❌ Không đủ gold! Cần ${item.price} gold.`);
         }
+        const result = addItem(player.inventory, item);
+        if (!result.success) {
+          return message.reply(`❌ ${result.message}`);
+        }
         await db.removeGold(player, item.price);
-        addItem(player.inventory, item);
         await db.updatePlayer(player);
         return message.reply(`✅ Mua thành công **${item.name}** (-${item.price} Gold)`);
       }

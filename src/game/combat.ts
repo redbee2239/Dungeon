@@ -72,7 +72,7 @@ export function summonAttack(
   }
 
   const isCrit = isCritical(summon.speed);
-  let baseDamage = summon.attack;
+  let baseDamage = Math.floor(summon.attack * 1.5);
   if (isCrit) baseDamage = Math.floor(baseDamage * 1.5);
 
   const damage = Math.floor(

@@ -88,16 +88,11 @@ export const prefixCommand = {
 
       const embed = new EmbedBuilder()
         .setTitle('🛒 Mua Đồ')
-        .setDescription(`💰 Gold: **${player.stats.gold}**\n\nDùng \`,shop buy <id>\` để mua:`)
+        .setDescription(`💰 Gold: **${player.stats.gold}**\n\nDùng \`,shop buy <id>\` để mua:\n\n` +
+          shopItems.map(item =>
+            `${item.emoji} **${item.name}** - ${item.price} Gold\n└ ${RARITY_NAMES[item.rarity]} | ID: \`${item.id}\``
+          ).join('\n\n'))
         .setColor(0xFFD700);
-
-      shopItems.forEach(item => {
-        embed.addFields({
-          name: `${item.emoji} ${item.name} - ${item.price} Gold`,
-          value: `${RARITY_NAMES[item.rarity]} | ${item.description}\nID: \`${item.id}\``,
-          inline: true
-        });
-      });
 
       message.reply({ embeds: [embed] });
 
@@ -137,19 +132,12 @@ export const prefixCommand = {
 
       const embed = new EmbedBuilder()
         .setTitle('💰 Bán Đồ')
-        .setDescription(`Gold: **${player.stats.gold}**\n\nDùng \`,shop sell <id> [số lượng]\` để bán:\nBỏ trống số lượng = bán hết`)
+        .setDescription(`Gold: **${player.stats.gold}**\n\nDùng \`,shop sell <id> [số lượng]\` để bán:\nBỏ trống số lượng = bán hết\n\n` +
+          player.inventory.items.map((i: any) => {
+            const item = ITEMS[i.itemId];
+            return item ? `${item.emoji} **${item.name}** x${i.quantity}\n└ ${item.sellPrice} Gold/ea | ID: \`${item.id}\`` : '';
+          }).filter(Boolean).join('\n\n'))
         .setColor(0xFFD700);
-
-      player.inventory.items.forEach((i: any) => {
-        const item = ITEMS[i.itemId];
-        if (item) {
-          embed.addFields({
-            name: `${item.emoji} ${item.name} x${i.quantity}`,
-            value: `${item.sellPrice} Gold/ea | ID: \`${item.id}\``,
-            inline: true
-          });
-        }
-      });
 
       message.reply({ embeds: [embed] });
     }

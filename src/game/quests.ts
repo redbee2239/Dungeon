@@ -47,6 +47,7 @@ const WEEKLY_QUESTS: Quest[] = [
   { id: 'weekly_boss_3', name: 'Săn Boss', emoji: '👑', description: 'Đánh bại 3 Boss', type: 'weekly', target: 3, reward: { gold: 500, gems: 100, exp: 300 } },
   { id: 'weekly_boss_8', name: 'Vua Săn', emoji: '🏆', description: 'Đánh bại 8 Boss', type: 'weekly', target: 8, reward: { gold: 1200, gems: 250, exp: 800 } },
   { id: 'weekly_gold', name: 'Triệu Phú', emoji: '🏦', description: 'Kiếm 5000 Gold', type: 'weekly', target: 5000, reward: { gold: 0, gems: 200, exp: 600 } },
+  { id: 'weekly_floor_30', name: 'Tiến Đạt', emoji: '🏃', description: 'Clear 30 tầng dungeon', type: 'weekly', target: 30, reward: { gold: 900, gems: 180, exp: 550 } },
 ];
 
 export function getDailyQuests(): Quest[] {
@@ -65,12 +66,7 @@ export function getWeeklyQuests(): Quest[] {
   const startOfYear = new Date(now.getFullYear(), 0, 1);
   const weekNum = Math.floor((now.getTime() - startOfYear.getTime()) / (7 * 24 * 60 * 60 * 1000));
   const seed = now.getFullYear() * 100 + weekNum;
-  const shuffled = [...WEEKLY_QUESTS].sort((a, b) => {
-    const ha = (seed + a.id.charCodeAt(0) * 31) % 100;
-    const hb = (seed + b.id.charCodeAt(0) * 31) % 100;
-    return ha - hb;
-  });
-  return shuffled.slice(0, 4);
+  return WEEKLY_QUESTS;
 }
 
 export function shouldResetDaily(lastReset: number): boolean {

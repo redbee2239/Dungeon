@@ -8,6 +8,7 @@ import { addItem, calculateBonusStats, removeItem } from '../game/inventory';
 import { rollChest, CHEST_RARITY_NAMES, CHEST_RARITY_COLORS } from '../game/chests';
 import { Summon, createSummon, SUMMON_DATA } from '../game/summons';
 import { ActiveEvents, createActiveEvents, rollForEvent, getEventMessages } from '../game/dungeonEvents';
+import { updateQuestProgress } from '../game/questProgress';
 import { ITEMS } from '../game/items';
 
 const SUMMON_SKILL_IDS = ['summon_wolf', 'summon_bear', 'summon_phoenix', 'summon_dragon', 'summon_army'];
@@ -273,6 +274,9 @@ export const prefixCommand = {
           removeItem(player.inventory, potionId, 1);
           combatData.potionUsed++;
 
+          // Quest: potion usage
+          await updateQuestProgress(db, player, 'potion', 1);
+
           let potionMsg = '';
 
           if (potionItem.healAmount) {
@@ -338,6 +342,14 @@ export const prefixCommand = {
               if (combatData.floor >= player.highestFloor) { player.highestFloor = combatData.floor + 1; player.dungeon.currentFloor = combatData.floor + 1; }
               player.totalMonstersKilled += 1;
               await db.updatePlayer(player);
+
+              // Quest progress
+              await updateQuestProgress(db, player, 'kill', 1);
+              if (combatData.monster.isBoss) await updateQuestProgress(db, player, 'boss', 1);
+              await updateQuestProgress(db, player, 'floor', 1);
+              await updateQuestProgress(db, player, 'potion', 1);
+              await updateQuestProgress(db, player, 'earn_gold', totalGold);
+
               let msg = `⚔️ **CHIẾN THẮNG!**\n🧪 Dùng ${potionItem.emoji} **${potionItem.name}**\n${potionMsg}\n\n+${totalExp * (result.expGained > 0 ? 1 : 1)} EXP, +${totalGold} Gold${expBoostMsg}\n💎 +${gemsEarned} Gem`;
               if (expResult.leveled) { const levelGems = expResult.levelsGained * 5; await db.addGems(player, levelGems); msg += `\n\n🎉 **LEVEL UP!** Level ${player.stats.level} (+${expResult.levelsGained})`; }
               const victoryEmbed = new EmbedBuilder().setTitle('🏆 Chiến Thắng!').setDescription(msg).setColor(0x00FF00);
@@ -602,6 +614,12 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
 
   player.totalMonstersKilled += monstersKilled;
   await db.updatePlayer(player);
+
+  // Quest progress
+  await updateQuestProgress(db, player, 'kill', monstersKilled);
+  if (combatData.monster.isBoss) await updateQuestProgress(db, player, 'boss', monstersKilled);
+  await updateQuestProgress(db, player, 'floor', 1);
+  await updateQuestProgress(db, player, 'earn_gold', totalGold);
 
   let msg = `⚔️ **CHIẾN THẮNG!**`;
   if (monstersKilled > 1) {

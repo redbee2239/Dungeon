@@ -2,6 +2,7 @@ import { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType 
 import { Database } from '../game/database';
 import { ITEMS } from '../game/items';
 import { removeItem } from '../game/inventory';
+import { updateQuestProgress } from '../game/questProgress';
 
 export const prefixCommand = {
   name: 'poison',
@@ -69,6 +70,9 @@ export const prefixCommand = {
       }
 
       removeItem(player.inventory, potionId, 1);
+
+      // Quest: potion usage
+      await updateQuestProgress(db, player, 'potion', 1);
 
       let potionMsg = '';
 

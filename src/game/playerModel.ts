@@ -63,6 +63,12 @@ export interface IPlayer extends Document {
     isAfk: boolean;
     startTime: number;
   };
+  quests: {
+    daily: { questId: string; progress: number; claimed: boolean }[];
+    dailyLastReset: number;
+    weekly: { questId: string; progress: number; claimed: boolean }[];
+    weeklyLastReset: number;
+  };
   expBoostCharges: number;
   createdAt: Date;
   lastActive: Date;
@@ -133,6 +139,20 @@ const PlayerSchema = new Schema<IPlayer>({
   afk: {
     isAfk: { type: Boolean, default: false },
     startTime: { type: Number, default: 0 }
+  },
+  quests: {
+    daily: [{
+      questId: String,
+      progress: { type: Number, default: 0 },
+      claimed: { type: Boolean, default: false }
+    }],
+    dailyLastReset: { type: Number, default: 0 },
+    weekly: [{
+      questId: String,
+      progress: { type: Number, default: 0 },
+      claimed: { type: Boolean, default: false }
+    }],
+    weeklyLastReset: { type: Number, default: 0 }
   },
   expBoostCharges: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },

@@ -55,6 +55,12 @@ export interface Player {
     isAfk: boolean;
     startTime: number;
   };
+  quests: {
+    daily: { questId: string; progress: number; claimed: boolean }[];
+    dailyLastReset: number;
+    weekly: { questId: string; progress: number; claimed: boolean }[];
+    weeklyLastReset: number;
+  };
   expBoostCharges: number;
   createdAt: Date;
   lastActive: Date;
@@ -92,6 +98,7 @@ function docToPlayer(doc: IPlayer): Player {
     equippedPet: doc.equippedPet || null,
     ownedPets: doc.ownedPets || [],
     afk: doc.afk || { isAfk: false, startTime: 0 },
+    quests: doc.quests || { daily: [], dailyLastReset: 0, weekly: [], weeklyLastReset: 0 },
     expBoostCharges: doc.expBoostCharges || 0,
     createdAt: doc.createdAt,
     lastActive: doc.lastActive
@@ -174,6 +181,7 @@ export class Database {
         equippedPet: player.equippedPet,
         ownedPets: player.ownedPets,
         afk: player.afk,
+        quests: player.quests,
         expBoostCharges: player.expBoostCharges,
         lastActive: new Date()
       }

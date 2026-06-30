@@ -98,3 +98,12 @@ export function resetWeeklyQuests(quests: PlayerQuest[]): PlayerQuest[] {
 export function getQuestById(id: string): Quest | undefined {
   return [...DAILY_QUESTS, ...WEEKLY_QUESTS].find(q => q.id === id);
 }
+
+export function isWeekend(): boolean {
+  const day = new Date().getDay();
+  return day === 0 || day === 6;
+}
+
+export function getDailyMultiplier(): number {
+  return isWeekend() ? 2 : 1;
+}

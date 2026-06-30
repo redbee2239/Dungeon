@@ -1,6 +1,6 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { Database } from '../game/database';
-import { getQuestById, shouldResetDaily, shouldResetWeekly, resetDailyQuests, resetWeeklyQuests, Quest } from '../game/quests';
+import { getQuestById, shouldResetDaily, shouldResetWeekly, resetDailyQuests, resetWeeklyQuests, Quest, isWeekend, getDailyMultiplier } from '../game/quests';
 
 export const prefixCommand = {
   name: 'quest',
@@ -59,7 +59,10 @@ export const prefixCommand = {
       dailyDesc += `${status} ${quest.emoji} **${quest.name}** ${bar}\n`;
       dailyDesc += `   ${quest.description}\n`;
       if (!q.claimed && done) {
-        dailyDesc += `   💰 ${quest.reward.gold} Gold | 💎 ${quest.reward.gems} Gem | ⭐ ${quest.reward.exp} EXP\n`;
+        const m = getDailyMultiplier();
+        dailyDesc += `   💰 ${quest.reward.gold * m} Gold | 💎 ${quest.reward.gems * m} Gem | ⭐ ${quest.reward.exp * m} EXP`;
+        if (isWeekend()) dailyDesc += ` **(x2 🎉)**`;
+        dailyDesc += '\n';
       }
     }
 
@@ -77,8 +80,9 @@ export const prefixCommand = {
       }
     }
 
+    const weekendMsg = isWeekend() ? ' 🎉 **T7/CN x2 rewards!**' : '';
     embed.addFields(
-      { name: '📅 Daily (đổi mỗi ngày)', value: dailyDesc || 'Chưa có quest', inline: false },
+      { name: `📅 Daily${weekendMsg}`, value: dailyDesc || 'Chưa có quest', inline: false },
       { name: '📆 Weekly (đổi mỗi tuần)', value: weeklyDesc || 'Chưa có quest', inline: false }
     );
 
@@ -110,9 +114,10 @@ async function claimQuests(message: any, player: any, db: Database) {
     if (!quest || q.claimed || q.progress < quest.target) continue;
 
     q.claimed = true;
-    totalGold += quest.reward.gold;
-    totalGems += quest.reward.gems;
-    totalExp += quest.reward.exp;
+    const m = quest.type === 'daily' ? getDailyMultiplier() : 1;
+    totalGold += quest.reward.gold * m;
+    totalGems += quest.reward.gems * m;
+    totalExp += quest.reward.exp * m;
     claimed++;
   }
 
@@ -126,13 +131,16 @@ async function claimQuests(message: any, player: any, db: Database) {
 
   await db.updatePlayer(player);
 
+  const weekendBonus = isWeekend() ? '\n🎉 **T7/CN x2 Daily rewards!**' : '';
+
   const embed = new EmbedBuilder()
     .setTitle('🎁 Nhận Thưởng Nhiệm Vụ!')
     .setDescription(
       `Đã nhận **${claimed}** quest:\n` +
       (totalGold > 0 ? `💰 +${totalGold} Gold\n` : '') +
       (totalGems > 0 ? `💎 +${totalGems} Gem\n` : '') +
-      (totalExp > 0 ? `⭐ +${totalExp} EXP\n` : '')
+      (totalExp > 0 ? `⭐ +${totalExp} EXP\n` : '') +
+      weekendBonus
     )
     .setColor(0x00FF00);
 

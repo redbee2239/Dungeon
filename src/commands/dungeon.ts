@@ -302,8 +302,10 @@ export const prefixCommand = {
           combatData.stunTurns = result.stunTurns;
 
           if (result.monsterDied || result.playerDied) {
-            combatData.active = false;
-            collector.stop();
+            if (result.playerDied || combatData.monsterQueue.length === 0) {
+              combatData.active = false;
+              collector.stop();
+            }
           }
 
           if (combatData.summon && result.summonDied) {
@@ -475,11 +477,12 @@ export const prefixCommand = {
           }
 
           if (result.monsterDied || result.playerDied) {
-            combatData.active = false;
-            collector.stop();
+            if (result.playerDied || combatData.monsterQueue.length === 0) {
+              combatData.active = false;
+              collector.stop();
+            }
           }
 
-          // Update summon state
           if (combatData.summon && result.summonDied) {
             combatData.summon = null;
           }
@@ -501,8 +504,10 @@ export const prefixCommand = {
       }
 
       if (result.monsterDied || result.playerDied) {
-        combatData.active = false;
-        collector.stop();
+        if (result.playerDied || combatData.monsterQueue.length === 0) {
+          combatData.active = false;
+          collector.stop();
+        }
       }
 
       // Update summon state

@@ -10,7 +10,8 @@ const RARITY_WEIGHTS: Record<ItemRarity, number> = {
   uncommon: 30,
   rare: 20,
   epic: 8,
-  legendary: 2
+  legendary: 2,
+  limited: 0
 };
 
 const GACHA_ITEMS = Object.values(ITEMS).filter(item => item.type !== 'potion');

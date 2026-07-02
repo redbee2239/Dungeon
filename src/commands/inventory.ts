@@ -7,7 +7,8 @@ const RARITY_EMOJI: Record<ItemRarity, string> = {
   uncommon: '🟢',
   rare: '🔵',
   epic: '🟣',
-  legendary: '🟠'
+  legendary: '🟠',
+  limited: '🔴'
 };
 
 export const prefixCommand = {

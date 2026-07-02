@@ -1,4 +1,4 @@
-export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'limited';
 export type ItemType = 'weapon' | 'armor' | 'potion' | 'accessory';
 export type WeaponType = 'physical' | 'magic';
 export type ItemClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator' | 'summoner' | 'archer' | 'all';
@@ -34,7 +34,8 @@ export const RARITY_COLORS: Record<ItemRarity, number> = {
   uncommon: 0x1EFF00,
   rare: 0x0070DD,
   epic: 0xA335EE,
-  legendary: 0xFF8000
+  legendary: 0xFF8000,
+  limited: 0xFF4500
 };
 
 export const RARITY_NAMES: Record<ItemRarity, string> = {
@@ -42,7 +43,8 @@ export const RARITY_NAMES: Record<ItemRarity, string> = {
   uncommon: 'Thông Thường',
   rare: 'Hiếm',
   epic: 'Sử Thi',
-  legendary: 'Huyền Thoại'
+  legendary: 'Huyền Thoại',
+  limited: 'Limited'
 };
 
 export const ITEMS: Record<string, Item> = {
@@ -1379,6 +1381,84 @@ export const ITEMS: Record<string, Item> = {
     stats: { attack: 10, defense: 10, hp: 30, mp: 30, speed: 8 },
     price: 5500,
     sellPrice: 2700
+  },
+
+  // === LIMITED SUMMER WEAPONS ===
+  summer_blade: {
+    id: 'summer_blade',
+    name: 'Kiếm Mùa Hè',
+    emoji: '☀️',
+    type: 'weapon',
+    rarity: 'limited',
+    weaponType: 'physical',
+    classRestriction: ['warrior', 'rogue', 'gladiator'],
+    description: 'Vũ khí limited - Sức mạnh của mùa hè!',
+    stats: { attack: 52, hp: 40, speed: 10 },
+    price: 0,
+    sellPrice: 0
+  },
+  summer_staff: {
+    id: 'summer_staff',
+    name: 'Gậy Mùa Hè',
+    emoji: '🌊',
+    type: 'weapon',
+    rarity: 'limited',
+    weaponType: 'magic',
+    classRestriction: ['mage', 'cleric'],
+    description: 'Vũ khí limited - Sức mạnh đại dương!',
+    stats: { attack: 42, mp: 160, speed: 8 },
+    price: 0,
+    sellPrice: 0
+  },
+  summer_bow: {
+    id: 'summer_bow',
+    name: 'Cung Mùa Hè',
+    emoji: '🌺',
+    type: 'weapon',
+    rarity: 'limited',
+    weaponType: 'physical',
+    classRestriction: ['warrior', 'rogue', 'gladiator'],
+    description: 'Vũ khí limited - Tốc độ如风!',
+    stats: { attack: 45, speed: 18, hp: 20 },
+    price: 0,
+    sellPrice: 0
+  },
+  summer_dagger: {
+    id: 'summer_dagger',
+    name: 'Dao Mùa Hè',
+    emoji: '🐚',
+    type: 'weapon',
+    rarity: 'limited',
+    weaponType: 'physical',
+    classRestriction: ['rogue'],
+    description: 'Vũ khí limited - Sát thủ biển!',
+    stats: { attack: 48, speed: 20, hp: 15 },
+    price: 0,
+    sellPrice: 0
+  },
+  summer_hammer: {
+    id: 'summer_hammer',
+    name: 'Búa Mùa Hè',
+    emoji: '🦀',
+    type: 'weapon',
+    rarity: 'limited',
+    weaponType: 'physical',
+    classRestriction: ['warrior', 'gladiator'],
+    description: 'Vũ khí limited - Sức mạnh cua!',
+    stats: { attack: 55, hp: 50, defense: 8 },
+    price: 0,
+    sellPrice: 0
+  },
+  summer_ring: {
+    id: 'summer_ring',
+    name: 'Nhẫn Mùa Hè',
+    emoji: '🐚',
+    type: 'accessory',
+    rarity: 'limited',
+    description: 'Phụ kiện limited - Blessing of Summer!',
+    stats: { attack: 12, defense: 12, hp: 40, mp: 40, speed: 10 },
+    price: 0,
+    sellPrice: 0
   }
 };
 

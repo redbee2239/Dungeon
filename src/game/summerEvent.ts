@@ -9,22 +9,22 @@ export const SUMMER_EVENT = {
   description: 'Đăng nhập mỗi ngày để nhận quà!',
 };
 
-export const DAILY_LOGIN_REWARDS: { day: number; gold: number; gems: number; items?: { id: string; qty: number }[] }[] = [
-  { day: 1,  gold: 200,   gems: 20 },
-  { day: 2,  gold: 300,   gems: 30,  items: [{ id: 'health_potion', qty: 2 }] },
-  { day: 3,  gold: 400,   gems: 40 },
-  { day: 4,  gold: 500,   gems: 50,  items: [{ id: 'mana_potion', qty: 2 }] },
-  { day: 5,  gold: 600,   gems: 60,  items: [{ id: 'health_potion', qty: 3 }] },
-  { day: 6,  gold: 800,   gems: 80 },
-  { day: 7,  gold: 1000,  gems: 100, items: [{ id: 'mega_health', qty: 2 }, { id: 'mana_potion', qty: 3 }] },
-  { day: 8,  gold: 500,   gems: 100 },
-  { day: 9,  gold: 600,   gems: 120, items: [{ id: 'health_potion', qty: 5 }] },
-  { day: 10, gold: 800,   gems: 150, items: [{ id: 'mana_mega', qty: 2 }] },
-  { day: 11, gold: 1000,  gems: 180, items: [{ id: 'mega_health', qty: 3 }] },
-  { day: 12, gold: 1200,  gems: 200 },
-  { day: 13, gold: 1500,  gems: 250, items: [{ id: 'elixir', qty: 1 }] },
-  { day: 14, gold: 2000,  gems: 300, items: [{ id: 'elixir', qty: 2 }] },
-  { day: 15, gold: 3000,  gems: 500, items: [{ id: 'elixir', qty: 3 }, { id: 'mega_health', qty: 5 }] },
+export const DAILY_LOGIN_REWARDS: { day: number; gold: number; gems: number; summerCoins: number; items?: { id: string; qty: number }[] }[] = [
+  { day: 1,  gold: 200,   gems: 20,   summerCoins: 10 },
+  { day: 2,  gold: 300,   gems: 30,   summerCoins: 15, items: [{ id: 'health_potion', qty: 2 }] },
+  { day: 3,  gold: 400,   gems: 40,   summerCoins: 20 },
+  { day: 4,  gold: 500,   gems: 50,   summerCoins: 25, items: [{ id: 'mana_potion', qty: 2 }] },
+  { day: 5,  gold: 600,   gems: 60,   summerCoins: 30, items: [{ id: 'health_potion', qty: 3 }] },
+  { day: 6,  gold: 800,   gems: 80,   summerCoins: 35 },
+  { day: 7,  gold: 1000,  gems: 100,  summerCoins: 50, items: [{ id: 'mega_health', qty: 2 }, { id: 'mana_potion', qty: 3 }] },
+  { day: 8,  gold: 500,   gems: 100,  summerCoins: 40 },
+  { day: 9,  gold: 600,   gems: 120,  summerCoins: 45, items: [{ id: 'health_potion', qty: 5 }] },
+  { day: 10, gold: 800,   gems: 150,  summerCoins: 55, items: [{ id: 'mana_mega', qty: 2 }] },
+  { day: 11, gold: 1000,  gems: 180,  summerCoins: 60, items: [{ id: 'mega_health', qty: 3 }] },
+  { day: 12, gold: 1200,  gems: 200,  summerCoins: 70 },
+  { day: 13, gold: 1500,  gems: 250,  summerCoins: 80, items: [{ id: 'elixir', qty: 1 }] },
+  { day: 14, gold: 2000,  gems: 300,  summerCoins: 90, items: [{ id: 'elixir', qty: 2 }] },
+  { day: 15, gold: 3000,  gems: 500,  summerCoins: 100, items: [{ id: 'elixir', qty: 3 }, { id: 'mega_health', qty: 5 }] },
 ];
 
 export function getEventStartDate(): Date {
@@ -88,6 +88,7 @@ export async function claimDailyLogin(db: Database, player: Player): Promise<{ s
 
   await db.addGold(player, reward.gold);
   await db.addGems(player, reward.gems);
+  player.summerCoins = (player.summerCoins || 0) + reward.summerCoins;
 
   let itemMsg = '';
   if (reward.items) {
@@ -121,7 +122,8 @@ export async function claimDailyLogin(db: Database, player: Player): Promise<{ s
     message:
       `🎉 **Đăng Nhập Ngày ${todayDay}/15**\n\n` +
       `💰 +${reward.gold} Gold\n` +
-      `💎 +${reward.gems} Gem` +
+      `💎 +${reward.gems} Gem\n` +
+      `🪙 +${reward.summerCoins} Summer Coin` +
       itemMsg +
       `\n\n📅 Còn **${daysLeft}** ngày nữa sự kiện kết thúc!`,
     day: todayDay,

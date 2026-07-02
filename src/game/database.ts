@@ -62,6 +62,7 @@ export interface Player {
     weeklyLastReset: number;
   };
   expBoostCharges: number;
+  summerCoins: number;
   summerEvent: {
     consecutiveDays: number;
     lastDailyLogin: number;
@@ -107,6 +108,7 @@ function docToPlayer(doc: IPlayer): Player {
     afk: doc.afk || { isAfk: false, startTime: 0 },
     quests: doc.quests || { daily: [], dailyLastReset: 0, weekly: [], weeklyLastReset: 0 },
     expBoostCharges: doc.expBoostCharges || 0,
+    summerCoins: doc.summerCoins || 0,
     summerEvent: doc.summerEvent || {
       consecutiveDays: 0,
       lastDailyLogin: 0,
@@ -197,6 +199,7 @@ export class Database {
         afk: player.afk,
         quests: player.quests,
         expBoostCharges: player.expBoostCharges,
+        summerCoins: player.summerCoins,
         summerEvent: player.summerEvent,
         lastActive: new Date()
       }

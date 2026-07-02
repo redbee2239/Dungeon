@@ -10,12 +10,12 @@ const SUMMER_SHOP_ITEMS = [
   { id: 'summer_dagger', name: 'Dao Mùa Hè', emoji: '🐚', price: 3150, description: 'ATK 48 + SPD 20 + HP 15' },
   { id: 'summer_hammer', name: 'Búa Mùa Hè', emoji: '🦀', price: 3850, description: 'ATK 55 + HP 50 + DEF 8' },
   { id: 'summer_ring', name: 'Nhẫn Mùa Hè', emoji: '🐚', price: 2800, description: 'All stats +10~12' },
-  { id: 'health_potion', name: 'Health Potion', emoji: '❤️', price: 50, description: '+100 HP', repeatable: true },
-  { id: 'mana_potion', name: 'Mana Potion', emoji: '💧', price: 50, description: '+80 MP', repeatable: true },
-  { id: 'mega_health', name: 'Mega Health', emoji: '💖', price: 150, description: '+300 HP', repeatable: true },
-  { id: 'mana_mega', name: 'Mana Mega', emoji: '🔵', price: 150, description: '+250 MP', repeatable: true },
-  { id: 'elixir', name: 'Elixir', emoji: '🧪', price: 400, description: '+200 HP +100 MP', repeatable: true },
-  { id: 'exp_boost_potion', name: 'EXP Boost', emoji: '📘', price: 200, description: 'x2 EXP 3 lượt', repeatable: true },
+  { id: 'health_potion', name: 'Health Potion', emoji: '❤️', price: 10, description: '+100 HP', repeatable: true },
+  { id: 'mana_potion', name: 'Mana Potion', emoji: '💧', price: 10, description: '+80 MP', repeatable: true },
+  { id: 'mega_health', name: 'Mega Health', emoji: '💖', price: 30, description: '+300 HP', repeatable: true },
+  { id: 'mana_mega', name: 'Mana Mega', emoji: '🔵', price: 30, description: '+250 MP', repeatable: true },
+  { id: 'elixir', name: 'Elixir', emoji: '🧪', price: 80, description: '+200 HP +100 MP', repeatable: true },
+  { id: 'exp_boost_potion', name: 'EXP Boost', emoji: '📘', price: 40, description: 'x2 EXP 3 lượt', repeatable: true },
 ];
 
 export const prefixCommand = {

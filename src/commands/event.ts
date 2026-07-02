@@ -10,6 +10,12 @@ const SUMMER_SHOP_ITEMS = [
   { id: 'summer_dagger', name: 'Dao Mùa Hè', emoji: '🐚', price: 3150, description: 'ATK 48 + SPD 20 + HP 15' },
   { id: 'summer_hammer', name: 'Búa Mùa Hè', emoji: '🦀', price: 3850, description: 'ATK 55 + HP 50 + DEF 8' },
   { id: 'summer_ring', name: 'Nhẫn Mùa Hè', emoji: '🐚', price: 2800, description: 'All stats +10~12' },
+  { id: 'health_potion', name: 'Health Potion', emoji: '❤️', price: 50, description: '+100 HP', repeatable: true },
+  { id: 'mana_potion', name: 'Mana Potion', emoji: '💧', price: 50, description: '+80 MP', repeatable: true },
+  { id: 'mega_health', name: 'Mega Health', emoji: '💖', price: 150, description: '+300 HP', repeatable: true },
+  { id: 'mana_mega', name: 'Mana Mega', emoji: '🔵', price: 150, description: '+250 MP', repeatable: true },
+  { id: 'elixir', name: 'Elixir', emoji: '🧪', price: 400, description: '+200 HP +100 MP', repeatable: true },
+  { id: 'exp_boost_potion', name: 'EXP Boost', emoji: '📘', price: 200, description: 'x2 EXP 3 lượt', repeatable: true },
 ];
 
 export const prefixCommand = {
@@ -130,8 +136,10 @@ export const prefixCommand = {
         const shopItem = SUMMER_SHOP_ITEMS.find(i => i.id === buyId);
         if (!shopItem) return message.reply('❌ Vật phẩm không tồn tại! Dùng `,event shop` để xem danh sách.');
 
-        const owned = player.inventory.items.find((i: any) => i.itemId === buyId);
-        if (owned) return message.reply('❌ Bạn đã sở hữu vật phẩm này rồi!');
+        if (!shopItem.repeatable) {
+          const owned = player.inventory.items.find((i: any) => i.itemId === buyId);
+          if (owned) return message.reply('❌ Bạn đã sở hữu vật phẩm này rồi!');
+        }
 
         if ((player.summerCoins || 0) < shopItem.price) {
           return message.reply(`❌ Không đủ Summer Coin! Cần ${shopItem.price}, bạn có ${player.summerCoins || 0}.`);
@@ -154,7 +162,7 @@ export const prefixCommand = {
       let shopList = '';
       for (const item of SUMMER_SHOP_ITEMS) {
         const owned = player.inventory.items.find((i: any) => i.itemId === item.id);
-        const status = owned ? '✅ Đã mua' : `🪙 ${item.price} Summer Coin`;
+        const status = !item.repeatable && owned ? '✅ Đã mua' : `🪙 ${item.price} Summer Coin`;
         shopList += `${item.emoji} **${item.name}** - ${item.description}\n   ${status}\n\n`;
       }
 

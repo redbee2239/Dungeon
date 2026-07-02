@@ -4,12 +4,12 @@ import { addItem } from '../game/inventory';
 import { ITEMS, RARITY_COLORS, RARITY_NAMES } from '../game/items';
 
 const SUMMER_SHOP_ITEMS = [
-  { id: 'summer_blade', name: 'Kiếm Mùa Hè', emoji: '☀️', price: 500, description: 'ATK 52 + HP 40 + SPD 10' },
-  { id: 'summer_staff', name: 'Gậy Mùa Hè', emoji: '🌊', price: 500, description: 'ATK 42 + MP 160 + SPD 8' },
-  { id: 'summer_bow', name: 'Cung Mùa Hè', emoji: '🌺', price: 450, description: 'ATK 45 + SPD 18 + HP 20' },
-  { id: 'summer_dagger', name: 'Dao Mùa Hè', emoji: '🐚', price: 450, description: 'ATK 48 + SPD 20 + HP 15' },
-  { id: 'summer_hammer', name: 'Búa Mùa Hè', emoji: '🦀', price: 550, description: 'ATK 55 + HP 50 + DEF 8' },
-  { id: 'summer_ring', name: 'Nhẫn Mùa Hè', emoji: '🐚', price: 400, description: 'All stats +10~12' },
+  { id: 'summer_blade', name: 'Kiếm Mùa Hè', emoji: '☀️', price: 3500, description: 'ATK 52 + HP 40 + SPD 10' },
+  { id: 'summer_staff', name: 'Gậy Mùa Hè', emoji: '🌊', price: 3500, description: 'ATK 42 + MP 160 + SPD 8' },
+  { id: 'summer_bow', name: 'Cung Mùa Hè', emoji: '🌺', price: 3150, description: 'ATK 45 + SPD 18 + HP 20' },
+  { id: 'summer_dagger', name: 'Dao Mùa Hè', emoji: '🐚', price: 3150, description: 'ATK 48 + SPD 20 + HP 15' },
+  { id: 'summer_hammer', name: 'Búa Mùa Hè', emoji: '🦀', price: 3850, description: 'ATK 55 + HP 50 + DEF 8' },
+  { id: 'summer_ring', name: 'Nhẫn Mùa Hè', emoji: '🐚', price: 2800, description: 'All stats +10~12' },
 ];
 
 export const prefixCommand = {

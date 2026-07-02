@@ -76,39 +76,39 @@ export const prefixCommand = {
       }
 
       if (game === 'coin') {
-        const bet = parseInt(subArgs[1]) || 100;
-        if (bet < 10) return message.reply('❌ Tối thiểu 10 Gold!');
-        if (bet > player.stats.gold) return message.reply(`❌ Không đủ Gold! Bạn có ${player.stats.gold}.`);
+        const bet = parseInt(subArgs[1]) || 10;
+        if (bet < 1) return message.reply('❌ Tối thiểu 1 Summer Coin!');
+        if ((player.summerCoins || 0) < bet) return message.reply(`❌ Không đủ Summer Coin! Bạn có ${player.summerCoins || 0}.`);
         const result = playCoinFlip(bet);
-        await db.addGold(player, result.goldWon!);
+        player.summerCoins = (player.summerCoins || 0) + result.goldWon!;
         await db.updatePlayer(player);
-        const embed = new EmbedBuilder().setTitle('🪙 Coin Flip').setDescription(result.message).setColor(result.success ? 0x00FF00 : 0xFF0000).setFooter({ text: `Gold: ${player.stats.gold}` });
+        const embed = new EmbedBuilder().setTitle('🪙 Coin Flip').setDescription(result.message).setColor(result.success ? 0x00FF00 : 0xFF0000).setFooter({ text: `Summer Coin: ${player.summerCoins}` });
         return message.reply({ embeds: [embed] });
       }
 
       if (game === 'dice') {
         const guess = parseInt(subArgs[1]);
-        const bet = parseInt(subArgs[2]) || 100;
-        if (!guess || guess < 1 || guess > 6) return message.reply('❌ Đoán 1-6! Ví dụ: `,event minigame dice 3 100`');
-        if (bet < 10) return message.reply('❌ Tối thiểu 10 Gold!');
-        if (bet > player.stats.gold) return message.reply(`❌ Không đủ Gold!`);
+        const bet = parseInt(subArgs[2]) || 10;
+        if (!guess || guess < 1 || guess > 6) return message.reply('❌ Đoán 1-6! Ví dụ: `,event minigame dice 3 10`');
+        if (bet < 1) return message.reply('❌ Tối thiểu 1 Summer Coin!');
+        if ((player.summerCoins || 0) < bet) return message.reply(`❌ Không đủ Summer Coin!`);
         const result = playDiceGuess(guess, bet);
-        await db.addGold(player, result.goldWon!);
+        player.summerCoins = (player.summerCoins || 0) + result.goldWon!;
         await db.updatePlayer(player);
-        const embed = new EmbedBuilder().setTitle('🎲 Dice').setDescription(result.message).setColor(result.success ? 0x00FF00 : 0xFF0000).setFooter({ text: `Gold: ${player.stats.gold}` });
+        const embed = new EmbedBuilder().setTitle('🎲 Dice').setDescription(result.message).setColor(result.success ? 0x00FF00 : 0xFF0000).setFooter({ text: `Summer Coin: ${player.summerCoins}` });
         return message.reply({ embeds: [embed] });
       }
 
       if (game === 'rps') {
         const choice = subArgs[1]?.toLowerCase();
-        const bet = parseInt(subArgs[2]) || 100;
+        const bet = parseInt(subArgs[2]) || 10;
         if (!['rock', 'paper', 'scissors'].includes(choice)) return message.reply('❌ Chọn rock, paper hoặc scissors!');
-        if (bet < 10) return message.reply('❌ Tối thiểu 10 Gold!');
-        if (bet > player.stats.gold) return message.reply(`❌ Không đủ Gold!`);
+        if (bet < 1) return message.reply('❌ Tối thiểu 1 Summer Coin!');
+        if ((player.summerCoins || 0) < bet) return message.reply(`❌ Không đủ Summer Coin!`);
         const result = playRPS(choice as 'rock' | 'paper' | 'scissors', bet);
-        await db.addGold(player, result.goldWon!);
+        player.summerCoins = (player.summerCoins || 0) + result.goldWon!;
         await db.updatePlayer(player);
-        const embed = new EmbedBuilder().setTitle('✊ Rock Paper Scissors').setDescription(result.message).setColor(result.success ? 0x00FF00 : 0xFF0000).setFooter({ text: `Gold: ${player.stats.gold}` });
+        const embed = new EmbedBuilder().setTitle('✊ Rock Paper Scissors').setDescription(result.message).setColor(result.success ? 0x00FF00 : 0xFF0000).setFooter({ text: `Summer Coin: ${player.summerCoins}` });
         return message.reply({ embeds: [embed] });
       }
 

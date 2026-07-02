@@ -1,10 +1,23 @@
 import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
-import { CodeModel } from '../game/codeModel';
+import { addItem } from '../game/inventory';
+import { ITEMS } from '../game/items';
+
+const CODES: Record<string, { gold: number; gems: number; items?: { id: string; qty: number }[] }> = {
+  summerevent: {
+    gold: 1000,
+    gems: 200,
+    items: [
+      { id: 'health_potion', qty: 5 },
+      { id: 'mana_potion', qty: 3 },
+    ],
+  },
+};
 
 export const prefixCommand = {
   name: 'code',
-  description: 'Nhập code nhận thưởng',
+  aliases: ['giftcode', 'gift'],
+  description: 'Nhập gift code',
   execute: async (message: any, args: string[], db: Database) => {
     const userId = message.author.id;
     const player = await db.getPlayer(userId);
@@ -14,44 +27,60 @@ export const prefixCommand = {
     }
 
     const code = args[0]?.toLowerCase();
+
     if (!code) {
-      return message.reply('❌ Dùng: `,code <mã code>`');
+      return message.reply('❌ Dùng: `,code <mã>`');
     }
 
-    try {
-      let codeDoc = await CodeModel.findOne({ code });
-
-      if (!codeDoc) {
-        codeDoc = await CodeModel.create({
-          code,
-          usedBy: [],
-          maxUses: 10,
-          reward: 500
-        });
-      }
-
-      if (codeDoc.usedBy.includes(userId)) {
-        return message.reply('❌ Bạn đã sử dụng code này rồi!');
-      }
-
-      if (codeDoc.usedBy.length >= codeDoc.maxUses) {
-        return message.reply('❌ Code đã hết lượt sử dụng!');
-      }
-
-      codeDoc.usedBy.push(userId);
-      await codeDoc.save();
-
-      await db.addGems(player, codeDoc.reward);
-
-      const embed = new EmbedBuilder()
-        .setTitle('🎁 Code Thành Công!')
-        .setDescription(`Bạn nhận được **${codeDoc.reward}** 💎\n\nCode: \`${code}\`\nLượt còn lại: **${codeDoc.maxUses - codeDoc.usedBy.length}**/${codeDoc.maxUses}`)
-        .setColor(0x00FF00);
-
-      message.reply({ embeds: [embed] });
-    } catch (error) {
-      console.error('Code error:', error);
-      message.reply('❌ Lỗi khi xử lý code!');
+    const codeData = CODES[code];
+    if (!codeData) {
+      return message.reply('❌ Mã code không hợp lệ!');
     }
+
+    if (!player.summerEvent) {
+      player.summerEvent = {
+        consecutiveDays: 0,
+        lastDailyLogin: 0,
+        claimedCode: false,
+        minigameLastPlay: 0,
+        minigameWins: 0,
+      };
+    }
+
+    if (code === 'summerevent' && player.summerEvent.claimedCode) {
+      return message.reply('❌ Bạn đã sử dụng code này rồi!');
+    }
+
+    await db.addGold(player, codeData.gold);
+    await db.addGems(player, codeData.gems);
+
+    let itemMsg = '';
+    if (codeData.items) {
+      for (const item of codeData.items) {
+        const itemData = ITEMS[item.id];
+        if (itemData) {
+          addItem(player.inventory, itemData, item.qty);
+          itemMsg += `\n🧪 +${item.qty}x ${itemData.name}`;
+        }
+      }
+    }
+
+    if (code === 'summerevent') {
+      player.summerEvent.claimedCode = true;
+    }
+
+    await db.updatePlayer(player);
+
+    const embed = new EmbedBuilder()
+      .setTitle('🎁 Gift Code')
+      .setDescription(
+        `✅ Mã **${code}** đã được sử dụng!\n\n` +
+        `💰 +${codeData.gold} Gold\n` +
+        `💎 +${codeData.gems} Gem` +
+        itemMsg
+      )
+      .setColor(0x00FF00);
+
+    message.reply({ embeds: [embed] });
   }
 };

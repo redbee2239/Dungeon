@@ -70,6 +70,13 @@ export interface IPlayer extends Document {
     weeklyLastReset: number;
   };
   expBoostCharges: number;
+  summerEvent: {
+    consecutiveDays: number;
+    lastDailyLogin: number;
+    claimedCode: boolean;
+    minigameLastPlay: number;
+    minigameWins: number;
+  };
   createdAt: Date;
   lastActive: Date;
 }
@@ -155,6 +162,13 @@ const PlayerSchema = new Schema<IPlayer>({
     weeklyLastReset: { type: Number, default: 0 }
   },
   expBoostCharges: { type: Number, default: 0 },
+  summerEvent: {
+    consecutiveDays: { type: Number, default: 0 },
+    lastDailyLogin: { type: Number, default: 0 },
+    claimedCode: { type: Boolean, default: false },
+    minigameLastPlay: { type: Number, default: 0 },
+    minigameWins: { type: Number, default: 0 },
+  },
   createdAt: { type: Date, default: Date.now },
   lastActive: { type: Date, default: Date.now }
 });

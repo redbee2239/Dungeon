@@ -69,7 +69,6 @@ export const prefixCommand = {
     await db.updatePlayer(player);
 
     if (result.killed) {
-      // Boss defeated - distribute rewards
       const top = getTopDamageDealers();
       const rewards = getBossRewards();
       let rewardMsg = '🎉 **WORLD BOSS ĐÃ BỊ ĐÁNH BẠI!**\n\n';
@@ -87,27 +86,20 @@ export const prefixCommand = {
             await db.updatePlayer(p);
           }
         }
-
         rewardMsg += '**Phần thưởng theo damage:**\n';
         for (const entry of top.slice(0, 5)) {
           const share = Math.floor(rewards.gold * (entry.damage / boss.maxHP));
           rewardMsg += `<@${entry.userId}>: **${entry.damage.toLocaleString()}** dmg → 💰${Math.max(100, share).toLocaleString()}\n`;
         }
       }
-
       despawnWorldBoss();
-
-      const embed = new EmbedBuilder()
-        .setTitle('💀 World Boss Defeated!')
-        .setDescription(rewardMsg)
-        .setColor(0x00FF00);
-
+      const embed = new EmbedBuilder().setTitle('💀 World Boss Defeated!').setDescription(rewardMsg).setColor(0x00FF00);
       return message.reply({ embeds: [embed] });
     }
 
-    // Normal attack response
     const hpPercent = Math.floor((boss.hp / boss.maxHP) * 100);
     const bar = hpBar(hpPercent);
+    const playerDead = result.playerDied;
 
     const embed = new EmbedBuilder()
       .setTitle(`${boss.emoji} ${boss.name}`)
@@ -116,12 +108,21 @@ export const prefixCommand = {
         `${bar} **${hpPercent}%**\n` +
         `Tham gia: ${boss.participants.size} người`
       )
-      .setColor(hpPercent > 50 ? 0xFF0000 : hpPercent > 20 ? 0xFFAA00 : 0x00FF00);
+      .setColor(playerDead ? 0x808080 : hpPercent > 50 ? 0xFF0000 : hpPercent > 20 ? 0xFFAA00 : 0x00FF00);
 
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
-      new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
-    );
+    const row = new ActionRowBuilder<ButtonBuilder>();
+    if (playerDead) {
+      row.addComponents(
+        new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger).setDisabled(true),
+        new ButtonBuilder().setCustomId('wb_heal').setLabel('🩹 Hồi Sinh').setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
+      );
+    } else {
+      row.addComponents(
+        new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
+      );
+    }
 
     const reply = await message.reply({ embeds: [embed], components: [row] });
 
@@ -135,9 +136,79 @@ export const prefixCommand = {
         return i.reply({ content: '❌ Không phải lượt của bạn!', ephemeral: true });
       }
 
+      if (i.customId === 'wb_heal') {
+        const p = await db.getPlayer(userId);
+        if (!p) return i.reply({ content: '❌ Lỗi!', ephemeral: true });
+
+        const { calculateBonusStats } = await import('../game/inventory');
+        const bonus = calculateBonusStats(p.inventory, p.equippedPet);
+        const maxHp = p.stats.maxHP + bonus.hp;
+
+        // Try auto heal with potions
+        const hpPotion = p.inventory.items.find((inv: any) => inv.itemId === 'health_potion' && inv.quantity > 0);
+        const megaPotion = p.inventory.items.find((inv: any) => inv.itemId === 'mega_health' && inv.quantity > 0);
+        const elixir = p.inventory.items.find((inv: any) => inv.itemId === 'elixir' && inv.quantity > 0);
+
+        let healed = false;
+        let healMsg = '';
+
+        if (elixir) {
+          const { removeItem } = await import('../game/inventory');
+          const { ITEMS } = await import('../game/items');
+          removeItem(p.inventory, 'elixir', 1);
+          p.stats.hp = Math.min(maxHp, p.stats.hp + 200);
+          p.stats.mp = Math.min(p.stats.maxMP + bonus.mp, p.stats.mp + 100);
+          healed = true;
+          healMsg = '🧪 Dùng Elixir → HP +200, MP +100';
+        } else if (megaPotion) {
+          const { removeItem } = await import('../game/inventory');
+          removeItem(p.inventory, 'mega_health', 1);
+          p.stats.hp = Math.min(maxHp, p.stats.hp + 300);
+          healed = true;
+          healMsg = '💖 Dùng Mega Health → HP +300';
+        } else if (hpPotion) {
+          const { removeItem } = await import('../game/inventory');
+          removeItem(p.inventory, 'health_potion', 1);
+          p.stats.hp = Math.min(maxHp, p.stats.hp + 100);
+          healed = true;
+          healMsg = '❤️ Dùng Health Potion → HP +100';
+        } else {
+          // No potions - partial heal
+          p.stats.hp = Math.floor(maxHp * 0.3);
+          healMsg = `⚠️ Không có thuốc! Hồi phục 30% HP (${p.stats.hp}/${maxHp})`;
+          healed = true;
+        }
+
+        await db.updatePlayer(p);
+
+        const bonus2 = calculateBonusStats(p.inventory, p.equippedPet);
+        const maxHp2 = p.stats.maxHP + bonus2.hp;
+
+        const healedEmbed = new EmbedBuilder()
+          .setTitle(`${boss!.emoji} ${boss!.name}`)
+          .setDescription(
+            `${healMsg}\n\n` +
+            `HP: ${p.stats.hp.toLocaleString()}/${maxHp2.toLocaleString()}\n\n` +
+            `${hpBar(Math.floor(boss!.hp / boss!.maxHP * 100))} **${Math.floor(boss!.hp / boss!.maxHP * 100)}%**\n` +
+            `Tham gia: ${boss!.participants.size} người`
+          )
+          .setColor(0x00FF00);
+
+        const attackRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+          new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
+        );
+
+        return i.update({ embeds: [healedEmbed], components: [attackRow] });
+      }
+
       if (i.customId === 'wb_attack') {
         const p = await db.getPlayer(userId);
         if (!p) return i.reply({ content: '❌ Lỗi!', ephemeral: true });
+
+        if (p.stats.hp <= 0) {
+          return i.reply({ content: '❌ Bạn đang chết! Dùng 🩹 Hồi Sinh trước.', ephemeral: true });
+        }
 
         const atkResult = attackWorldBoss(p);
         await db.updatePlayer(p);
@@ -160,26 +231,20 @@ export const prefixCommand = {
                 await db.updatePlayer(playerData);
               }
             }
-
             rewardMsg += '**Phần thưởng theo damage:**\n';
             for (const entry of top.slice(0, 5)) {
               const share = Math.floor(rewards.gold * (entry.damage / boss!.maxHP));
               rewardMsg += `<@${entry.userId}>: **${entry.damage.toLocaleString()}** dmg → 💰${Math.max(100, share).toLocaleString()}\n`;
             }
           }
-
           despawnWorldBoss();
-
-          const finalEmbed = new EmbedBuilder()
-            .setTitle('💀 World Boss Defeated!')
-            .setDescription(rewardMsg)
-            .setColor(0x00FF00);
-
+          const finalEmbed = new EmbedBuilder().setTitle('💀 World Boss Defeated!').setDescription(rewardMsg).setColor(0x00FF00);
           return i.update({ embeds: [finalEmbed], components: [] });
         }
 
         const newHpPercent = Math.floor((boss!.hp / boss!.maxHP) * 100);
         const bar = hpBar(newHpPercent);
+        const isDead = atkResult.playerDied;
 
         const atkEmbed = new EmbedBuilder()
           .setTitle(`${boss!.emoji} ${boss!.name}`)
@@ -188,9 +253,23 @@ export const prefixCommand = {
             `${bar} **${newHpPercent}%**\n` +
             `Tham gia: ${boss!.participants.size} người`
           )
-          .setColor(newHpPercent > 50 ? 0xFF0000 : newHpPercent > 20 ? 0xFFAA00 : 0x00FF00);
+          .setColor(isDead ? 0x808080 : newHpPercent > 50 ? 0xFF0000 : newHpPercent > 20 ? 0xFFAA00 : 0x00FF00);
 
-        return i.update({ embeds: [atkEmbed], components: [row] });
+        const atkRow = new ActionRowBuilder<ButtonBuilder>();
+        if (isDead) {
+          atkRow.addComponents(
+            new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger).setDisabled(true),
+            new ButtonBuilder().setCustomId('wb_heal').setLabel('🩹 Hồi Sinh').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
+          );
+        } else {
+          atkRow.addComponents(
+            new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
+          );
+        }
+
+        return i.update({ embeds: [atkEmbed], components: [atkRow] });
       }
 
       if (i.customId === 'wb_info') {
@@ -201,12 +280,10 @@ export const prefixCommand = {
           const medal = j === 0 ? '🥇' : j === 1 ? '🥈' : j === 2 ? '🥉' : `${j + 1}.`;
           topList += `${medal} <@${entry.userId}> - **${entry.damage.toLocaleString()}** dmg\n`;
         }
-
         const infoEmbed = new EmbedBuilder()
           .setTitle(`${boss!.emoji} ${boss!.name} - Top Damage`)
           .setDescription(topList || 'Chưa ai tấn công')
           .setColor(0xFFD700);
-
         return i.reply({ embeds: [infoEmbed], ephemeral: true });
       }
     });

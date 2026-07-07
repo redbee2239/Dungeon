@@ -83,14 +83,15 @@ export function despawnWorldBoss(): void {
 export function attackWorldBoss(
   player: Player,
   critChance: number = 0.1
-): { damage: number; killed: boolean; message: string; isCrit: boolean } {
+): { damage: number; killed: boolean; message: string; isCrit: boolean; bossDamage: number; playerDied: boolean } {
   if (!currentBoss || !currentBoss.active) {
-    return { damage: 0, killed: false, message: '❌ Không có World Boss nào!', isCrit: false };
+    return { damage: 0, killed: false, message: '❌ Không có World Boss nào!', isCrit: false, bossDamage: 0, playerDied: false };
   }
 
   const bonus = calculateBonusStats(player.inventory, player.equippedPet);
   const totalAtk = player.stats.attack + bonus.attack;
   const totalDef = player.stats.defense + bonus.defense;
+  const totalHp = player.stats.maxHP + bonus.hp;
 
   const baseDmg = Math.max(1, totalAtk - Math.floor(currentBoss.defense / 2));
   const isCrit = Math.random() < critChance;
@@ -111,11 +112,19 @@ export function attackWorldBoss(
     currentBoss.active = false;
   }
 
+  // Boss counter-attack
+  const bossBaseDmg = Math.max(1, currentBoss.attack - Math.floor(totalDef / 3));
+  const bossDamage = bossBaseDmg + Math.floor(Math.random() * (currentBoss.attack * 0.3));
+  player.stats.hp = Math.max(0, player.stats.hp - bossDamage);
+  const playerDied = player.stats.hp <= 0;
+
   let msg = `${currentBoss.emoji} **${currentBoss.name}**\n`;
   msg += `HP: ${currentBoss.hp.toLocaleString()}/${currentBoss.maxHP.toLocaleString()}\n`;
-  msg += `🎯 Gây **${damage.toLocaleString()}** damage${isCrit ? ' **CRIT!**' : ''}`;
+  msg += `🎯 Gây **${damage.toLocaleString()}** damage${isCrit ? ' **CRIT!**' : ''}\n`;
+  msg += `🩸 Boss phản công **${bossDamage.toLocaleString()}** damage → HP: ${player.stats.hp.toLocaleString()}/${totalHp}`;
+  if (playerDied) msg += `\n\n💀 **Bạn đã bị boss giết!** Dùng potions hoặc ,heal để hồi sinh.`;
 
-  return { damage, killed, message: msg, isCrit };
+  return { damage, killed, message: msg, isCrit, bossDamage, playerDied };
 }
 
 export function getBossRewards(): { gold: number; gems: number; summerCoins: number } | null {

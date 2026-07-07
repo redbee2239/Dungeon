@@ -53,7 +53,9 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
-  ]
+  ],
+  rest: { timeout: 60000 },
+  presence: { activities: [{ name: ',help | Mùa Hè Bùng Nổ', type: 0 }] }
 });
 
 client.once(Events.ClientReady, async (readyClient) => {
@@ -75,6 +77,26 @@ client.once(Events.ClientReady, async (readyClient) => {
   } catch (error) {
     console.error('Error registering commands:', error);
   }
+});
+
+client.on(Events.Error, (error) => {
+  console.error('❌ Client error:', error);
+});
+
+client.on(Events.Warn, (warning) => {
+  console.warn('⚠️ Client warning:', warning);
+});
+
+client.on('disconnect', () => {
+  console.log('🔌 Disconnected. Attempting reconnect...');
+});
+
+client.on('reconnecting', () => {
+  console.log('🔄 Reconnecting...');
+});
+
+client.on('error', (err) => {
+  console.error('❌ WebSocket error:', err.message);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -201,5 +223,25 @@ async function start() {
 
   await client.login(token);
 }
+
+process.on('unhandledRejection', (error) => {
+  console.error('❌ Unhandled rejection:', error);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught exception:', error);
+});
+
+process.on('SIGTERM', () => {
+  console.log('🛑 SIGTERM received. Shutting down...');
+  client.destroy();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 SIGINT received. Shutting down...');
+  client.destroy();
+  process.exit(0);
+});
 
 start().catch(console.error);

@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Collection, Events, REST, Routes, SlashCommandBuilder } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, Events, REST, Routes, SlashCommandBuilder, ActivityType } from 'discord.js';
 import { config } from 'dotenv';
 import express from 'express';
 import * as fs from 'fs';
@@ -59,7 +59,7 @@ const client = new Client({
     GatewayIntentBits.MessageContent
   ],
   rest: { timeout: 60000 },
-  presence: { activities: [{ name: ',help | Mùa Hè Bùng Nổ', type: 0 }] }
+  presence: { activities: [{ name: ',help | Mùa Hè Bùng Nổ', type: ActivityType.Playing }] }
 });
 
 client.once(Events.ClientReady, async (readyClient) => {
@@ -83,24 +83,16 @@ client.once(Events.ClientReady, async (readyClient) => {
   }
 });
 
-client.on(Events.Error, (error) => {
-  console.error('❌ Client error:', error);
-});
-
 client.on(Events.Warn, (warning) => {
   console.warn('⚠️ Client warning:', warning);
 });
 
 client.on('disconnect', () => {
-  console.log('🔌 Disconnected. Attempting reconnect...');
-});
-
-client.on('reconnecting', () => {
-  console.log('🔄 Reconnecting...');
+  console.log('🔌 Disconnected. Discord.js will auto-reconnect...');
 });
 
 client.on('error', (err) => {
-  console.error('❌ WebSocket error:', err.message);
+  console.error('❌ Client error:', err.message);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -225,7 +217,17 @@ async function start() {
     startSelfPing();
   });
 
-  await client.login(token);
+  async function connectDiscord() {
+    try {
+      await client.login(token);
+    } catch (err) {
+      console.error('❌ Discord login failed:', err);
+      console.log('🔄 Retrying in 30s...');
+      setTimeout(connectDiscord, 30000);
+    }
+  }
+
+  await connectDiscord();
 }
 
 process.on('unhandledRejection', (error) => {
@@ -234,18 +236,7 @@ process.on('unhandledRejection', (error) => {
 
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught exception:', error);
-});
-
-process.on('SIGTERM', () => {
-  console.log('🛑 SIGTERM received. Shutting down...');
-  client.destroy();
-  process.exit(0);
-});
-
-process.on('SIGINT', () => {
-  console.log('🛑 SIGINT received. Shutting down...');
-  client.destroy();
-  process.exit(0);
+  setTimeout(() => process.exit(1), 1000);
 });
 
 start().catch(console.error);

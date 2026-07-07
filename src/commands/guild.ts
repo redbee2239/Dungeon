@@ -38,6 +38,28 @@ export const prefixCommand = {
     const sub = args[0]?.toLowerCase();
     const subArgs = args.slice(1);
 
+    if (!sub) {
+      const helpEmbed = new EmbedBuilder()
+        .setTitle('⚔️ Hướng Dẫn Bang Hội')
+        .setDescription('Quản lý bang hội của bạn!')
+        .addFields(
+          { name: '📋 Lệnh', value: [
+            '`,guild create <tên>` - Tạo bang mới (1,000 Gold)',
+            '`,guild join <tag>` - Vào bang',
+            '`,guild leave` - Rời bang',
+            '`,guild info` - Xem thông tin bang',
+            '`,guild list` - Danh sách bang hội',
+            '`,guild donate <sốGold>` - Đóng góp Gold (nhận EXP)',
+            '`,guild promote <@user>` - Thăng chức thành phó bang',
+            '`,guild kick <@user>` - Đuổi thành viên',
+            '`,guild disband` - Giải tán bang',
+          ].join('\n') },
+          { name: '📈 Bang Hội', value: 'Đóng góp Gold → EXP → Level lên → mở khóa thêm thành viên (10 + level/2 × 2)' },
+        )
+        .setColor(0x5865F2);
+      return message.reply({ embeds: [helpEmbed] });
+    }
+
     // GUILD CREATE
     if (sub === 'create' || sub === 'tao') {
       const name = subArgs.join(' ');

@@ -35,16 +35,20 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
-  const command = require(filePath);
-  
-  if (command.prefixCommand) {
-    prefixCommands.set(command.prefixCommand.name, command.prefixCommand);
-    console.log(`✅ Prefix: ${PREFIX}${command.prefixCommand.name}`);
-  }
-  
-  if (command.data && command.execute) {
-    slashCommands.set(command.data.name, command);
-    console.log(`✅ Slash: /${command.data.name}`);
+  try {
+    const command = require(filePath);
+    
+    if (command.prefixCommand) {
+      prefixCommands.set(command.prefixCommand.name, command.prefixCommand);
+      console.log(`✅ Prefix: ${PREFIX}${command.prefixCommand.name}`);
+    }
+    
+    if (command.data && command.execute) {
+      slashCommands.set(command.data.name, command);
+      console.log(`✅ Slash: /${command.data.name}`);
+    }
+  } catch (error) {
+    console.error(`❌ Failed to load ${file}:`, error);
   }
 }
 

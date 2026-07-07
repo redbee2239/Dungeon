@@ -219,9 +219,13 @@ async function start() {
 
   async function connectDiscord() {
     try {
+      console.log('🔑 Attempting Discord login...');
+      console.log('Token starts with:', token?.substring(0, 10) + '...');
+      console.log('Token length:', token?.length);
       await client.login(token);
+      console.log('✅ client.login() resolved');
     } catch (err) {
-      console.error('❌ Discord login failed:', err);
+      console.error('❌ Discord login failed:', (err as Error).message || err);
       console.log('🔄 Retrying in 30s...');
       setTimeout(connectDiscord, 30000);
     }

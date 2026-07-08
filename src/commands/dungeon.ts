@@ -4,7 +4,7 @@ import { getRandomMonster, getMultipleRandomMonsters, Monster, BOSS_FLOORS } fro
 import { executeCombatRound, useSkillMana } from '../game/combat';
 import { FLOOR_NAMES, FLOOR_DESCRIPTIONS } from '../game/dungeon';
 import { getSkillsForClass, Skill } from '../game/skills';
-import { addItem, calculateBonusStats, removeItem } from '../game/inventory';
+import { addItem, calculateBonusStats, removeItem, getEquippedEffects } from '../game/inventory';
 import { rollChest, CHEST_RARITY_NAMES, CHEST_RARITY_COLORS } from '../game/chests';
 import { Summon, createSummon, SUMMON_DATA } from '../game/summons';
 import { ActiveEvents, createActiveEvents, rollForEvent, getEventMessages } from '../game/dungeonEvents';
@@ -305,7 +305,7 @@ export const prefixCommand = {
             }
           }
 
-          const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns);
+          const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns, getEquippedEffects(player.inventory));
           combatData.stunTurns = result.stunTurns;
 
           if (result.monsterDied || result.playerDied) {
@@ -379,7 +379,7 @@ export const prefixCommand = {
           collector.stop();
           await i.message.edit({ content: '🏃 Chạy trốn thành công!', embeds: [], components: [] });
         } else {
-          const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns);
+          const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, 1, combatData.events, combatData.stunTurns, getEquippedEffects(player.inventory));
           combatData.stunTurns = result.stunTurns;
           if (result.playerDied) {
             combatData.active = false;
@@ -484,7 +484,7 @@ export const prefixCommand = {
             }
           }
 
-          const result = executeCombatRound(player.stats, combatData.monster, skill, getBonusWithBuffs(), combatData.summon, mpMultiplier, combatData.events, combatData.stunTurns);
+          const result = executeCombatRound(player.stats, combatData.monster, skill, getBonusWithBuffs(), combatData.summon, mpMultiplier, combatData.events, combatData.stunTurns, getEquippedEffects(player.inventory));
           combatData.stunTurns = result.stunTurns;
 
           if (combatData.floor >= 20 && !result.monsterDied && !result.playerDied) {

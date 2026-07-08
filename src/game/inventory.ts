@@ -1,4 +1,5 @@
 import { Item, ITEMS } from './items';
+import { EquipmentEffectDef } from './effects';
 
 export interface Inventory {
   items: InventoryItem[];
@@ -118,6 +119,21 @@ export function calculateBonusStats(inventory: Inventory, equippedPet?: string |
   }
 
   return { attack, defense, hp, mp, speed, summonBoost, crit };
+}
+
+export function getEquippedEffects(inventory: Inventory): EquipmentEffectDef[] {
+  const effects: EquipmentEffectDef[] = [];
+  const equipped = (inventory as any).equipped;
+  if (equipped) {
+    const equipIds = [equipped.weapon, equipped.armor, equipped.accessory].filter(Boolean);
+    for (const itemId of equipIds) {
+      const item = ITEMS[itemId];
+      if (item && item.effects) {
+        effects.push(...item.effects);
+      }
+    }
+  }
+  return effects;
 }
 
 export function sellItem(inventory: Inventory, itemId: string, quantity: number = 1): { success: boolean; gold: number; message: string } {

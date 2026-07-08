@@ -3,6 +3,7 @@ import { Monster } from './monsters';
 import { Item, getRandomDrop } from './items';
 import { Skill } from './skills';
 import { Summon } from './summons';
+import { EquipmentEffectDef, rollEquipmentEffect } from './effects';
 import {
   ActiveEvents,
   hasEffect,
@@ -143,7 +144,8 @@ export function executeCombatRound(
   summon?: Summon | null,
   mpMultiplier: number = 1,
   events?: ActiveEvents,
-  stunTurns: number = 0
+  stunTurns: number = 0,
+  equipmentEffects?: EquipmentEffectDef[]
 ): CombatResult {
   const effectiveStats = bonusStats ? {
     ...playerStats,
@@ -255,6 +257,53 @@ export function executeCombatRound(
           message += `Bạn tấn công gây **${playerDamage}** sát thương${playerCrit ? ' (CHÍ MẠNG!)' : ''}!`;
         } else {
           message += pResult.message;
+        }
+      }
+    }
+
+    // Process equipment effects
+    if (equipmentEffects && equipmentEffects.length > 0 && playerDamage > 0 && monster.hp > 0) {
+      const effectResults = rollEquipmentEffect(equipmentEffects);
+      for (const eff of effectResults) {
+        message += `\n${eff.message}`;
+        switch (eff.effect) {
+          case 'poison':
+          case 'bleed':
+            // Apply DoT to monster (simplified - just deal immediate damage)
+            const dotDmg = Math.floor(monster.maxHP * eff.value / 100);
+            monster.hp = Math.max(0, monster.hp - dotDmg);
+            message += ` (**${dotDmg}** damage)`;
+            break;
+          case 'burn':
+            const burnDmg = Math.floor(monster.maxHP * eff.value / 100);
+            monster.hp = Math.max(0, monster.hp - burnDmg);
+            message += ` (**${burnDmg}** damage)`;
+            break;
+          case 'stun':
+            newStunTurns = Math.max(newStunTurns, 1);
+            break;
+          case 'double_attack':
+            const secondDmg = Math.floor(playerDamage * eff.value / 100);
+            monster.hp = Math.max(0, monster.hp - secondDmg);
+            message += ` (**${secondDmg}** damage lần 2)`;
+            break;
+          case 'lifesteal':
+            const healAmt = Math.floor(playerDamage * eff.value / 100);
+            playerStats.hp = Math.min(playerStats.maxHP, playerStats.hp + healAmt);
+            message += ` (Hồi **${healAmt}** HP)`;
+            break;
+          case 'execute':
+            if (monster.hp <= monster.maxHP * eff.value / 100) {
+              monster.hp = 0;
+              message += ` **KẾT LIỄU!**`;
+            }
+            break;
+          case 'frost':
+            monster.speed = Math.floor(monster.speed * (1 - eff.value / 100));
+            break;
+          case 'shield_break':
+            monster.defense = Math.floor(monster.defense * 0.5);
+            break;
         }
       }
     }

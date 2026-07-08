@@ -1,3 +1,5 @@
+import { EquipmentEffectDef } from './effects';
+
 export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'limited';
 export type ItemType = 'weapon' | 'armor' | 'potion' | 'accessory';
 export type WeaponType = 'physical' | 'magic';
@@ -25,6 +27,7 @@ export interface Item {
   buffAmount?: number;
   debuffStat?: string;
   debuffAmount?: number;
+  effects?: EquipmentEffectDef[];
   price: number;
   sellPrice: number;
 }
@@ -1529,111 +1532,145 @@ export const ITEMS: Record<string, Item> = {
     description: 'Kiếm được rèn từ vảy rồng. Hỏa long thiêu đốt kẻ thù.',
     stats: { attack: 45, hp: 30 }, price: 1500, sellPrice: 700,
     buffStat: 'attack', buffAmount: 20,
+    effects: [{ type: 'burn', chance: 25, value: 8, turns: 3 }],
     classRestriction: ['warrior', 'gladiator']
   },
   demon_blade: {
     id: 'demon_blade', name: 'Lưỡi Daemon', emoji: '😈',
     type: 'weapon', rarity: 'epic', weaponType: 'physical',
-    description: 'Lưỡi kiếm nhuộm máu quỷ. Sức mạnh bóng tối.',
+    description: 'Lưỡi kiếm nhuộm máu quỷ. Hút máu kẻ thù.',
     stats: { attack: 50, speed: -3 }, price: 1600, sellPrice: 750,
     buffStat: 'attack', buffAmount: 25, debuffStat: 'defense', debuffAmount: -8,
+    effects: [{ type: 'lifesteal', chance: 30, value: 15 }],
     classRestriction: ['warrior', 'rogue', 'gladiator']
   },
   arcane_orb: {
     id: 'arcane_orb', name: 'Quả Cầu Huyền Bí', emoji: '🔮',
     type: 'weapon', rarity: 'epic', weaponType: 'magic',
-    description: 'Quả cầu chứa đựng sức mạnh hư không.',
+    description: 'Quả cầu chứa đựng sức mạnh hư không. Gây choáng.',
     stats: { attack: 40, mp: 60 }, price: 1700, sellPrice: 800,
     buffStat: 'mp', buffAmount: 30,
+    effects: [{ type: 'stun', chance: 20, value: 0, turns: 1 }],
     classRestriction: ['mage', 'cleric', 'necromancer']
   },
   dragon_plate: {
     id: 'dragon_plate', name: 'Giáp Rồng', emoji: '🐲',
     type: 'armor', rarity: 'epic',
-    description: 'Giáp làm từ vảy rồng cực cứng. Phản sát thương.',
+    description: 'Giáp làm từ vảy rồng cực cứng. Phản伤 kẻ thù.',
     stats: { defense: 35, hp: 80 }, price: 2500, sellPrice: 1100,
-    buffStat: 'hp', buffAmount: 50
+    buffStat: 'hp', buffAmount: 50,
+    effects: [{ type: 'thorns', chance: 40, value: 15 }]
   },
   demon_armor: {
     id: 'demon_armor', name: 'Giáp Daemon', emoji: '😈',
     type: 'armor', rarity: 'epic',
     description: 'Giáp được ban phước bởi ác quỷ. Tăng ATK, giảm tốc.',
     stats: { defense: 30, attack: 10, hp: 50 }, price: 2700, sellPrice: 1200,
-    buffStat: 'attack', buffAmount: 15, debuffStat: 'speed', debuffAmount: -5
+    buffStat: 'attack', buffAmount: 15, debuffStat: 'speed', debuffAmount: -5,
+    effects: [{ type: 'poison', chance: 20, value: 5, turns: 3 }]
   },
   phoenix_mantle: {
     id: 'phoenix_mantle', name: 'Áo Choàng Phượng Hoàng', emoji: '🔥',
     type: 'armor', rarity: 'epic',
     description: 'Áo choàng phát lửa bảo vệ. Hồi phục mỗi lượt.',
     stats: { defense: 25, mp: 40, speed: 5 }, price: 2600, sellPrice: 1150,
-    buffStat: 'defense', buffAmount: 20
+    buffStat: 'defense', buffAmount: 20,
+    effects: [{ type: 'revive', chance: 15, value: 30 }]
   },
   dragon_pendant: {
     id: 'dragon_pendant', name: 'Dây Chuyền Rồng', emoji: '🐲',
     type: 'accessory', rarity: 'epic',
     description: 'Dây chuyền tăng sức mạnh rồng. Critical hit tăng.',
     stats: { attack: 15, defense: 10, hp: 60 }, price: 2200, sellPrice: 1000,
-    buffStat: 'attack', buffAmount: 18
+    buffStat: 'attack', buffAmount: 18,
+    effects: [{ type: 'crit_boost', chance: 35, value: 20 }]
   },
   demon_ring: {
     id: 'demon_ring', name: 'Nhẫn Daemon', emoji: '😈',
     type: 'accessory', rarity: 'epic',
-    description: 'Nhẫn tăng sức tấn công. Nhưng giảm giáp.',
+    description: 'Nhẫn tăng sức tấn công. Đánh đôi.',
     stats: { attack: 20, speed: 5 }, price: 2300, sellPrice: 1050,
-    buffStat: 'attack', buffAmount: 22, debuffStat: 'defense', debuffAmount: -6
+    buffStat: 'attack', buffAmount: 22, debuffStat: 'defense', debuffAmount: -6,
+    effects: [{ type: 'double_attack', chance: 25, value: 50 }]
   },
   phoenix_amulet: {
     id: 'phoenix_amulet', name: 'Dây Chuyền Phượng Hoàng', emoji: '🔥',
     type: 'accessory', rarity: 'epic',
-    description: 'Dây chuyền hồi phục HP liên tục.',
+    description: 'Dây chuyền hồi phục HP liên tục. Burns kẻ thù.',
     stats: { hp: 100, mp: 30 }, price: 2400, sellPrice: 1100,
-    buffStat: 'hp', buffAmount: 40
+    buffStat: 'hp', buffAmount: 40,
+    effects: [{ type: 'burn', chance: 30, value: 6, turns: 2 }]
   },
 
   // === CRAFTABLE LEGENDARY ===
   excalibur: {
     id: 'excalibur', name: 'Excalibur', emoji: '⚔️',
     type: 'weapon', rarity: 'legendary', weaponType: 'physical',
-    description: 'Thanh kiếm huyền thoại của vua Arthur. Sát thương chí mạng.',
+    description: 'Thanh kiếm huyền thoại. Kết liễu kẻ yếu.',
     stats: { attack: 70, defense: 10, speed: 5 }, price: 10000, sellPrice: 5000,
     buffStat: 'attack', buffAmount: 40, debuffStat: 'mp', debuffAmount: -20,
+    effects: [
+      { type: 'execute', chance: 20, value: 25 },
+      { type: 'double_attack', chance: 15, value: 60 }
+    ],
     classRestriction: ['warrior', 'gladiator']
   },
   abyssal_fang: {
     id: 'abyssal_fang', name: 'Nanh Địa Ngục', emoji: '💀',
     type: 'weapon', rarity: 'legendary', weaponType: 'physical',
-    description: 'Nanh từ quái vật địa ngục. Hút máu kẻ thù.',
+    description: 'Nanh từ quái vật địa ngục. Hút máu + độc.',
     stats: { attack: 65, speed: 8 }, price: 11000, sellPrice: 5500,
     buffStat: 'attack', buffAmount: 50, debuffStat: 'hp', debuffAmount: -30,
+    effects: [
+      { type: 'lifesteal', chance: 35, value: 20 },
+      { type: 'poison', chance: 40, value: 10, turns: 4 }
+    ],
     classRestriction: ['rogue', 'gladiator', 'necromancer']
   },
   aegis: {
     id: 'aegis', name: 'Aegis', emoji: '🛡️',
     type: 'armor', rarity: 'legendary',
-    description: 'Khiên của thần Zeus. Bất tử tạm thời.',
+    description: 'Khiên của thần Zeus. Phản伤 + đóng băng.',
     stats: { defense: 55, hp: 150, attack: 10 }, price: 15000, sellPrice: 7000,
-    buffStat: 'defense', buffAmount: 35, debuffStat: 'speed', debuffAmount: -10
+    buffStat: 'defense', buffAmount: 35, debuffStat: 'speed', debuffAmount: -10,
+    effects: [
+      { type: 'thorns', chance: 50, value: 25 },
+      { type: 'frost', chance: 30, value: 30 }
+    ]
   },
   void_shroud: {
     id: 'void_shroud', name: 'Mantle Hư Không', emoji: '🌀',
     type: 'armor', rarity: 'legendary',
-    description: 'Áo choàng từ hư không. Phép thuật mạnh hơn.',
+    description: 'Áo choàng từ hư không. Hút mana + né.',
     stats: { defense: 40, mp: 80, speed: 10 }, price: 16000, sellPrice: 7500,
-    buffStat: 'mp', buffAmount: 60
+    buffStat: 'mp', buffAmount: 60,
+    effects: [
+      { type: 'mana_steal', chance: 40, value: 15 },
+      { type: 'dodge_boost', chance: 30, value: 25 }
+    ]
   },
   eternal_ring: {
     id: 'eternal_ring', name: 'Nhẫn Vĩnh Cửu', emoji: '🌟',
     type: 'accessory', rarity: 'legendary',
-    description: 'Nhẫn phát sáng vĩnh cửu. Cân bằng tất cả.',
+    description: 'Nhẫn phát sáng vĩnh cửu. Đánh đôi + chí mạng.',
     stats: { attack: 25, defense: 20, hp: 100, mp: 50, speed: 10 }, price: 12000, sellPrice: 6000,
-    buffStat: 'attack', buffAmount: 30, debuffStat: 'defense', debuffAmount: -10
+    buffStat: 'attack', buffAmount: 30, debuffStat: 'defense', debuffAmount: -10,
+    effects: [
+      { type: 'double_attack', chance: 30, value: 70 },
+      { type: 'crit_boost', chance: 40, value: 30 }
+    ]
   },
   abyssal_pendant: {
     id: 'abyssal_pendant', name: 'Dây Chuyền Địa Ngục', emoji: '💀',
     type: 'accessory', rarity: 'legendary',
-    description: 'Dây chuyền tăng sức mạnh bóng tối. CRIT +25%.',
+    description: 'Dây chuyền bóng tối. Độc + kết liễu + hút máu.',
     stats: { attack: 30, speed: 15, hp: 80 }, price: 13000, sellPrice: 6500,
-    buffStat: 'attack', buffAmount: 45, debuffStat: 'defense', debuffAmount: -15
+    buffStat: 'attack', buffAmount: 45, debuffStat: 'defense', debuffAmount: -15,
+    effects: [
+      { type: 'poison', chance: 45, value: 12, turns: 4 },
+      { type: 'execute', chance: 15, value: 20 },
+      { type: 'lifesteal', chance: 25, value: 15 }
+    ]
   }
 };
 

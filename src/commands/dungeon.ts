@@ -671,7 +671,7 @@ function buildCombatButtons(): ActionRowBuilder<ButtonBuilder> {
   return row;
 }
 
-function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[], cachedBonus?: ReturnType<typeof calculateBonusStats>): EmbedBuilder {
+function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[], cachedBonus?: ReturnType<typeof calculateBonusStats>, combatData?: any): EmbedBuilder {
   const bonus = cachedBonus || calculateBonusStats(player.inventory, player.equippedPet);
   const totalHP = player.stats.maxHP + bonus.hp;
   const totalMP = player.stats.maxMP + bonus.mp;
@@ -679,39 +679,108 @@ function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, 
   const monsterBar = generateProgressBar(monster.hp, monster.maxHP, 15);
   const playerBar = generateProgressBar(player.stats.hp, totalHP, 15);
 
-  let description = extraMessage || '';
+  // Player stats
+  const playerATK = player.stats.attack + bonus.attack;
+  const playerDEF = player.stats.defense + bonus.defense;
+  const playerSPD = player.stats.speed + bonus.speed;
+
+  // Monster stats
+  const monsterATK = monster.attack;
+  const monsterDEF = monster.defense;
+  const monsterSPD = monster.speed;
+
+  // Floor info
+  const floor = combatData?.floor || player.dungeon.currentFloor;
+  const isBoss = BOSS_FLOORS.includes(floor);
+  const floorName = FLOOR_NAMES[floor] || `Tầng ${floor}`;
+  const monstersRemaining = combatData ? 1 + combatData.monsterQueue.length : 1;
+
+  // Equipped weapon
+  const equippedWeapon = player.inventory.equipped?.weapon;
+  const weaponItem = equippedWeapon ? ITEMS[equippedWeapon] : null;
+
+  // Equipment effects
+  const equippedEffects = getEquippedEffects(player.inventory);
+  const effectNames = equippedEffects.map(e => {
+    const info: Record<string, string> = {
+      poison: '☠️Độc', burn: '🔥Cháy', stun: '💫Choáng', double_attack: '⚔️Đánh đôi',
+      lifesteal: '🧛Hút máu', crit_boost: '🎯CRIT', thorns: '🌵Phản傷',
+      mana_steal: '💧Hút MP', dodge_boost: '💨Né', execute: '💀Kết liễu',
+      bleed: '🩸Chảy máu', frost: '❄️Đóng băng', revive: '✨Hồi sinh',
+      shield_break: '🛡️Phá giáp', chain_lightning: '⚡Sét lan'
+    };
+    return info[e.type] || e.type;
+  });
+
+  let description = '';
+
+  // Action message
+  if (extraMessage) {
+    description += `${extraMessage}\n\n`;
+  }
+
+  // Player section
+  description += `**👤 ${player.name || 'Bạn'}** (Lv.${player.stats.level})`;
+  if (weaponItem) {
+    description += ` | ${weaponItem.emoji} ${weaponItem.name}`;
+  }
+  description += `\n`;
+  description += `❤️ ${player.stats.hp}/${totalHP} ${generateProgressBar(player.stats.hp, totalHP, 10)}\n`;
+  description += `💧 ${player.stats.mp}/${totalMP} ${generateProgressBar(player.stats.mp, totalMP, 10)}\n`;
+  description += `⚔️ ${playerATK} | 🛡️ ${playerDEF} | 💨 ${playerSPD}`;
+
+  // Buffs/debuffs
+  if (buffs && buffs.length > 0) {
+    const buffTexts = buffs.map(b => `${b.stat.toUpperCase()} +${b.amount}`);
+    description += `\n⬆️ ${buffTexts.join(', ')}`;
+  }
+
+  description += '\n\n';
+
+  // Monster section
+  description += `**${monster.emoji} ${monster.name}** (Lv.${monster.level})`;
+  if (monster.isBoss) description += ' **[BOSS]**';
+  description += `\n`;
+  description += `❤️ ${monster.hp}/${monster.maxHP} ${monsterBar}\n`;
+  description += `⚔️ ${monsterATK} | 🛡️ ${monsterDEF} | 💨 ${monsterSPD}`;
+
+  // Equipment effects on monster
+  if (effectNames.length > 0 && monster.hp > 0) {
+    description += `\n✨ Hiệu ứng: ${effectNames.join(', ')}`;
+  }
+
+  // Events
   if (events && events.events.length > 0) {
     const eventMsgs = getEventMessages(events);
     description += `\n\n⚡ **Sự kiện:**\n${eventMsgs.join('\n')}`;
   }
-  if (buffs && buffs.length > 0) {
-    const buffMsgs = buffs.map(b => `⬆️ ${b.stat.toUpperCase()} +${b.amount}`);
-    description += `\n\n🧪 **Buff:** ${buffMsgs.join(', ')}`;
-  }
 
   const embed = new EmbedBuilder()
-    .setTitle('⚔️ Combat')
+    .setTitle(`${isBoss ? '👑' : '⚔️'} ${floorName} | Còn ${monstersRemaining} quái`)
     .setDescription(description)
-    .addFields(
-      { name: `${monster.emoji} ${monster.name}`, value: `❤️ ${monster.hp}/${monster.maxHP}\n${monsterBar}`, inline: true },
-      { name: '👤 Bạn', value: `❤️ ${player.stats.hp}/${totalHP} | 💧 ${player.stats.mp}/${totalMP}\n${playerBar}`, inline: true }
-    )
-    .setColor(0xFF6600);
+    .setColor(monster.isBoss ? 0xFF0000 : 0xFF6600);
 
+  // Summon
   if (summon && summon.hp > 0) {
-    const summonBar = generateProgressBar(summon.hp, summon.maxHP, 15);
+    const summonBar = generateProgressBar(summon.hp, summon.maxHP, 10);
     embed.addFields({
-      name: `${summon.emoji} ${summon.name} (Lv.${summon.level} Triệu Hồi)`,
-      value: `❤️ ${summon.hp}/${summon.maxHP}\n⚔️ ATK: ${summon.attack} | 🛡️ DEF: ${summon.defense}\n${summonBar}`,
+      name: `${summon.emoji} ${summon.name} (Lv.${summon.level})`,
+      value: `❤️ ${summon.hp}/${summon.maxHP} ${summonBar}\n⚔️ ${summon.attack} | 🛡️ ${summon.defense}`,
       inline: true
     });
+  }
+
+  // Potion count
+  if (combatData) {
+    const skillUsed = Object.values(combatData.skillUsage || {}).reduce((a: any, b: any) => Number(a) + Number(b), 0);
+    embed.setFooter({ text: `Thuốc: ${combatData.potionUsed}/${POTION_LIMIT} | Lượt kỹ năng: ${skillUsed}` });
   }
 
   return embed;
 }
 
-async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[], cachedBonus?: ReturnType<typeof calculateBonusStats>) {
-  const embed = buildCombatEmbed(player, monster, extraMessage, skillUsage, summon, events, buffs, cachedBonus);
+async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[], cachedBonus?: ReturnType<typeof calculateBonusStats>, combatData?: any) {
+  const embed = buildCombatEmbed(player, monster, extraMessage, skillUsage, summon, events, buffs, cachedBonus, combatData);
   const row = buildCombatButtons();
   await i.message.edit({ embeds: [embed], components: [row] });
 }

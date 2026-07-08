@@ -1,6 +1,7 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { Database } from '../game/database';
 import { RARITY_NAMES, RARITY_COLORS, ITEMS, ItemRarity } from '../game/items';
+import { MATERIALS } from '../game/materials';
 
 const RARITY_EMOJI: Record<ItemRarity, string> = {
   common: '⚪',
@@ -10,6 +11,73 @@ const RARITY_EMOJI: Record<ItemRarity, string> = {
   legendary: '🟠',
   limited: '🔴'
 };
+
+interface InventoryPage {
+  name: string;
+  emoji: string;
+  filter: (item: any) => boolean;
+}
+
+const PAGES: InventoryPage[] = [
+  { name: 'Nguyên Liệu', emoji: '📦', filter: (item) => !!MATERIALS[item.itemId] },
+  { name: 'Vũ Khí', emoji: '⚔️', filter: (item) => { const i = ITEMS[item.itemId]; return i?.type === 'weapon'; } },
+  { name: 'Giáp', emoji: '🛡️', filter: (item) => { const i = ITEMS[item.itemId]; return i?.type === 'armor'; } },
+  { name: 'Phụ Kiện', emoji: '💍', filter: (item) => { const i = ITEMS[item.itemId]; return i?.type === 'accessory' || i?.type === 'potion'; } },
+];
+
+function getItemInfo(itemId: string): { name: string; emoji: string; rarity: ItemRarity; type: string } | null {
+  if (ITEMS[itemId]) {
+    const item = ITEMS[itemId];
+    return { name: item.name, emoji: item.emoji, rarity: item.rarity, type: item.type };
+  }
+  if (MATERIALS[itemId]) {
+    const mat = MATERIALS[itemId];
+    return { name: mat.name, emoji: mat.emoji, rarity: mat.rarity, type: 'material' };
+  }
+  return null;
+}
+
+function buildPageEmbed(player: any, page: number): EmbedBuilder {
+  const p = PAGES[page];
+  const items = player.inventory.items.filter((i: any) => p.filter(i));
+
+  const equippedCount = [player.inventory.equipped.weapon, player.inventory.equipped.armor, player.inventory.equipped.accessory].filter(Boolean).length;
+
+  const embed = new EmbedBuilder()
+    .setTitle(`${p.emoji} ${p.name}`)
+    .setDescription(`📦 ${player.inventory.items.length}/${player.inventory.maxSlots} | 💰 ${player.stats.gold} Gold | 👔 Đang mang: ${equippedCount}/3`)
+    .setColor(0xFFD700);
+
+  if (items.length === 0) {
+    embed.setDescription(`${embed.data.description}\n\n*Không có vật phẩm nào.*`);
+    return embed;
+  }
+
+  const lines = items.map((i: any) => {
+    const info = getItemInfo(i.itemId);
+    if (!info) return `❓ ${i.itemId} x${i.quantity}`;
+    const rarityEmoji = RARITY_EMOJI[info.rarity];
+    return `${rarityEmoji} ${info.emoji} **${info.name}** x${i.quantity} | \`${i.itemId}\``;
+  });
+
+  // Split into fields of 1024 chars each
+  let field = '';
+  let fieldNum = 1;
+  for (const line of lines) {
+    if ((field + '\n' + line).length > 1024) {
+      embed.addFields({ name: fieldNum === 1 ? 'Danh sách:' : ` `, value: field, inline: false });
+      field = line;
+      fieldNum++;
+    } else {
+      field = field ? field + '\n' + line : line;
+    }
+  }
+  if (field) {
+    embed.addFields({ name: fieldNum === 1 ? 'Danh sách:' : ` `, value: field, inline: false });
+  }
+
+  return embed;
+}
 
 export const prefixCommand = {
   name: 'inventory',
@@ -23,11 +91,10 @@ export const prefixCommand = {
       return message.reply('❌ Bạn chưa có nhân vật! Dùng `,create` để tạo.');
     }
 
-    const { inventory } = player;
     const action = args[0]?.toLowerCase();
 
     if (action === 'equip' || action === 'wearing' || action === 'mang') {
-      const equipped = inventory.equipped;
+      const equipped = player.inventory.equipped;
       const embed = new EmbedBuilder()
         .setTitle('👔 Trang Bị Đang Mang')
         .setColor(0xFFD700);
@@ -69,52 +136,56 @@ export const prefixCommand = {
       return message.reply({ embeds: [embed] });
     }
 
-    if (inventory.items.length === 0) {
+    if (player.inventory.items.length === 0) {
       return message.reply('📦 Hành trang trống! Đánh quái để nhặt đồ.');
     }
 
-    const grouped: Record<string, any[]> = {
-      weapon: [],
-      armor: [],
-      potion: [],
-      accessory: []
-    };
+    let currentPage = 0;
 
-    inventory.items.forEach((i: any) => {
-      const item = require('../game/items').ITEMS[i.itemId];
-      if (item) {
-        grouped[item.type]?.push({ ...item, quantity: i.quantity });
-      }
+    const embed = buildPageEmbed(player, currentPage);
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setCustomId('inv_prev').setLabel('⬅️').setStyle(ButtonStyle.Secondary).setDisabled(true),
+      new ButtonBuilder().setCustomId('inv_page').setLabel(`${PAGES[currentPage].emoji} ${PAGES[currentPage].name}`).setStyle(ButtonStyle.Primary).setDisabled(true),
+      new ButtonBuilder().setCustomId('inv_next').setLabel('➡️').setStyle(ButtonStyle.Secondary).setDisabled(currentPage >= PAGES.length - 1),
+    );
+
+    const reply = await message.reply({ embeds: [embed], components: [row] });
+
+    const collector = reply.createMessageComponentCollector({
+      componentType: ComponentType.Button,
+      time: 60000,
     });
 
-    const typeNames: Record<string, string> = {
-      weapon: '⚔️ Vũ Khí',
-      armor: '🛡️ Giáp',
-      potion: '🧪 Thuốc',
-      accessory: '💍 Phụ Kiện'
-    };
+    collector.on('collect', async (i: any) => {
+      if (i.user.id !== userId) {
+        return i.reply({ content: '❌ Không phải menu của bạn!', ephemeral: true });
+      }
 
-    const equippedCount = [inventory.equipped.weapon, inventory.equipped.armor, inventory.equipped.accessory].filter(Boolean).length;
+      if (i.customId === 'inv_prev' && currentPage > 0) {
+        currentPage--;
+      } else if (i.customId === 'inv_next' && currentPage < PAGES.length - 1) {
+        currentPage++;
+      }
 
-    const embed = new EmbedBuilder()
-      .setTitle('📦 Hành Trang')
-      .setDescription(`${inventory.items.length}/${inventory.maxSlots} | 💰 ${player.stats.gold} Gold | 👔 Đang mang: ${equippedCount}/3`)
-      .setColor(0xFFD700);
+      const newEmbed = buildPageEmbed(player, currentPage);
+      const newRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId('inv_prev').setLabel('⬅️').setStyle(ButtonStyle.Secondary).setDisabled(currentPage === 0),
+        new ButtonBuilder().setCustomId('inv_page').setLabel(`${PAGES[currentPage].emoji} ${PAGES[currentPage].name}`).setStyle(ButtonStyle.Primary).setDisabled(true),
+        new ButtonBuilder().setCustomId('inv_next').setLabel('➡️').setStyle(ButtonStyle.Secondary).setDisabled(currentPage >= PAGES.length - 1),
+      );
 
-    for (const [type, items] of Object.entries(grouped)) {
-      if (items.length === 0) continue;
-      const value = items.map((i: any) => {
-        const rarity = i.rarity as ItemRarity;
-        const rarityEmoji = RARITY_EMOJI[rarity];
-        const rarityName = RARITY_NAMES[rarity];
-        return `${rarityEmoji} ${i.emoji} **${i.name}** x${i.quantity} (${rarityName}) | ID: \`${i.id}\``;
-      }).join('\n');
-      if (!value) continue;
-      embed.addFields({ name: typeNames[type] || type, value: value.substring(0, 1024), inline: false });
-    }
+      await i.update({ embeds: [newEmbed], components: [newRow] });
+    });
 
-    embed.setFooter({ text: 'Dùng ,inventory equip để xem trang bị đang mang' });
-
-    message.reply({ embeds: [embed] });
+    collector.on('end', async () => {
+      try {
+        const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder().setCustomId('inv_prev').setLabel('⬅️').setStyle(ButtonStyle.Secondary).setDisabled(true),
+          new ButtonBuilder().setCustomId('inv_page').setLabel(`${PAGES[currentPage].emoji} ${PAGES[currentPage].name}`).setStyle(ButtonStyle.Primary).setDisabled(true),
+          new ButtonBuilder().setCustomId('inv_next').setLabel('➡️').setStyle(ButtonStyle.Secondary).setDisabled(true),
+        );
+        await reply.edit({ components: [disabledRow] });
+      } catch {}
+    });
   }
 };

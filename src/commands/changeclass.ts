@@ -34,7 +34,7 @@ export const prefixCommand = {
           '- Level sẽ reset về 1\n' +
           '- Dungeon sẽ reset về tầng 1\n' +
           '- Inventory giữ nguyên\n' +
-          '- Skill points giữ nguyên\n\n' +
+          '- Skill points sẽ reset về 0\n\n' +
           '**Lớp có sẵn:**\n' +
           '⚔️ `warrior` - Chiến Binh\n' +
           '🔮 `mage` - Pháp Sư\n' +
@@ -64,6 +64,7 @@ export const prefixCommand = {
     player.dungeon.roomsExplored = 0;
     player.dungeon.monstersDefeated = 0;
     player.highestFloor = 1;
+    player.skillPoints = 0;
 
     const starterSkills: Record<CharacterClass, string> = {
       warrior: 'basic_slash',

@@ -1487,49 +1487,56 @@ export const ITEMS: Record<string, Item> = {
   mithril_blade: {
     id: 'mithril_blade', name: 'Lưỡi Mithril', emoji: '⚔️',
     type: 'weapon', rarity: 'rare', weaponType: 'physical',
-    description: 'Lưỡi kiếm làm từ mithril.',
+    description: 'Lưỡi kiếm làm từ mithril. Sắc bén vô song.',
     stats: { attack: 28, speed: 3 }, price: 500, sellPrice: 220,
+    buffStat: 'attack', buffAmount: 12,
     classRestriction: ['warrior', 'rogue', 'gladiator']
   },
   starbow: {
     id: 'starbow', name: 'Cung Sao', emoji: '🏹',
     type: 'weapon', rarity: 'rare', weaponType: 'physical',
-    description: 'Cung làm từ ánh sao.',
+    description: 'Cung làm từ ánh sao. Tốc độ bắn nhanh.',
     stats: { attack: 25, speed: 6 }, price: 480, sellPrice: 210,
+    buffStat: 'speed', buffAmount: 8,
     classRestriction: ['archer']
   },
   mithril_ring: {
     id: 'mithril_ring', name: 'Nhẫn Mithril', emoji: '💍',
     type: 'accessory', rarity: 'rare',
-    description: 'Nhẫn làm từ mithril quý.',
-    stats: { attack: 8, defense: 8, speed: 4 }, price: 600, sellPrice: 270
+    description: 'Nhẫn làm từ mithril quý. Cân bằng.',
+    stats: { attack: 8, defense: 8, speed: 4 }, price: 600, sellPrice: 270,
+    buffStat: 'attack', buffAmount: 8
   },
   arcane_amulet: {
     id: 'arcane_amulet', name: 'Dây Chuyền Huyền Bí', emoji: '📿',
     type: 'accessory', rarity: 'rare',
-    description: 'Dây chuyền tăng mana.',
-    stats: { mp: 50, attack: 6 }, price: 650, sellPrice: 290
+    description: 'Dây chuyền tăng mana. Phép thuật mạnh hơn.',
+    stats: { mp: 50, attack: 6 }, price: 650, sellPrice: 290,
+    buffStat: 'mp', buffAmount: 20
   },
   shadow_amulet: {
     id: 'shadow_amulet', name: 'Bùa Bóng Tối', emoji: '🕸️',
     type: 'accessory', rarity: 'rare',
     description: 'Bùa tăng tốc và né tránh.',
-    stats: { speed: 10, defense: 5 }, price: 580, sellPrice: 260
+    stats: { speed: 10, defense: 5 }, price: 580, sellPrice: 260,
+    buffStat: 'speed', buffAmount: 6
   },
 
   // === CRAFTABLE EPIC ===
   dragon_sword: {
     id: 'dragon_sword', name: 'Kiếm Rồng', emoji: '🐲',
     type: 'weapon', rarity: 'epic', weaponType: 'physical',
-    description: 'Kiếm được rèn từ vảy rồng.',
+    description: 'Kiếm được rèn từ vảy rồng. Hỏa long thiêu đốt kẻ thù.',
     stats: { attack: 45, hp: 30 }, price: 1500, sellPrice: 700,
+    buffStat: 'attack', buffAmount: 20,
     classRestriction: ['warrior', 'gladiator']
   },
   demon_blade: {
     id: 'demon_blade', name: 'Lưỡi Daemon', emoji: '😈',
     type: 'weapon', rarity: 'epic', weaponType: 'physical',
-    description: 'Lưỡi kiếm nhuộm máu quỷ.',
+    description: 'Lưỡi kiếm nhuộm máu quỷ. Sức mạnh bóng tối.',
     stats: { attack: 50, speed: -3 }, price: 1600, sellPrice: 750,
+    buffStat: 'attack', buffAmount: 25, debuffStat: 'defense', debuffAmount: -8,
     classRestriction: ['warrior', 'rogue', 'gladiator']
   },
   arcane_orb: {
@@ -1537,83 +1544,96 @@ export const ITEMS: Record<string, Item> = {
     type: 'weapon', rarity: 'epic', weaponType: 'magic',
     description: 'Quả cầu chứa đựng sức mạnh hư không.',
     stats: { attack: 40, mp: 60 }, price: 1700, sellPrice: 800,
+    buffStat: 'mp', buffAmount: 30,
     classRestriction: ['mage', 'cleric', 'necromancer']
   },
   dragon_plate: {
     id: 'dragon_plate', name: 'Giáp Rồng', emoji: '🐲',
     type: 'armor', rarity: 'epic',
-    description: 'Giáp làm từ vảy rồng cực cứng.',
-    stats: { defense: 35, hp: 80 }, price: 2500, sellPrice: 1100
+    description: 'Giáp làm từ vảy rồng cực cứng. Phản sát thương.',
+    stats: { defense: 35, hp: 80 }, price: 2500, sellPrice: 1100,
+    buffStat: 'hp', buffAmount: 50
   },
   demon_armor: {
     id: 'demon_armor', name: 'Giáp Daemon', emoji: '😈',
     type: 'armor', rarity: 'epic',
-    description: 'Giáp được ban phước bởi ác quỷ.',
-    stats: { defense: 30, attack: 10, hp: 50 }, price: 2700, sellPrice: 1200
+    description: 'Giáp được ban phước bởi ác quỷ. Tăng ATK, giảm tốc.',
+    stats: { defense: 30, attack: 10, hp: 50 }, price: 2700, sellPrice: 1200,
+    buffStat: 'attack', buffAmount: 15, debuffStat: 'speed', debuffAmount: -5
   },
   phoenix_mantle: {
     id: 'phoenix_mantle', name: 'Áo Choàng Phượng Hoàng', emoji: '🔥',
     type: 'armor', rarity: 'epic',
-    description: 'Áo choàng phát lửa bảo vệ.',
-    stats: { defense: 25, mp: 40, speed: 5 }, price: 2600, sellPrice: 1150
+    description: 'Áo choàng phát lửa bảo vệ. Hồi phục mỗi lượt.',
+    stats: { defense: 25, mp: 40, speed: 5 }, price: 2600, sellPrice: 1150,
+    buffStat: 'defense', buffAmount: 20
   },
   dragon_pendant: {
     id: 'dragon_pendant', name: 'Dây Chuyền Rồng', emoji: '🐲',
     type: 'accessory', rarity: 'epic',
-    description: 'Dây chuyền tăng sức mạnh rồng.',
-    stats: { attack: 15, defense: 10, hp: 60 }, price: 2200, sellPrice: 1000
+    description: 'Dây chuyền tăng sức mạnh rồng. Critical hit tăng.',
+    stats: { attack: 15, defense: 10, hp: 60 }, price: 2200, sellPrice: 1000,
+    buffStat: 'attack', buffAmount: 18
   },
   demon_ring: {
     id: 'demon_ring', name: 'Nhẫn Daemon', emoji: '😈',
     type: 'accessory', rarity: 'epic',
-    description: 'Nhẫn tăng sức tấn công.',
-    stats: { attack: 20, speed: 5 }, price: 2300, sellPrice: 1050
+    description: 'Nhẫn tăng sức tấn công. Nhưng giảm giáp.',
+    stats: { attack: 20, speed: 5 }, price: 2300, sellPrice: 1050,
+    buffStat: 'attack', buffAmount: 22, debuffStat: 'defense', debuffAmount: -6
   },
   phoenix_amulet: {
     id: 'phoenix_amulet', name: 'Dây Chuyền Phượng Hoàng', emoji: '🔥',
     type: 'accessory', rarity: 'epic',
-    description: 'Dây chuyền hồi phụcHP.',
-    stats: { hp: 100, mp: 30 }, price: 2400, sellPrice: 1100
+    description: 'Dây chuyền hồi phục HP liên tục.',
+    stats: { hp: 100, mp: 30 }, price: 2400, sellPrice: 1100,
+    buffStat: 'hp', buffAmount: 40
   },
 
   // === CRAFTABLE LEGENDARY ===
   excalibur: {
     id: 'excalibur', name: 'Excalibur', emoji: '⚔️',
     type: 'weapon', rarity: 'legendary', weaponType: 'physical',
-    description: 'Thanh kiếm huyền thoại của vua Arthur.',
+    description: 'Thanh kiếm huyền thoại của vua Arthur. Sát thương chí mạng.',
     stats: { attack: 70, defense: 10, speed: 5 }, price: 10000, sellPrice: 5000,
+    buffStat: 'attack', buffAmount: 40, debuffStat: 'mp', debuffAmount: -20,
     classRestriction: ['warrior', 'gladiator']
   },
   abyssal_fang: {
     id: 'abyssal_fang', name: 'Nanh Địa Ngục', emoji: '💀',
     type: 'weapon', rarity: 'legendary', weaponType: 'physical',
-    description: 'Nanh từ quái vật địa ngục.',
+    description: 'Nanh từ quái vật địa ngục. Hút máu kẻ thù.',
     stats: { attack: 65, speed: 8 }, price: 11000, sellPrice: 5500,
+    buffStat: 'attack', buffAmount: 50, debuffStat: 'hp', debuffAmount: -30,
     classRestriction: ['rogue', 'gladiator', 'necromancer']
   },
   aegis: {
     id: 'aegis', name: 'Aegis', emoji: '🛡️',
     type: 'armor', rarity: 'legendary',
-    description: 'Khiên của thần Zeus.',
-    stats: { defense: 55, hp: 150, attack: 10 }, price: 15000, sellPrice: 7000
+    description: 'Khiên của thần Zeus. Bất tử tạm thời.',
+    stats: { defense: 55, hp: 150, attack: 10 }, price: 15000, sellPrice: 7000,
+    buffStat: 'defense', buffAmount: 35, debuffStat: 'speed', debuffAmount: -10
   },
   void_shroud: {
     id: 'void_shroud', name: 'Mantle Hư Không', emoji: '🌀',
     type: 'armor', rarity: 'legendary',
-    description: 'Áo choàng từ hư không.',
-    stats: { defense: 40, mp: 80, speed: 10 }, price: 16000, sellPrice: 7500
+    description: 'Áo choàng từ hư không. Phép thuật mạnh hơn.',
+    stats: { defense: 40, mp: 80, speed: 10 }, price: 16000, sellPrice: 7500,
+    buffStat: 'mp', buffAmount: 60
   },
   eternal_ring: {
     id: 'eternal_ring', name: 'Nhẫn Vĩnh Cửu', emoji: '🌟',
     type: 'accessory', rarity: 'legendary',
-    description: 'Nhẫn phát sáng vĩnh cửu.',
-    stats: { attack: 25, defense: 20, hp: 100, mp: 50, speed: 10 }, price: 12000, sellPrice: 6000
+    description: 'Nhẫn phát sáng vĩnh cửu. Cân bằng tất cả.',
+    stats: { attack: 25, defense: 20, hp: 100, mp: 50, speed: 10 }, price: 12000, sellPrice: 6000,
+    buffStat: 'attack', buffAmount: 30, debuffStat: 'defense', debuffAmount: -10
   },
   abyssal_pendant: {
     id: 'abyssal_pendant', name: 'Dây Chuyền Địa Ngục', emoji: '💀',
     type: 'accessory', rarity: 'legendary',
-    description: 'Dây chuyền tăng sức mạnh bóng tối.',
-    stats: { attack: 30, speed: 15, hp: 80 }, price: 13000, sellPrice: 6500
+    description: 'Dây chuyền tăng sức mạnh bóng tối. CRIT +25%.',
+    stats: { attack: 30, speed: 15, hp: 80 }, price: 13000, sellPrice: 6500,
+    buffStat: 'attack', buffAmount: 45, debuffStat: 'defense', debuffAmount: -15
   }
 };
 

@@ -470,6 +470,56 @@ export const SKILLS: Skill[] = [
     gachaRate: 0.08
   },
 
+  // Necromancer skills
+  {
+    id: 'drain_life',
+    name: 'Cắn Rút Sinh Lực',
+    emoji: '🩸',
+    description: 'Rút HP từ kẻ thù, gây sát thương phép và hồi phục bản thân.',
+    manaCost: 20,
+    damage: 1.3,
+    unlockLevel: 1,
+    class: 'necromancer',
+    rarity: 'common',
+    gachaRate: 0
+  },
+  {
+    id: 'summon_skeleton',
+    name: 'Triệu Hồi Binh Lính Xương',
+    emoji: '💀',
+    description: 'Triệu hồi lính xương tấn công và gây bleed.',
+    manaCost: 30,
+    damage: 0.8,
+    unlockLevel: 3,
+    class: 'necromancer',
+    rarity: 'uncommon',
+    gachaRate: 0.3
+  },
+  {
+    id: 'death_coil',
+    name: 'Vòng Xoáy Tử Thần',
+    emoji: '☠️',
+    description: 'Sát thương phép nặng + có thể khiến kẻ thù sợ hãi (bỏ lượt).',
+    manaCost: 40,
+    damage: 1.8,
+    unlockLevel: 10,
+    class: 'necromancer',
+    rarity: 'rare',
+    gachaRate: 0.2
+  },
+  {
+    id: 'army_of_dead',
+    name: 'Quân Đoàn Tử Vong',
+    emoji: '🦴',
+    description: 'Triệu hồi 3 lính xương cùng lúc, tấn công kẻ thù.',
+    manaCost: 60,
+    damage: 0.6,
+    unlockLevel: 15,
+    class: 'necromancer',
+    rarity: 'epic',
+    gachaRate: 0.08
+  },
+
   // Legendary skills (cross-class)
   {
     id: 'dragon_breath',

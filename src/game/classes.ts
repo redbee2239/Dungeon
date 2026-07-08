@@ -1,4 +1,4 @@
-export type CharacterClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator' | 'summoner' | 'archer';
+export type CharacterClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator' | 'summoner' | 'archer' | 'necromancer';
 
 export interface ClassStats {
   name: string;
@@ -15,9 +15,9 @@ export const CLASS_DATA: Record<CharacterClass, ClassStats> = {
   warrior: {
     name: 'Chiến Binh',
     emoji: '⚔️',
-    baseHP: 200,
+    baseHP: 220,
     baseMP: 50,
-    baseAttack: 25,
+    baseAttack: 28,
     baseDefense: 18,
     baseSpeed: 10,
     description: 'Sức mạnh và phòng thủ cao, phù hợp cho người mới.'
@@ -37,9 +37,9 @@ export const CLASS_DATA: Record<CharacterClass, ClassStats> = {
     emoji: '🗡️',
     baseHP: 150,
     baseMP: 80,
-    baseAttack: 30,
+    baseAttack: 33,
     baseDefense: 10,
-    baseSpeed: 22,
+    baseSpeed: 18,
     description: 'Tốc độ nhanh, chí mạng cao, lẩn trốn giỏi.'
   },
   cleric: {
@@ -47,15 +47,15 @@ export const CLASS_DATA: Record<CharacterClass, ClassStats> = {
     emoji: '✝️',
     baseHP: 160,
     baseMP: 120,
-    baseAttack: 18,
-    baseDefense: 15,
+    baseAttack: 22,
+    baseDefense: 18,
     baseSpeed: 11,
     description: 'Có khả năng hồi phục, hỗ trợ đồng đội.'
   },
   gladiator: {
     name: 'Đấu Sĩ',
     emoji: '🏟️',
-    baseHP: 220,
+    baseHP: 240,
     baseMP: 40,
     baseAttack: 38,
     baseDefense: 14,
@@ -81,6 +81,16 @@ export const CLASS_DATA: Record<CharacterClass, ClassStats> = {
     baseDefense: 12,
     baseSpeed: 20,
     description: 'Tấn công từ xa, chí mạng cao.'
+  },
+  necromancer: {
+    name: 'Âm Linh Sư',
+    emoji: '💀',
+    baseHP: 140,
+    baseMP: 140,
+    baseAttack: 30,
+    baseDefense: 10,
+    baseSpeed: 11,
+    description: 'Triệu hồi undead và cắn rút sinh lực kẻ thù.'
   }
 };
 
@@ -119,16 +129,24 @@ export function getExpToNextLevel(level: number): number {
   return Math.floor(50 + level * 30);
 }
 
-export function levelUp(stats: PlayerStats): PlayerStats {
+export function levelUp(stats: PlayerStats, characterClass?: CharacterClass): PlayerStats {
   const newStats = { ...stats };
   newStats.level += 1;
   newStats.expToNext = getExpToNextLevel(newStats.level);
   
-  newStats.maxHP += 15 + Math.floor(Math.random() * 10);
-  newStats.maxMP += 8 + Math.floor(Math.random() * 5);
-  newStats.attack += 3 + Math.floor(Math.random() * 3);
-  newStats.defense += 2 + Math.floor(Math.random() * 2);
-  newStats.speed += 1 + Math.floor(Math.random() * 2);
+  if (characterClass === 'necromancer' || characterClass === 'summoner' || characterClass === 'mage') {
+    newStats.maxHP += 12 + Math.floor(Math.random() * 8);
+    newStats.maxMP += 12 + Math.floor(Math.random() * 6);
+    newStats.attack += 3 + Math.floor(Math.random() * 3);
+    newStats.defense += 1 + Math.floor(Math.random() * 2);
+    newStats.speed += 1 + Math.floor(Math.random() * 2);
+  } else {
+    newStats.maxHP += 15 + Math.floor(Math.random() * 10);
+    newStats.maxMP += 8 + Math.floor(Math.random() * 5);
+    newStats.attack += 3 + Math.floor(Math.random() * 3);
+    newStats.defense += 2 + Math.floor(Math.random() * 2);
+    newStats.speed += 1 + Math.floor(Math.random() * 2);
+  }
   
   newStats.hp = newStats.maxHP;
   newStats.mp = newStats.maxMP;

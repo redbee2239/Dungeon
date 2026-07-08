@@ -1,9 +1,15 @@
 import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
 import { ITEMS, RARITY_NAMES, RARITY_COLORS, ItemRarity, Item } from '../game/items';
+import { isBeta } from '../game/beta';
 
 const GACHA_COST = 50;
 const MULTI_COST = 450;
+
+const BETA_1_3_COST_SINGLE = 40;
+const BETA_1_3_COST_MULTI = 360;
+const BETA_1_3_RAINBOW_PITY = 30;
+const BETA_1_3_SSR_PITY = 10;
 
 const RARITY_WEIGHTS: Record<ItemRarity, number> = {
   common: 40,
@@ -33,8 +39,29 @@ function rollRarity(pityEpic: number, pityLegendary: number): ItemRarity {
   return 'common';
 }
 
+function rollRarityBeta(pityEpic: number, pityLegendary: number): ItemRarity {
+  if (pityLegendary >= BETA_1_3_RAINBOW_PITY) return 'legendary';
+  if (pityEpic >= BETA_1_3_SSR_PITY) return 'epic';
+
+  const total = Object.values(RARITY_WEIGHTS).reduce((a, b) => a + b, 0);
+  let roll = Math.random() * total;
+  
+  for (const [rarity, weight] of Object.entries(RARITY_WEIGHTS)) {
+    roll -= weight;
+    if (roll <= 0) return rarity as ItemRarity;
+  }
+  return 'common';
+}
+
 function rollItem(pityEpic: number, pityLegendary: number): Item {
   const rarity = rollRarity(pityEpic, pityLegendary);
+  const pool = GACHA_ITEMS.filter(i => i.rarity === rarity);
+  if (pool.length === 0) return GACHA_ITEMS[0];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function rollItemBeta(pityEpic: number, pityLegendary: number): Item {
+  const rarity = rollRarityBeta(pityEpic, pityLegendary);
   const pool = GACHA_ITEMS.filter(i => i.rarity === rarity);
   if (pool.length === 0) return GACHA_ITEMS[0];
   return pool[Math.floor(Math.random() * pool.length)];
@@ -52,18 +79,24 @@ export const prefixCommand = {
     }
 
     const action = args[0]?.toLowerCase();
+    const betaActive = isBeta();
+
+    const gachaCost = betaActive ? BETA_1_3_COST_SINGLE : GACHA_COST;
+    const multiCost = betaActive ? BETA_1_3_COST_MULTI : MULTI_COST;
+    const epicPity = betaActive ? BETA_1_3_SSR_PITY : EPIC_PITY;
+    const legendaryPity = betaActive ? BETA_1_3_RAINBOW_PITY : LEGENDARY_PITY;
 
     if (!action || !['1', '10', 'single', 'multi', 'roll', 'history'].includes(action)) {
       const embed = new EmbedBuilder()
-        .setTitle('🎰 Gacha Trang Bị')
-        .setDescription(`Chi phí:\n- 1 lần: **${GACHA_COST}** 💎\n- 10 lần: **${MULTI_COST}** 💎 (-10%)\n\nGem của bạn: **${player.gems}** 💎`)
+        .setTitle(betaActive ? '🎲 BETA GACHA' : '🎰 Gacha Trang Bị')
+        .setDescription(`Chi phí:\n- 1 lần: **${gachaCost}** 💎\n- 10 lần: **${multiCost}** 💎 (-10%)\n\nGem của bạn: **${player.gems}** 💎`)
         .addFields(
           { name: '📊 Tỷ Lệ', value: [
             '⚪ Phổ Thông: 40%',
             '🟢 Thông Thường: 30%',
             '🔵 Hiếm: 20%',
-            '🟣 Sử Thi: 8% (pity: 50)',
-            '🟠 Huyền Thoại: 2% (pity: 150)'
+            `🟣 Sử Thi: 8% (pity: ${epicPity})`,
+            `🟠 Huyền Thoại: 2% (pity: ${legendaryPity})`
           ].join('\n') },
           { name: '💡 Cách Dùng', value: [
             ',gacha 1 - Quay 1 lần',
@@ -94,7 +127,7 @@ export const prefixCommand = {
     }
 
     const isMulti = action === '10' || action === 'multi';
-    const cost = isMulti ? MULTI_COST : GACHA_COST;
+    const cost = isMulti ? multiCost : gachaCost;
 
     if (player.gems < cost) {
       return message.reply(`❌ Không đủ Gem! Cần ${cost} 💎 (Bạn có ${player.gems} 💎)`);
@@ -106,7 +139,9 @@ export const prefixCommand = {
     const rollCount = isMulti ? 10 : 1;
 
     for (let i = 0; i < rollCount; i++) {
-      const item = rollItem(player.gachaPity.epic, player.gachaPity.legendary);
+      const item = betaActive
+        ? rollItemBeta(player.gachaPity.epic, player.gachaPity.legendary)
+        : rollItem(player.gachaPity.epic, player.gachaPity.legendary);
       const existing = player.inventory.items.find((inv: any) => inv.itemId === item.id);
       const isNew = !existing || existing.quantity === 0;
       results.push({ item, isNew });
@@ -139,7 +174,9 @@ export const prefixCommand = {
     await db.updatePlayer(player);
 
     const embed = new EmbedBuilder()
-      .setTitle(isMulti ? '🎰 Gacha 10 Lượt' : '🎰 Gacha 1 Lượt')
+      .setTitle(isMulti
+        ? (betaActive ? '🎲 BETA Gacha 10 Lượt' : '🎰 Gacha 10 Lượt')
+        : (betaActive ? '🎲 BETA Gacha 1 Lượt' : '🎰 Gacha 1 Lượt'))
       .setDescription(`Sử dụng **${cost}** 💎`)
       .setColor(0xFF8000);
 

@@ -1,7 +1,7 @@
 export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'limited';
 export type ItemType = 'weapon' | 'armor' | 'potion' | 'accessory';
 export type WeaponType = 'physical' | 'magic';
-export type ItemClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator' | 'summoner' | 'archer' | 'all';
+export type ItemClass = 'warrior' | 'mage' | 'rogue' | 'cleric' | 'gladiator' | 'summoner' | 'archer' | 'necromancer' | 'all';
 
 export interface Item {
   id: string;

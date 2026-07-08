@@ -9,7 +9,8 @@ const classMap: Record<string, CharacterClass> = {
   'cleric': 'cleric',
   'gladiator': 'gladiator',
   'summoner': 'summoner',
-  'archer': 'archer'
+  'archer': 'archer',
+  'necromancer': 'necromancer'
 };
 
 export const prefixCommand = {
@@ -42,7 +43,8 @@ export const prefixCommand = {
           '✝️ `cleric` - Tu Sĩ\n' +
           '🏟️ `gladiator` - Đấu Sĩ\n' +
           '🔮 `summoner` - Triệu Hồi Sư\n' +
-          '🏹 `archer` - Cung Thủ'
+          '🏹 `archer` - Cung Thủ\n' +
+          '💀 `necromancer` - Âm Linh Sư'
         )
         .setColor(0xFF6600);
       return message.reply({ embeds: [embed] });
@@ -73,7 +75,8 @@ export const prefixCommand = {
       cleric: 'holy_smite',
       gladiator: 'battle_cry',
       summoner: 'summon_wolf',
-      archer: 'quick_shot'
+      archer: 'quick_shot',
+      necromancer: 'drain_life'
     };
     player.unlockedSkills = [starterSkills[newClass]];
     player.equippedSkill = null;

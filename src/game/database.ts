@@ -150,7 +150,8 @@ export class Database {
       cleric: 'holy_smite',
       gladiator: 'battle_cry',
       summoner: 'summon_wolf',
-      archer: 'quick_shot'
+      archer: 'quick_shot',
+      necromancer: 'drain_life'
     };
     
     const doc = await PlayerModel.create({
@@ -213,7 +214,7 @@ export class Database {
     player.stats.exp += exp;
     while (player.stats.exp >= player.stats.expToNext) {
       player.stats.exp -= player.stats.expToNext;
-      player.stats = levelUp(player.stats);
+      player.stats = levelUp(player.stats, player.characterClass);
       player.skillPoints += 3;
       leveled = true;
       levelsGained++;

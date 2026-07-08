@@ -10,6 +10,9 @@ import { Summon, createSummon, SUMMON_DATA } from '../game/summons';
 import { ActiveEvents, createActiveEvents, rollForEvent, getEventMessages } from '../game/dungeonEvents';
 import { updateQuestProgress } from '../game/questProgress';
 import { ITEMS } from '../game/items';
+import { isBeta } from '../game/beta';
+import { getMaterialDrop } from '../game/materialDrops';
+import { MATERIALS } from '../game/materials';
 
 const SUMMON_SKILL_IDS = ['summon_wolf', 'summon_bear', 'summon_phoenix', 'summon_dragon', 'summon_army'];
 
@@ -210,7 +213,7 @@ export const prefixCommand = {
 
       if (i.customId === 'potion') {
         if (combatData.potionUsed >= POTION_LIMIT) {
-          await showCombatStatus(i, player, combatData.monster, `❌ Đã dùng tối đa **${POTION_LIMIT}** thuốc trong combat này!`, combatData.skillUsage, combatData.summon, combatData.events);
+          await showCombatStatus(i, player, combatData.monster, `❌ Đã dùng tối đa **${POTION_LIMIT}** thuốc trong combat này!`, combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
           return;
         }
 
@@ -220,7 +223,7 @@ export const prefixCommand = {
         });
 
         if (potions.length === 0) {
-          await showCombatStatus(i, player, combatData.monster, '❌ Không có thuốc nào trong túi!', combatData.skillUsage, combatData.summon, combatData.events);
+          await showCombatStatus(i, player, combatData.monster, '❌ Không có thuốc nào trong túi!', combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
           return;
         }
 
@@ -323,7 +326,7 @@ export const prefixCommand = {
               combatData.monster = combatData.monsterQueue.shift()!;
               combatData.skillUsage = {};
               const nextMsg = `${fullMsg}\n\n⚔️ **Quái tiếp theo:** ${combatData.monster.emoji} ${combatData.monster.name} (${combatData.monster.hp}/${combatData.monster.maxHP} HP)`;
-              const embed = buildCombatEmbed(player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events);
+              const embed = buildCombatEmbed(player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
               await pi.update({ embeds: [embed], components: [buildCombatButtons()] });
             } else {
               const totalExp = result.expGained;
@@ -359,7 +362,7 @@ export const prefixCommand = {
             await db.updatePlayer(player);
             await pi.update({ content: `💀 **GAME OVER**\n${fullMsg}`, embeds: [], components: [] });
           } else {
-            const embed = buildCombatEmbed(player, combatData.monster, fullMsg, combatData.skillUsage, combatData.summon, combatData.events, combatData.buffs);
+            const embed = buildCombatEmbed(player, combatData.monster, fullMsg, combatData.skillUsage, combatData.summon, combatData.events, combatData.buffs, bonus);
             await pi.update({ embeds: [embed], components: [buildCombatButtons()] });
           }
           potionCollector.stop();
@@ -389,7 +392,7 @@ export const prefixCommand = {
             collector.stop();
             await handleVictory(i, player, combatData, db, result);
           } else {
-            await showCombatStatus(i, player, combatData.monster, `🏃 Không chạy được!\n${result.message}`, combatData.skillUsage, combatData.summon, combatData.events);
+            await showCombatStatus(i, player, combatData.monster, `🏃 Không chạy được!\n${result.message}`, combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
           }
         }
         return;
@@ -399,7 +402,7 @@ export const prefixCommand = {
         const availableSkills = getAvailableSkills(player);
         
         if (availableSkills.length === 0) {
-          await showCombatStatus(i, player, combatData.monster, '❌ Không có kỹ năng nào khả dụng (hết MP hoặc chưa học)!', combatData.skillUsage, combatData.summon, combatData.events);
+          await showCombatStatus(i, player, combatData.monster, '❌ Không có kỹ năng nào khả dụng (hết MP hoặc chưa học)!', combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
           return;
         }
 
@@ -411,7 +414,7 @@ export const prefixCommand = {
         });
 
         if (usableSkills.length === 0) {
-          await showCombatStatus(i, player, combatData.monster, '❌ Hết lượt sử dụng kỹ năng trong lượt này!', combatData.skillUsage, combatData.summon, combatData.events);
+          await showCombatStatus(i, player, combatData.monster, '❌ Hết lượt sử dụng kỹ năng trong lượt này!', combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
           return;
         }
 
@@ -469,12 +472,12 @@ export const prefixCommand = {
               if (!combatData.summon || combatData.summon.hp <= 0) {
                 combatData.summon = createSummon(skillId, player.stats.level, bonus.summonBoost);
                 if (combatData.summon) {
-                  await showCombatStatus(i, player, combatData.monster, `${combatData.summon.emoji} **${combatData.summon.name}** (Lv.${combatData.summon.level}) đã được triệu hồi!\n❤️ HP: ${combatData.summon.hp}/${combatData.summon.maxHP} | ⚔️ ATK: ${combatData.summon.attack}`, combatData.skillUsage, combatData.summon, combatData.events);
+                  await showCombatStatus(i, player, combatData.monster, `${combatData.summon.emoji} **${combatData.summon.name}** (Lv.${combatData.summon.level}) đã được triệu hồi!\n❤️ HP: ${combatData.summon.hp}/${combatData.summon.maxHP} | ⚔️ ATK: ${combatData.summon.attack}`, combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
                   skillCollector.stop();
                   return;
                 }
               } else {
-                await showCombatStatus(i, player, combatData.monster, '❌ Đã có triệu hồi trên sân! Triệu hồi khác khi nó chết.', combatData.skillUsage, combatData.summon, combatData.events);
+                await showCombatStatus(i, player, combatData.monster, '❌ Đã có triệu hồi trên sân! Triệu hồi khác khi nó chết.', combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
                 skillCollector.stop();
                 return;
               }
@@ -499,7 +502,7 @@ export const prefixCommand = {
             combatData.summon = null;
           }
 
-          await processResult(si, player, combatData, db, result);
+          await processResult(si, player, combatData, db, result, undefined, bonus);
           skillCollector.stop();
         });
 
@@ -527,7 +530,7 @@ export const prefixCommand = {
         combatData.summon = null;
       }
 
-      await processResult(i, player, combatData, db, result);
+      await processResult(i, player, combatData, db, result, undefined, bonus);
     });
 
     collector.on('end', async (_collected: any, reason: string) => {
@@ -543,14 +546,14 @@ export const prefixCommand = {
   }
 };
 
-async function processResult(i: any, player: any, combatData: CombatData, db: Database, result: any, extraMsg?: string) {
+async function processResult(i: any, player: any, combatData: CombatData, db: Database, result: any, extraMsg?: string, cachedBonus?: ReturnType<typeof calculateBonusStats>) {
   const msg = extraMsg ? `${extraMsg}\n\n${result.message}` : result.message;
   if (result.monsterDied) {
     if (combatData.monsterQueue.length > 0) {
       combatData.monster = combatData.monsterQueue.shift()!;
       combatData.skillUsage = {};
       const nextMsg = `${msg}\n\n⚔️ **Quái tiếp theo:** ${combatData.monster.emoji} ${combatData.monster.name} (${combatData.monster.hp}/${combatData.monster.maxHP} HP)`;
-      await showCombatStatus(i, player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events);
+      await showCombatStatus(i, player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events, undefined, cachedBonus);
     } else {
       await handleVictory(i, player, combatData, db, result);
     }
@@ -558,7 +561,7 @@ async function processResult(i: any, player: any, combatData: CombatData, db: Da
     await db.updatePlayer(player);
     await i.message.edit({ content: `💀 **GAME OVER**\n${msg}`, embeds: [], components: [] });
   } else {
-    await showCombatStatus(i, player, combatData.monster, msg, combatData.skillUsage, combatData.summon, combatData.events);
+    await showCombatStatus(i, player, combatData.monster, msg, combatData.skillUsage, combatData.summon, combatData.events, undefined, cachedBonus);
   }
 }
 
@@ -598,6 +601,18 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
     gemsEarned += gemBonus;
   }
 
+  let materialMsg = '';
+  if (isBeta()) {
+    const drops = getMaterialDrop(combatData.monster.level);
+    for (const drop of drops) {
+      const mat = MATERIALS[drop.materialId];
+      if (mat) {
+        addItem(player.inventory, mat, drop.quantity);
+        materialMsg += `\n${mat.emoji} **${mat.name}** x${drop.quantity}`;
+      }
+    }
+  }
+
   let chestMsg = '';
   if (combatData.monster.isBoss) {
     const chest = rollChest(combatData.floor);
@@ -628,6 +643,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   msg += `\n+${totalExp} EXP, +${totalGold} Gold${expBoostMsg}`;
   msg += `\n💎 +${gemsEarned} Gem`;
   msg += chestMsg;
+  if (materialMsg) msg += `\n📦 Nguyên liệu:${materialMsg}`;
   if (expResult.leveled) {
     const levelGems = expResult.levelsGained * 5;
     await db.addGems(player, levelGems);
@@ -655,8 +671,8 @@ function buildCombatButtons(): ActionRowBuilder<ButtonBuilder> {
   return row;
 }
 
-function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]): EmbedBuilder {
-  const bonus = calculateBonusStats(player.inventory, player.equippedPet);
+function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[], cachedBonus?: ReturnType<typeof calculateBonusStats>): EmbedBuilder {
+  const bonus = cachedBonus || calculateBonusStats(player.inventory, player.equippedPet);
   const totalHP = player.stats.maxHP + bonus.hp;
   const totalMP = player.stats.maxMP + bonus.mp;
 
@@ -694,8 +710,8 @@ function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, 
   return embed;
 }
 
-async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[]) {
-  const embed = buildCombatEmbed(player, monster, extraMessage, skillUsage, summon, events, buffs);
+async function showCombatStatus(i: any, player: any, monster: Monster, extraMessage?: string, skillUsage?: Record<string, number>, summon?: Summon | null, events?: ActiveEvents, buffs?: CombatBuff[], cachedBonus?: ReturnType<typeof calculateBonusStats>) {
+  const embed = buildCombatEmbed(player, monster, extraMessage, skillUsage, summon, events, buffs, cachedBonus);
   const row = buildCombatButtons();
   await i.message.edit({ embeds: [embed], components: [row] });
 }

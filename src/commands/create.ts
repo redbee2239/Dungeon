@@ -19,13 +19,17 @@ const classMap: Record<string, CharacterClass> = {
   'archer': 'archer',
   'cungthủ': 'archer',
   'ct': 'archer',
+  'necromancer': 'necromancer',
+  'âmlinhsư': 'necromancer',
+  'al': 'necromancer',
   '1': 'warrior',
   '2': 'mage',
   '3': 'rogue',
   '4': 'cleric',
   '5': 'gladiator',
   '6': 'summoner',
-  '7': 'archer'
+  '7': 'archer',
+  '8': 'necromancer'
 };
 
 export const prefixCommand = {
@@ -43,7 +47,7 @@ export const prefixCommand = {
     if (!classInput || !classMap[classInput]) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Chọn lớp nhân vật')
-        .setDescription('Cách dùng: `,create <lớp>`\n\n**Lớp có sẵn:**\n⚔️ `warrior` - Chiến Binh\n🔮 `mage` - Pháp Sư\n🗡️ `rogue` - Sát Thủ\n✝️ `cleric` - Tu Sĩ\n🏟️ `gladiator` - Đấu Sĩ\n🔮 `summoner` - Triệu Hồi Sư\n🏹 `archer` - Cung Thủ')
+        .setDescription('Cách dùng: `,create <lớp>`\n\n**Lớp có sẵn:**\n⚔️ `warrior` - Chiến Binh\n🔮 `mage` - Pháp Sư\n🗡️ `rogue` - Sát Thủ\n✝️ `cleric` - Tu Sĩ\n🏟️ `gladiator` - Đấu Sĩ\n🔮 `summoner` - Triệu Hồi Sư\n🏹 `archer` - Cung Thủ\n💀 `necromancer` - Âm Linh Sư')
         .setColor(0xFF0000);
       return message.reply({ embeds: [embed] });
     }

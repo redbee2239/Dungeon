@@ -5,16 +5,16 @@ const OWNER_ID = '1185140041022976083';
 
 export const data = new SlashCommandBuilder()
   .setName('open')
-  .setDescription('Beta feature toggle')
+  .setDescription('Bật/tắt tính năng beta')
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addStringOption(option =>
     option.setName('action')
-      .setDescription('Action')
+      .setDescription('Hành động')
       .setRequired(true)
       .addChoices(
-        { name: 'beta 1.3 - Activate', value: 'beta' },
-        { name: 'close - Deactivate', value: 'close' },
-        { name: 'status - Check status', value: 'status' }
+        { name: 'beta 1.3 - Bật', value: 'beta' },
+        { name: 'close - Tắt', value: 'close' },
+        { name: 'status - Xem trạng thái', value: 'status' }
       )
   );
 
@@ -29,7 +29,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     activateBeta();
     const embed = new EmbedBuilder()
       .setTitle('🔓 Beta Đã Kích Hoạt')
-      .setDescription('Các tính năng beta version 1.3 đã được bật.\n\n**Tính năng:**\n- 🛠️ Crafting\n- 💀 Class Necromancer\n- 🎲 Gacha Rework\n- 🔄 Trading\n- 📦 Nguyên liệu drops')
+      .setDescription('Các tính năng beta version 1.3 đã được bật.\n\n**Tính năng:**\n- 🛠️ Chế tạo\n- 💀 Class Âm Linh Sư\n- 🎲 Gacha Rework\n- 🔄 Giao dịch\n- 📦 Nguyên liệu drops')
       .setColor(0x00FF00);
     return interaction.reply({ embeds: [embed] });
   }

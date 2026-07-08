@@ -10,7 +10,7 @@ import { Summon, createSummon, SUMMON_DATA } from '../game/summons';
 import { ActiveEvents, createActiveEvents, rollForEvent, getEventMessages } from '../game/dungeonEvents';
 import { updateQuestProgress } from '../game/questProgress';
 import { ITEMS } from '../game/items';
-import { isBeta } from '../game/beta';
+import { isBeta, isSecretChannel } from '../game/beta';
 import { getMaterialDrop } from '../game/materialDrops';
 import { MATERIALS } from '../game/materials';
 
@@ -602,7 +602,7 @@ async function handleVictory(i: any, player: any, combatData: any, db: Database,
   }
 
   let materialMsg = '';
-  if (isBeta()) {
+  if (isBeta() || isSecretChannel(i.message?.channel?.id || '')) {
     const drops = getMaterialDrop(combatData.monster.level);
     for (const drop of drops) {
       const mat = MATERIALS[drop.materialId];

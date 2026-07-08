@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as https from 'https';
 import { Database } from './game/database';
 import { setCooldown, getCooldown, hasCooldown, formatCooldown } from './utils/cooldown';
+import { isSecretChannel } from './game/beta';
 
 config();
 
@@ -99,7 +100,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
-  if (allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(interaction.channelId)) {
+  if (!isSecretChannel(interaction.channelId) && allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(interaction.channelId)) {
     return interaction.reply({
       content: '❌ Chỉ có thể sử dụng lệnh trong kênh được chỉ định!',
       ephemeral: true
@@ -112,15 +113,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const cooldownTime = command.cooldown || COOLDOWN_SECONDS;
   const remaining = getCooldown(interaction.user.id, interaction.commandName);
   
-  if (remaining > 0) {
+  if (!isSecretChannel(interaction.channelId) && remaining > 0) {
     return interaction.reply({
       content: `⏰ Vui lòng đợi **${formatCooldown(remaining)}** nữa!`,
       ephemeral: true
     });
   }
 
-  try {
+  if (!isSecretChannel(interaction.channelId)) {
     setCooldown(interaction.user.id, interaction.commandName, cooldownTime);
+  }
+
+  try {
     await command.execute(interaction, db);
   } catch (error) {
     console.error(`Error executing ${interaction.commandName}:`, error);
@@ -138,7 +142,7 @@ client.on('messageCreate', async (message) => {
   if (!message.content.startsWith(PREFIX)) return;
 
   const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
-  if (allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(message.channel.id)) return;
+  if (!isSecretChannel(message.channel.id) && allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(message.channel.id)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift()?.toLowerCase();
@@ -151,14 +155,16 @@ client.on('messageCreate', async (message) => {
   const cooldownTime = command.cooldown || COOLDOWN_SECONDS;
   const remaining = getCooldown(message.author.id, commandName);
   
-  if (remaining > 0) {
+  if (!isSecretChannel(message.channel.id) && remaining > 0) {
     const msg = await message.reply(`⏰ Vui lòng đợi **${formatCooldown(remaining)}** nữa!`);
     setTimeout(() => msg.delete().catch(() => {}), 3000);
     return;
   }
 
   try {
-    setCooldown(message.author.id, commandName, cooldownTime);
+    if (!isSecretChannel(message.channel.id)) {
+      setCooldown(message.author.id, commandName, cooldownTime);
+    }
     await command.execute(message, args, db);
   } catch (error) {
     console.error(`Error executing ${commandName}:`, error);

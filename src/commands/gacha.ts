@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
 import { ITEMS, RARITY_NAMES, RARITY_COLORS, ItemRarity, Item } from '../game/items';
-import { isBeta } from '../game/beta';
+import { isBeta, isSecretChannel } from '../game/beta';
 
 const GACHA_COST = 50;
 const MULTI_COST = 450;
@@ -79,7 +79,7 @@ export const prefixCommand = {
     }
 
     const action = args[0]?.toLowerCase();
-    const betaActive = isBeta();
+    const betaActive = isBeta() || isSecretChannel(message.channel.id);
 
     const gachaCost = betaActive ? BETA_1_3_COST_SINGLE : GACHA_COST;
     const multiCost = betaActive ? BETA_1_3_COST_MULTI : MULTI_COST;

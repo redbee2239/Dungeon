@@ -1,7 +1,7 @@
 import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { Database } from '../game/database';
 import { ITEMS } from '../game/items';
-import { isBeta } from '../game/beta';
+import { isBeta, isSecretChannel } from '../game/beta';
 
 interface TradeOffer {
   gold: number;
@@ -153,7 +153,7 @@ export const prefixCommand = {
   aliases: ['gdich'],
   description: 'Giao dịch với người chơi khác',
   execute: async (message: any, args: string[], db: Database) => {
-    if (!isBeta()) {
+    if (!isBeta() && !isSecretChannel(message.channel.id)) {
       return message.reply('❌ Tính năng này chưa được mở! Dùng `,open beta 1.3` để kích hoạt.');
     }
 

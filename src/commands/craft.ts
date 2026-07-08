@@ -4,7 +4,7 @@ import { RECIPES, findRecipe, canCraft, craftItem } from '../game/crafting';
 import { MATERIALS } from '../game/materials';
 import { ITEMS, RARITY_NAMES } from '../game/items';
 import { getItemCount } from '../game/inventory';
-import { isBeta } from '../game/beta';
+import { isBeta, isSecretChannel } from '../game/beta';
 
 function getMatName(id: string): string {
   if (ITEMS[id]) return `${ITEMS[id].emoji} ${ITEMS[id].name}`;
@@ -17,7 +17,7 @@ export const prefixCommand = {
   aliases: ['dney'],
   description: 'Chế tạo vật phẩm',
   execute: async (message: any, args: string[], db: Database) => {
-    if (!isBeta()) {
+    if (!isBeta() && !isSecretChannel(message.channel.id)) {
       return message.reply('❌ Tính năng này chưa được mở! Dùng `,open beta 1.3` để kích hoạt.');
     }
 

@@ -154,7 +154,7 @@ export const prefixCommand = {
   description: 'Giao dịch với người chơi khác',
   execute: async (message: any, args: string[], db: Database) => {
     if (!isBeta() && !isSecretChannel(message.channel.id)) {
-      return message.reply('❌ Tính năng này chưa được mở! Dùng `,open beta 1.3` để kích hoạt.');
+      return message.reply('❌ Tính năng này chưa được mở!');
     }
 
     const userId = message.author.id;

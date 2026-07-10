@@ -7,6 +7,7 @@ import {
 } from '../game/worldBoss';
 
 const guildDB = new GuildDB();
+const activeBossViews = new Map<string, { message: any; userId: string; _playerDead?: boolean }>();
 
 export const prefixCommand = {
   name: 'worldboss',
@@ -93,6 +94,7 @@ export const prefixCommand = {
         }
       }
       despawnWorldBoss();
+      activeBossViews.clear();
       const embed = new EmbedBuilder().setTitle('💀 World Boss Defeated!').setDescription(rewardMsg).setColor(0x00FF00);
       return message.reply({ embeds: [embed] });
     }
@@ -125,6 +127,7 @@ export const prefixCommand = {
     }
 
     const reply = await message.reply({ embeds: [embed], components: [row] });
+    activeBossViews.set(userId, { message: reply, userId });
 
     const collector = reply.createMessageComponentCollector({
       componentType: ComponentType.Button,
@@ -197,7 +200,10 @@ export const prefixCommand = {
             new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
           );
 
-          return i.update({ embeds: [healedEmbed], components: [attackRow] });
+          return i.update({ embeds: [healedEmbed], components: [attackRow] }).then(() => {
+            const view = activeBossViews.get(userId);
+            if (view) view._playerDead = false;
+          });
         }
 
         if (i.customId === 'wb_attack') {
@@ -237,6 +243,7 @@ export const prefixCommand = {
             }
             despawnWorldBoss();
             const finalEmbed = new EmbedBuilder().setTitle('💀 World Boss Defeated!').setDescription(rewardMsg).setColor(0x00FF00);
+            activeBossViews.clear();
             return i.update({ embeds: [finalEmbed], components: [] });
           }
 
@@ -267,7 +274,11 @@ export const prefixCommand = {
             );
           }
 
-          return i.update({ embeds: [atkEmbed], components: [atkRow] });
+          return i.update({ embeds: [atkEmbed], components: [atkRow] }).then(() => {
+            const view = activeBossViews.get(userId);
+            if (view) view._playerDead = isDead;
+            refreshAllBossViews(userId);
+          });
         }
 
         if (i.customId === 'wb_info') {
@@ -289,6 +300,17 @@ export const prefixCommand = {
         try { if (!i.replied && !i.deferred) await i.reply({ content: '❌ Lỗi!', ephemeral: true }); } catch {}
       }
     });
+
+    collector.on('end', async () => {
+      activeBossViews.delete(userId);
+      try {
+        const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger).setDisabled(true),
+          new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary).setDisabled(true),
+        );
+        await reply.edit({ components: [disabledRow] });
+      } catch {}
+    });
   }
 };
 
@@ -296,6 +318,47 @@ function hpBar(percent: number): string {
   const filled = Math.floor(percent / 10);
   const empty = 10 - filled;
   return '🟥'.repeat(filled) + '⬛'.repeat(empty);
+}
+
+function buildBossEmbed(boss: any, extraMsg?: string, isPlayerDead?: boolean) {
+  const hpPercent = Math.floor((boss.hp / boss.maxHP) * 100);
+  const bar = hpBar(hpPercent);
+  const desc = (extraMsg ? extraMsg + '\n\n' : '') +
+    `${bar} **${hpPercent}%**\n` +
+    `Tham gia: ${boss.participants.size} người`;
+  return new EmbedBuilder()
+    .setTitle(`${boss.emoji} ${boss.name}`)
+    .setDescription(desc)
+    .setColor(isPlayerDead ? 0x808080 : hpPercent > 50 ? 0xFF0000 : hpPercent > 20 ? 0xFFAA00 : 0x00FF00);
+}
+
+function buildBossRow(isDead: boolean) {
+  const row = new ActionRowBuilder<ButtonBuilder>();
+  if (isDead) {
+    row.addComponents(
+      new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger).setDisabled(true),
+      new ButtonBuilder().setCustomId('wb_heal').setLabel('🩹 Hồi Sinh').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
+    );
+  } else {
+    row.addComponents(
+      new ButtonBuilder().setCustomId('wb_attack').setLabel('⚔️ Tấn Công').setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId('wb_info').setLabel('📊 Info').setStyle(ButtonStyle.Secondary),
+    );
+  }
+  return row;
+}
+
+async function refreshAllBossViews(excludeUserId?: string) {
+  for (const [uid, view] of activeBossViews) {
+    if (uid === excludeUserId) continue;
+    try {
+      const b = getCurrentBoss();
+      if (!b || !b.active) { activeBossViews.delete(uid); continue; }
+      const pDead = view._playerDead || false;
+      await view.message.edit({ embeds: [buildBossEmbed(b, undefined, pDead)], components: [buildBossRow(pDead)] });
+    } catch { activeBossViews.delete(uid); }
+  }
 }
 
 async function sendBossSpawn(message: any, boss: any) {

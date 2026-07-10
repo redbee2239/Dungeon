@@ -28,11 +28,14 @@ interface CombatData {
   active: boolean;
   skillUsage: Record<string, number>;
   summon: Summon | null;
+  summonUsed: boolean;
   events: ActiveEvents;
   stunTurns: number;
   buffs: CombatBuff[];
   debuffs: CombatBuff[];
   potionUsed: number;
+  totalMonsters: number;
+  currentMonster: number;
 }
 
 const SKILL_LIMIT = 3;
@@ -116,7 +119,7 @@ export const prefixCommand = {
     const monster = monsters[0];
     const monsterQueue = monsters.slice(1);
 
-    activeCombats.set(userId, { monster, monsterQueue, floor, active: true, skillUsage: {}, summon: null, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [], potionUsed: 0 });
+    activeCombats.set(userId, { monster, monsterQueue, floor, active: true, skillUsage: {}, summon: null, summonUsed: false, events: createActiveEvents(), stunTurns: 0, buffs: [], debuffs: [], potionUsed: 0, totalMonsters: monsters.length, currentMonster: 1 });
 
     const bonus = calculateBonusStats(player.inventory, player.equippedPet);
     const totalHP = player.stats.maxHP + bonus.hp;
@@ -325,6 +328,7 @@ export const prefixCommand = {
           if (result.monsterDied) {
             if (combatData.monsterQueue.length > 0) {
               combatData.monster = combatData.monsterQueue.shift()!;
+              combatData.currentMonster++;
               combatData.skillUsage = {};
               const nextMsg = `${fullMsg}\n\n⚔️ **Quái tiếp theo:** ${combatData.monster.emoji} ${combatData.monster.name} (${combatData.monster.hp}/${combatData.monster.maxHP} HP)`;
               const embed = buildCombatEmbed(player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus);
@@ -429,7 +433,7 @@ export const prefixCommand = {
               limitedSkills.map(s => {
                 const used = combatData.skillUsage[s.id] || 0;
                 const limit = isSummoner ? SUMMONER_SKILL_LIMIT : SKILL_LIMIT;
-                const mpCost = isSummoner ? s.manaCost * 3 : s.manaCost;
+                const mpCost = isSummoner ? s.manaCost * 1.5 : s.manaCost;
                 const isSummonSkill = SUMMON_SKILL_IDS.includes(s.id);
                 const label = isSummonSkill ? `${s.emoji} ${s.name} (${mpCost} MP) [${limit - used}]` : `${s.name} (${mpCost} MP) [${limit - used}]`;
                 return {
@@ -462,7 +466,7 @@ export const prefixCommand = {
 
           const skillId = si.values[0];
           const skill = availableSkills.find(s => s.id === skillId);
-          const mpMultiplier = isSummoner ? 3 : 1;
+          const mpMultiplier = isSummoner ? 1.5 : 1;
 
           if (skill && player.stats.mp >= skill.manaCost * mpMultiplier) {
             player.stats.mp -= skill.manaCost * mpMultiplier;
@@ -470,15 +474,16 @@ export const prefixCommand = {
 
             // Handle summon creation
             if (SUMMON_SKILL_IDS.includes(skillId)) {
-              if (!combatData.summon || combatData.summon.hp <= 0) {
+              if (!combatData.summonUsed) {
                 combatData.summon = createSummon(skillId, player.stats.level, bonus.summonBoost);
+                combatData.summonUsed = true;
                 if (combatData.summon) {
                   await showCombatStatus(i, player, combatData.monster, `${combatData.summon.emoji} **${combatData.summon.name}** (Lv.${combatData.summon.level}) đã được triệu hồi!\n❤️ HP: ${combatData.summon.hp}/${combatData.summon.maxHP} | ⚔️ ATK: ${combatData.summon.attack}`, combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus, combatData);
                   skillCollector.stop();
                   return;
                 }
               } else {
-                await showCombatStatus(i, player, combatData.monster, '❌ Đã có triệu hồi trên sân! Triệu hồi khác khi nó chết.', combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus, combatData);
+                await showCombatStatus(i, player, combatData.monster, '❌ Đã triệu hồi rồi! Chỉ được 1 lần mỗi dungeon.', combatData.skillUsage, combatData.summon, combatData.events, undefined, bonus, combatData);
                 skillCollector.stop();
                 return;
               }
@@ -511,7 +516,7 @@ export const prefixCommand = {
       }
 
       const isSummoner = player.characterClass === 'summoner';
-      const mpMultiplier = isSummoner ? 3 : 1;
+      const mpMultiplier = isSummoner ? 1.5 : 1;
       const result = executeCombatRound(player.stats, combatData.monster, undefined, getBonusWithBuffs(), combatData.summon, mpMultiplier, combatData.events, combatData.stunTurns);
       combatData.stunTurns = result.stunTurns;
 
@@ -555,6 +560,7 @@ async function processResult(i: any, player: any, combatData: CombatData, db: Da
   if (result.monsterDied) {
     if (combatData.monsterQueue.length > 0) {
       combatData.monster = combatData.monsterQueue.shift()!;
+      combatData.currentMonster++;
       combatData.skillUsage = {};
       const nextMsg = `${msg}\n\n⚔️ **Quái tiếp theo:** ${combatData.monster.emoji} ${combatData.monster.name} (${combatData.monster.hp}/${combatData.monster.maxHP} HP)`;
       await showCombatStatus(i, player, combatData.monster, nextMsg, combatData.skillUsage, combatData.summon, combatData.events, undefined, cachedBonus, combatData);
@@ -744,6 +750,7 @@ function buildCombatEmbed(player: any, monster: Monster, extraMessage?: string, 
   // Monster section
   description += `**${monster.emoji} ${monster.name}** (Lv.${monster.level})`;
   if (monster.isBoss) description += ' **[BOSS]**';
+  description += ` | Quái ${combatData?.currentMonster || 1}/${combatData?.totalMonsters || 1}`;
   description += `\n`;
   description += `❤️ ${monster.hp}/${monster.maxHP} ${monsterBar}\n`;
   description += `⚔️ ${monsterATK} | 🛡️ ${monsterDEF} | 💨 ${monsterSPD}`;

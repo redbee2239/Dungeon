@@ -1,4 +1,4 @@
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { Database } from '../game/database';
 import { getQuestById, shouldResetDaily, shouldResetWeekly, resetDailyQuests, resetWeeklyQuests, Quest, isWeekend, getDailyMultiplier } from '../game/quests';
 
@@ -42,7 +42,22 @@ export const prefixCommand = {
     const action = args[0]?.toLowerCase();
 
     if (action === 'claim' || action === 'nhan') {
-      return claimQuests(message, player, db);
+      const result = await claimQuests(message, player, db);
+      if (!result) {
+        return message.reply('❌ Không có quest nào cần nhận thưởng!');
+      }
+      const weekendBonus = isWeekend() ? '\n🎉 **T7/CN x2 Daily rewards!**' : '';
+      const embed = new EmbedBuilder()
+        .setTitle('🎁 Nhận Thưởng Nhiệm Vụ!')
+        .setDescription(
+          `Đã nhận **${result.claimed}** quest:\n` +
+          (result.gold > 0 ? `💰 +${result.gold} Gold\n` : '') +
+          (result.gems > 0 ? `💎 +${result.gems} Gem\n` : '') +
+          (result.exp > 0 ? `⭐ +${result.exp} EXP\n` : '') +
+          weekendBonus
+        )
+        .setColor(0x00FF00);
+      return message.reply({ embeds: [embed] });
     }
 
     const embed = new EmbedBuilder()
@@ -96,14 +111,55 @@ export const prefixCommand = {
       row.addComponents(
         new ButtonBuilder().setCustomId('quest_claim').setLabel('🎁 Nhận Thưởng').setStyle(ButtonStyle.Success)
       );
-      return message.reply({ embeds: [embed], components: [row] });
+      const reply = await message.reply({ embeds: [embed], components: [row] });
+
+      const collector = reply.createMessageComponentCollector({
+        componentType: ComponentType.Button,
+        time: 60000
+      });
+
+      collector.on('collect', async (i: any) => {
+        if (i.user.id !== userId) {
+          return i.reply({ content: '❌ Đây không phải quest của bạn!', ephemeral: true });
+        }
+
+        if (i.customId === 'quest_claim') {
+          await i.deferUpdate();
+          const result = await claimQuests(message, player, db);
+          if (result) {
+            const weekendBonus = isWeekend() ? '\n🎉 **T7/CN x2 Daily rewards!**' : '';
+            const rewardEmbed = new EmbedBuilder()
+              .setTitle('🎁 Nhận Thưởng Nhiệm Vụ!')
+              .setDescription(
+                `Đã nhận **${result.claimed}** quest:\n` +
+                (result.gold > 0 ? `💰 +${result.gold} Gold\n` : '') +
+                (result.gems > 0 ? `💎 +${result.gems} Gem\n` : '') +
+                (result.exp > 0 ? `⭐ +${result.exp} EXP\n` : '') +
+                weekendBonus
+              )
+              .setColor(0x00FF00);
+            await i.followUp({ embeds: [rewardEmbed] });
+          }
+          collector.stop();
+        }
+      });
+
+      collector.on('end', async () => {
+        const disabledRow = new ActionRowBuilder<ButtonBuilder>();
+        disabledRow.addComponents(
+          new ButtonBuilder().setCustomId('quest_claim').setLabel('✅ Đã Nhận').setStyle(ButtonStyle.Secondary).setDisabled(true)
+        );
+        await message.reply({ embeds: [embed], components: [disabledRow] }).catch(() => {});
+      });
+
+      return;
     }
 
     message.reply({ embeds: [embed] });
   }
 };
 
-async function claimQuests(message: any, player: any, db: Database) {
+async function claimQuests(message: any, player: any, db: Database): Promise<{ claimed: number; gold: number; gems: number; exp: number } | null> {
   let totalGold = 0;
   let totalGems = 0;
   let totalExp = 0;
@@ -121,9 +177,7 @@ async function claimQuests(message: any, player: any, db: Database) {
     claimed++;
   }
 
-  if (claimed === 0) {
-    return message.reply('❌ Không có quest nào cần nhận thưởng!');
-  }
+  if (claimed === 0) return null;
 
   if (totalGold > 0) await db.addGold(player, totalGold);
   if (totalGems > 0) await db.addGems(player, totalGems);
@@ -131,18 +185,5 @@ async function claimQuests(message: any, player: any, db: Database) {
 
   await db.updatePlayer(player);
 
-  const weekendBonus = isWeekend() ? '\n🎉 **T7/CN x2 Daily rewards!**' : '';
-
-  const embed = new EmbedBuilder()
-    .setTitle('🎁 Nhận Thưởng Nhiệm Vụ!')
-    .setDescription(
-      `Đã nhận **${claimed}** quest:\n` +
-      (totalGold > 0 ? `💰 +${totalGold} Gold\n` : '') +
-      (totalGems > 0 ? `💎 +${totalGems} Gem\n` : '') +
-      (totalExp > 0 ? `⭐ +${totalExp} EXP\n` : '') +
-      weekendBonus
-    )
-    .setColor(0x00FF00);
-
-  message.reply({ embeds: [embed] });
+  return { claimed, gold: totalGold, gems: totalGems, exp: totalExp };
 }

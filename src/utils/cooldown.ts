@@ -23,6 +23,14 @@ export function hasCooldown(userId: string, command: string): boolean {
   return getCooldown(userId, command) > 0;
 }
 
+export function clearCooldown(userId: string): void {
+  for (const key of cooldowns.keys()) {
+    if (key.startsWith(`${userId}:`)) {
+      cooldowns.delete(key);
+    }
+  }
+}
+
 export function formatCooldown(seconds: number): string {
   if (seconds <= 0) return '';
   if (seconds < 60) return `${seconds} giây`;

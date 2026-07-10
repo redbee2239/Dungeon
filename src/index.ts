@@ -5,8 +5,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import { Database } from './game/database';
-import { setCooldown, getCooldown, hasCooldown, formatCooldown } from './utils/cooldown';
+import { setCooldown, getCooldown, formatCooldown } from './utils/cooldown';
 import { isSecretChannel } from './game/beta';
+import { loadAdminConfig, isUserBanned, isCommandDisabled, isSystemEnabled, trackCommand, trackMessage, trackError } from './game/adminState';
 
 config();
 
@@ -110,23 +111,32 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const command = slashCommands.get(interaction.commandName);
   if (!command) return;
 
+  if (isUserBanned(interaction.user.id)) {
+    return interaction.reply({ content: '❌ Bạn đã bị chặn sử dụng lệnh!', ephemeral: true });
+  }
+  if (isCommandDisabled(interaction.commandName)) {
+    return interaction.reply({ content: '❌ Lệnh này đang bị tắt!', ephemeral: true });
+  }
+
   const cooldownTime = command.cooldown || COOLDOWN_SECONDS;
   const remaining = getCooldown(interaction.user.id, interaction.commandName);
   
-  if (!isSecretChannel(interaction.channelId) && remaining > 0) {
+  if (isSystemEnabled('cooldown') && !isSecretChannel(interaction.channelId) && remaining > 0) {
     return interaction.reply({
       content: `⏰ Vui lòng đợi **${formatCooldown(remaining)}** nữa!`,
       ephemeral: true
     });
   }
 
-  if (!isSecretChannel(interaction.channelId)) {
+  if (isSystemEnabled('cooldown') && !isSecretChannel(interaction.channelId)) {
     setCooldown(interaction.user.id, interaction.commandName, cooldownTime);
   }
 
   try {
+    trackCommand(interaction.commandName);
     await command.execute(interaction, db);
   } catch (error) {
+    trackError();
     console.error(`Error executing ${interaction.commandName}:`, error);
     const reply = { content: '❌ Có lỗi xảy ra!', ephemeral: true };
     if (interaction.replied || interaction.deferred) {
@@ -139,6 +149,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
+  trackMessage();
   if (!message.content.startsWith(PREFIX)) return;
 
   const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
@@ -152,21 +163,26 @@ client.on('messageCreate', async (message) => {
   const command = prefixCommands.get(commandName);
   if (!command) return;
 
+  if (isUserBanned(message.author.id)) return;
+  if (commandName !== 'admin' && isCommandDisabled(commandName)) return;
+
   const cooldownTime = command.cooldown || COOLDOWN_SECONDS;
   const remaining = getCooldown(message.author.id, commandName);
   
-  if (!isSecretChannel(message.channel.id) && remaining > 0) {
+  if (isSystemEnabled('cooldown') && !isSecretChannel(message.channel.id) && remaining > 0) {
     const msg = await message.reply(`⏰ Vui lòng đợi **${formatCooldown(remaining)}** nữa!`);
     setTimeout(() => msg.delete().catch(() => {}), 3000);
     return;
   }
 
   try {
-    if (!isSecretChannel(message.channel.id)) {
+    if (isSystemEnabled('cooldown') && !isSecretChannel(message.channel.id)) {
       setCooldown(message.author.id, commandName, cooldownTime);
     }
+    trackCommand(commandName);
     await command.execute(message, args, db);
   } catch (error) {
+    trackError();
     console.error(`Error executing ${commandName}:`, error);
     message.reply('❌ Có lỗi xảy ra!');
   }
@@ -217,6 +233,8 @@ async function start() {
   }
 
   await db.connect(mongoUri);
+  await loadAdminConfig();
+  console.log('✅ Admin config loaded');
 
   app.listen(PORT, () => {
     console.log(`🌐 Web server running on port ${PORT}`);
@@ -241,6 +259,7 @@ async function start() {
 }
 
 process.on('unhandledRejection', (error) => {
+  trackError();
   console.error('❌ Unhandled rejection:', error);
 });
 

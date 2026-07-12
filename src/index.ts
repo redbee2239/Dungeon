@@ -9,6 +9,11 @@ import { setCooldown, getCooldown, formatCooldown } from './utils/cooldown';
 import { isSecretChannel } from './game/beta';
 import { loadAdminConfig, isUserBanned, isCommandDisabled, isSystemEnabled, trackCommand, trackMessage, trackError, isPaused } from './game/adminState';
 
+function isAdminChannel(channelId: string): boolean {
+  const id = process.env.ADMIN_CHANNEL_ID?.trim();
+  return !!id && channelId === id;
+}
+
 config();
 
 const PREFIX = ',';
@@ -105,7 +110,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
-  if (!isSecretChannel(interaction.channelId) && allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(interaction.channelId)) {
+  if (!isSecretChannel(interaction.channelId) && !isAdminChannel(interaction.channelId) && allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(interaction.channelId)) {
     return interaction.reply({
       content: '❌ Chỉ có thể sử dụng lệnh trong kênh được chỉ định!',
       ephemeral: true
@@ -157,7 +162,7 @@ client.on('messageCreate', async (message) => {
   if (!message.content.startsWith(PREFIX)) return;
 
   const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
-  if (!isSecretChannel(message.channel.id) && allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(message.channel.id)) return;
+  if (!isSecretChannel(message.channel.id) && !isAdminChannel(message.channel.id) && allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(message.channel.id)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift()?.toLowerCase();

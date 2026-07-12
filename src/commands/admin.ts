@@ -3,7 +3,7 @@ import { Database } from '../game/database';
 import {
   loadAdminConfig, getAdminConfig, toggleSystem, isSystemEnabled,
   toggleCommand, isCommandDisabled, banUser, unbanUser, isUserBanned,
-  getStats
+  getStats, isPaused, setPaused
 } from '../game/adminState';
 import { ITEMS } from '../game/items';
 import { addItem } from '../game/inventory';
@@ -59,6 +59,8 @@ export const prefixCommand = {
         .setColor(0xFF4500)
         .setDescription(
           '**Hệ thống:**\n' +
+          '`,admin pause` — Tạm dừng bot (chỉ admin dùng được)\n' +
+          '`,admin resume` — Tiếp tục bot\n' +
           '`,admin toggle <system>` — Bật/tắt hệ thống\n' +
           '`,admin systems` — Xem trạng thái hệ thống\n\n' +
           '**Lệnh:**\n' +
@@ -81,6 +83,16 @@ export const prefixCommand = {
           '`,admin broadcast <tin nhắn>` — Gửi tin nhắn'
         );
       return message.reply({ embeds: [embed] });
+    }
+
+    // ─── PAUSE / RESUME ───
+    if (sub === 'pause') {
+      await setPaused(true);
+      return message.reply('⏸️ Bot đã **tạm dừng**. Dùng `,admin resume` để tiếp tục.');
+    }
+    if (sub === 'resume') {
+      await setPaused(false);
+      return message.reply('▶️ Bot đã **tiếp tục** hoạt động.');
     }
 
     // ─── SYSTEMS ───

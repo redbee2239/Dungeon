@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAdminConfig extends Document {
+  paused: boolean;
   systems: {
     beta: boolean;
     event: boolean;
@@ -14,6 +15,7 @@ export interface IAdminConfig extends Document {
 }
 
 const AdminConfigSchema = new Schema<IAdminConfig>({
+  paused: { type: Boolean, default: false },
   systems: {
     beta: { type: Boolean, default: false },
     event: { type: Boolean, default: true },
@@ -46,6 +48,18 @@ export function getAdminConfig(): IAdminConfig {
 export async function saveAdminConfig(): Promise<void> {
   if (!config) return;
   await config.save();
+}
+
+// Pause system
+export function isPaused(): boolean {
+  if (!config) return false;
+  return config.paused;
+}
+
+export async function setPaused(value: boolean): Promise<void> {
+  if (!config) throw new Error('AdminConfig not loaded');
+  config.paused = value;
+  await saveAdminConfig();
 }
 
 // System toggles

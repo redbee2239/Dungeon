@@ -7,7 +7,7 @@ import * as https from 'https';
 import { Database } from './game/database';
 import { setCooldown, getCooldown, formatCooldown } from './utils/cooldown';
 import { isSecretChannel } from './game/beta';
-import { loadAdminConfig, isUserBanned, isCommandDisabled, isSystemEnabled, trackCommand, trackMessage, trackError } from './game/adminState';
+import { loadAdminConfig, isUserBanned, isCommandDisabled, isSystemEnabled, trackCommand, trackMessage, trackError, isPaused } from './game/adminState';
 
 config();
 
@@ -100,6 +100,10 @@ client.on('error', (err) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
+  if (isPaused()) {
+    return interaction.reply({ content: '⏸️ Bot đang tạm dừng!', ephemeral: true });
+  }
+
   const allowedChannelIds = process.env.CHANNEL_ID?.split(',').map(id => id.trim());
   if (!isSecretChannel(interaction.channelId) && allowedChannelIds && allowedChannelIds.length > 0 && !allowedChannelIds.includes(interaction.channelId)) {
     return interaction.reply({
@@ -164,6 +168,7 @@ client.on('messageCreate', async (message) => {
   if (!command) return;
 
   if (isUserBanned(message.author.id)) return;
+  if (isPaused() && commandName !== 'admin') return;
   if (commandName !== 'admin' && isCommandDisabled(commandName)) return;
 
   const cooldownTime = command.cooldown || COOLDOWN_SECONDS;

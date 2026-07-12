@@ -13,6 +13,14 @@ import { activateBeta, deactivateBeta } from '../game/beta';
 
 const OWNER_ID = '1185140041022976083';
 
+const ALL_COMMANDS = [
+  'afk', 'autosell', 'balance', 'changeclass', 'chest', 'craft', 'create',
+  'dungeon', 'equip', 'event', 'gacha', 'gift', 'give', 'gopy', 'guild',
+  'heal', 'help', 'inventory', 'leaderboard', 'learn', 'open', 'pet',
+  'poison', 'profile', 'quest', 'shop', 'skills', 'stat', 'trade',
+  'unequip', 'worldboss'
+];
+
 function isAdminChannel(message: any): boolean {
   const adminChannelId = process.env.ADMIN_CHANNEL_ID?.trim();
   if (!adminChannelId) return false;
@@ -52,36 +60,51 @@ export const prefixCommand = {
 
     const sub = args[0]?.toLowerCase();
 
-    // ─── HELP ───
+    // ─── HELP / DASHBOARD ───
     if (!sub || sub === 'help') {
+      const config = getAdminConfig();
+      const stats = getStats();
+      const systems = config.systems as Record<string, boolean>;
+      const paused = isPaused();
+
+      const systemLines = Object.entries(systems).map(([k, v]) =>
+        `${v ? '🟢' : '🔴'} ${k}`
+      ).join('  ');
+
+      const disabledList = config.disabledCommands.length > 0
+        ? config.disabledCommands.map(c => `\`${c}\``).join(', ')
+        : 'Không có';
+
+      const bannedList = config.bannedUsers.length > 0
+        ? config.bannedUsers.map(id => `<@${id}>`).join(', ')
+        : 'Không có';
+
+      const boss = getCurrentBoss();
+      const bossStatus = boss?.active
+        ? `${boss.emoji} ${boss.name} — HP: ${boss.hp.toLocaleString()}/${boss.maxHP.toLocaleString()}`
+        : 'Không có';
+
       const embed = new EmbedBuilder()
-        .setTitle('🛠️ Admin Console')
-        .setColor(0xFF4500)
+        .setTitle('🛠️ Admin Dashboard')
+        .setColor(paused ? 0xFF0000 : 0x2ECC71)
         .setDescription(
-          '**Hệ thống:**\n' +
-          '`,admin pause` — Tạm dừng bot (chỉ admin dùng được)\n' +
-          '`,admin resume` — Tiếp tục bot\n' +
-          '`,admin toggle <system>` — Bật/tắt hệ thống\n' +
-          '`,admin systems` — Xem trạng thái hệ thống\n\n' +
-          '**Lệnh:**\n' +
-          '`,admin cmd disable <tên>` — Tắt lệnh\n' +
-          '`,admin cmd enable <tên>` — Bật lệnh\n' +
-          '`,admin cmd list` — Danh sách lệnh bị tắt\n\n' +
-          '**Player:**\n' +
-          '`,admin player info <@user>` — Xem thông tin\n' +
-          '`,admin player give <@user> gold|gems <số>` — Cho资源\n' +
-          '`,admin player give <@user> item <item_id> [số]` — Cho item\n' +
-          '`,admin player reset <@user>` — Reset nhân vật\n' +
-          '`,admin player ban <@user>` — Chặn lệnh\n' +
-          '`,admin player unban <@user>` — Bỏ chặn\n\n' +
-          '**Boss:**\n' +
-          '`,admin boss spawn` — Spawn world boss\n' +
-          '`,admin boss kill` — Kill boss hiện tại\n\n' +
-          '**Khác:**\n' +
-          '`,admin stats` — Thống kê\n' +
-          '`,admin cooldown <@user>` — Xóa cooldown\n' +
-          '`,admin broadcast <tin nhắn>` — Gửi tin nhắn'
-        );
+          `**Trạng thái:** ${paused ? '⏸️ Tạm dừng' : '▶️ Hoạt động'}\n\n` +
+          `**Hệ thống:** ${systemLines}\n\n` +
+          `**Lệnh bị tắt:** ${disabledList}\n\n` +
+          `**Banned:** ${bannedList}\n\n` +
+          `**World Boss:** ${bossStatus}\n\n` +
+          `**Thống kê (từ khi restart):**\n` +
+          `Uptime: ${formatUptime(stats.uptime)} | Players: ${(await db.getAllPlayers()).length}\n` +
+          `Lệnh: ${stats.totalCommands} | Messages: ${stats.messagesProcessed} | Errors: ${stats.errors}`
+        )
+        .addFields(
+          { name: '🔧 Hệ thống', value: '`,admin toggle <tên>` — Bật/tắt\n`,admin pause/resume` — Tạm dừng/tiếp tục', inline: true },
+          { name: '📋 Lệnh', value: '`,admin cmd disable/enable <tên>`\n`,admin cmd list` — Xem tắt', inline: true },
+          { name: '👤 Player', value: '`,admin player info/give/reset/ban/unban <@user>`', inline: true },
+          { name: '🐉 Boss', value: '`,admin boss spawn/kill`', inline: true },
+          { name: '📊 Khác', value: '`,admin stats` — Chi tiết\n`,admin cooldown <@user>`\n`,admin broadcast <tin nhắn>`', inline: true }
+        )
+        .setFooter({ text: 'Dùng ,admin help để hiện lại dashboard' });
       return message.reply({ embeds: [embed] });
     }
 

@@ -20,3 +20,7 @@ services:
         sync: false
       - key: SECRET_CHANNEL_ID
         sync: false
+      - key: ADMIN_CHANNEL_ID
+        sync: false
+      - key: CLIENT_ID
+        sync: false

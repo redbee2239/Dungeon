@@ -102,6 +102,7 @@ export const prefixCommand = {
           { name: '📋 Lệnh', value: '`,admin cmd disable/enable <tên>`\n`,admin cmd list` — Xem tắt', inline: true },
           { name: '👤 Player', value: '`,admin player info/give/reset/ban/unban <@user>`', inline: true },
           { name: '🐉 Boss', value: '`,admin boss spawn/kill`', inline: true },
+          { name: '⚠️ Danger', value: '`,admin resetall confirm` — Xóa toàn bộ data', inline: true },
           { name: '📊 Khác', value: '`,admin stats` — Chi tiết\n`,admin cooldown <@user>`\n`,admin broadcast <tin nhắn>`', inline: true }
         )
         .setFooter({ text: 'Dùng ,admin help để hiện lại dashboard' });
@@ -312,6 +313,17 @@ export const prefixCommand = {
       if (!targetId) return message.reply('❌ Tag người chơi: `,admin cooldown <@user>`');
       clearCooldown(targetId);
       return message.reply(`✅ Đã xóa cooldown của **${targetId}**`);
+    }
+
+    // ─── RESET ALL ───
+    if (sub === 'resetall') {
+      const confirm = args[1]?.toLowerCase();
+      if (confirm !== 'confirm') {
+        return message.reply('⚠️ **CẢNH BÁO:** Thao tác này sẽ xóa TOÀN BỘ dữ liệu players!\nDùng `,admin resetall confirm` để xác nhận.');
+      }
+      const { PlayerModel } = require('../game/playerModel');
+      const result = await PlayerModel.deleteMany({});
+      return message.reply(`✅ Đã xóa **${result.deletedCount}** player.`);
     }
 
     // ─── BROADCAST ───

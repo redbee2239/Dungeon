@@ -42,6 +42,7 @@ export interface IPlayer extends Document {
     startTime: number;
   };
   skillPoints: number;
+  statPointsUsed: number;
   unlockedSkills: string[];
   equippedSkill: string | null;
   totalMonstersKilled: number;
@@ -116,6 +117,7 @@ const PlayerSchema = new Schema<IPlayer>({
     startTime: { type: Number, default: 0 }
   },
   skillPoints: { type: Number, default: 0 },
+  statPointsUsed: { type: Number, default: 0 },
   unlockedSkills: [String],
   equippedSkill: { type: String, default: null },
   totalMonstersKilled: { type: Number, default: 0 },

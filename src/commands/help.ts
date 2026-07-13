@@ -45,7 +45,8 @@ export const prefixCommand = {
             value: [
               '`stat` - Xem/nâng chỉ số',
               '`stat atk 3` - ATK +6',
-              '`stat spd` - Nâng speed'
+              '`stat spd` - Nâng speed',
+              '`stat reset` - Reset chỉ số (200 💎)'
             ].join('\n'),
             inline: true
           },

@@ -34,6 +34,7 @@ export interface Player {
     startTime: number;
   };
   skillPoints: number;
+  statPointsUsed: number;
   unlockedSkills: string[];
   equippedSkill: string | null;
   totalMonstersKilled: number;
@@ -87,6 +88,7 @@ function docToPlayer(doc: IPlayer): Player {
     },
     dungeon: doc.dungeon,
     skillPoints: doc.skillPoints,
+    statPointsUsed: doc.statPointsUsed || 0,
     unlockedSkills: doc.unlockedSkills,
     equippedSkill: doc.equippedSkill,
     totalMonstersKilled: doc.totalMonstersKilled,

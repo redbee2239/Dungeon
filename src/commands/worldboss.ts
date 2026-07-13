@@ -58,7 +58,7 @@ export const prefixCommand = {
         )
         .addFields(
           { name: '🏆 Top Damage', value: topList || 'Chưa ai tấn công', inline: false },
-          { name: '🎁 Phần Thưởng', value: `💰 ${boss.rewards.gold.toLocaleString()} Gold | 💎 ${boss.rewards.gems} Gem | 🪙 ${boss.rewards.summerCoins} Summer Coin`, inline: false }
+          { name: '🎁 Phần Thưởng', value: `💰 ${boss.rewards.gold.toLocaleString()} Gold | 💎 ${boss.rewards.gems} Gem`, inline: false }
         )
         .setColor(0xFF0000);
 
@@ -80,10 +80,9 @@ export const prefixCommand = {
           if (p) {
             const share = Math.floor(rewards.gold * (entry.damage / boss.maxHP));
             const gemShare = Math.floor(rewards.gems * (entry.damage / boss.maxHP));
-            const coinShare = Math.floor(rewards.summerCoins * (entry.damage / boss.maxHP));
+            const coinShare = Math.floor(rewards.gems * (entry.damage / boss.maxHP));
             await db.addGold(p, Math.max(100, share));
             await db.addGems(p, Math.max(5, gemShare));
-            p.summerCoins = (p.summerCoins || 0) + Math.max(5, coinShare);
             await db.updatePlayer(p);
           }
         }
@@ -228,10 +227,9 @@ export const prefixCommand = {
                 if (playerData) {
                   const share = Math.floor(rewards.gold * (entry.damage / b.maxHP));
                   const gemShare = Math.floor(rewards.gems * (entry.damage / b.maxHP));
-                  const coinShare = Math.floor(rewards.summerCoins * (entry.damage / b.maxHP));
+                  const coinShare = Math.floor(rewards.gems * (entry.damage / b.maxHP));
                   await db.addGold(playerData, Math.max(100, share));
                   await db.addGems(playerData, Math.max(5, gemShare));
-                  playerData.summerCoins = (playerData.summerCoins || 0) + Math.max(5, coinShare);
                   await db.updatePlayer(playerData);
                 }
               }
@@ -368,7 +366,7 @@ async function sendBossSpawn(message: any, boss: any) {
       `**HP:** ${boss.maxHP.toLocaleString()}\n` +
       `**ATK:** ${boss.attack} | **DEF:** ${boss.defense}\n\n` +
       'Dùng `,worldboss` để tấn công!\n' +
-      `Phần thưởng: 💰${boss.rewards.gold.toLocaleString()} Gold | 💎${boss.rewards.gems} Gem | 🪙${boss.rewards.summerCoins} Summer Coin`
+      `Phần thưởng: 💰${boss.rewards.gold.toLocaleString()} Gold | 💎${boss.rewards.gems} Gem`
     )
     .setColor(0xFF0000);
 

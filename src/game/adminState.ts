@@ -4,7 +4,6 @@ export interface IAdminConfig extends Document {
   paused: boolean;
   systems: {
     beta: boolean;
-    event: boolean;
     worldboss: boolean;
     crafting: boolean;
     gacha: boolean;
@@ -18,7 +17,6 @@ const AdminConfigSchema = new Schema<IAdminConfig>({
   paused: { type: Boolean, default: false },
   systems: {
     beta: { type: Boolean, default: false },
-    event: { type: Boolean, default: true },
     worldboss: { type: Boolean, default: true },
     crafting: { type: Boolean, default: false },
     gacha: { type: Boolean, default: true },

@@ -66,7 +66,7 @@ const client = new Client({
     GatewayIntentBits.MessageContent
   ],
   rest: { timeout: 60000 },
-  presence: { activities: [{ name: ',help | Mùa Hè Bùng Nổ', type: ActivityType.Playing }] }
+  presence: { activities: [{ name: ',help | Dungeon Crawler', type: ActivityType.Playing }] }
 });
 
 client.once(Events.ClientReady, async (readyClient) => {

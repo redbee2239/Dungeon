@@ -15,7 +15,7 @@ const OWNER_ID = '1185140041022976083';
 
 const ALL_COMMANDS = [
   'afk', 'autosell', 'balance', 'changeclass', 'chest', 'craft', 'create',
-  'dungeon', 'equip', 'event', 'gacha', 'gift', 'give', 'gopy', 'guild',
+  'dungeon', 'equip', 'gacha', 'gift', 'give', 'gopy', 'guild',
   'heal', 'help', 'inventory', 'leaderboard', 'learn', 'open', 'pet',
   'poison', 'profile', 'quest', 'shop', 'skills', 'stat', 'trade',
   'unequip', 'worldboss'
@@ -135,7 +135,7 @@ export const prefixCommand = {
 
     if (sub === 'toggle') {
       const systemName = args[1]?.toLowerCase();
-      const validSystems = ['beta', 'event', 'worldboss', 'crafting', 'gacha', 'cooldown'];
+      const validSystems = ['beta', 'worldboss', 'crafting', 'gacha', 'cooldown'];
       if (!systemName || !validSystems.includes(systemName)) {
         return message.reply(`❌ Hệ thống hợp lệ: ${validSystems.join(', ')}`);
       }

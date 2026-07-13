@@ -15,7 +15,6 @@ export interface WorldBoss {
   rewards: {
     gold: number;
     gems: number;
-    summerCoins: number;
   };
   participants: Map<string, { damage: number; lastAttack: number }>;
   active: boolean;
@@ -32,7 +31,7 @@ const WORLD_BOSS_TEMPLATES: Omit<WorldBoss, 'hp' | 'participants' | 'active' | '
     attack: 200,
     defense: 100,
     speed: 80,
-    rewards: { gold: 5000, gems: 200, summerCoins: 100 },
+    rewards: { gold: 5000, gems: 200 },
   },
   {
     id: 'world_demon',
@@ -43,7 +42,7 @@ const WORLD_BOSS_TEMPLATES: Omit<WorldBoss, 'hp' | 'participants' | 'active' | '
     attack: 180,
     defense: 90,
     speed: 85,
-    rewards: { gold: 4000, gems: 150, summerCoins: 80 },
+    rewards: { gold: 4000, gems: 150 },
   },
   {
     id: 'world_golem',
@@ -54,7 +53,7 @@ const WORLD_BOSS_TEMPLATES: Omit<WorldBoss, 'hp' | 'participants' | 'active' | '
     attack: 150,
     defense: 150,
     speed: 40,
-    rewards: { gold: 4500, gems: 180, summerCoins: 90 },
+    rewards: { gold: 4500, gems: 180 },
   },
 ];
 
@@ -127,7 +126,7 @@ export function attackWorldBoss(
   return { damage, killed, message: msg, isCrit, bossDamage, playerDied };
 }
 
-export function getBossRewards(): { gold: number; gems: number; summerCoins: number } | null {
+export function getBossRewards(): { gold: number; gems: number } | null {
   if (!currentBoss) return null;
   return currentBoss.rewards;
 }

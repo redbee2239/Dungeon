@@ -62,14 +62,6 @@ export interface Player {
     weeklyLastReset: number;
   };
   expBoostCharges: number;
-  summerCoins: number;
-  summerEvent: {
-    consecutiveDays: number;
-    lastDailyLogin: number;
-    claimedCode: boolean;
-    minigameLastPlay: number;
-    minigameWins: number;
-  };
   createdAt: Date;
   lastActive: Date;
 }
@@ -108,14 +100,6 @@ function docToPlayer(doc: IPlayer): Player {
     afk: doc.afk || { isAfk: false, startTime: 0 },
     quests: doc.quests || { daily: [], dailyLastReset: 0, weekly: [], weeklyLastReset: 0 },
     expBoostCharges: doc.expBoostCharges || 0,
-    summerCoins: doc.summerCoins || 0,
-    summerEvent: doc.summerEvent || {
-      consecutiveDays: 0,
-      lastDailyLogin: 0,
-      claimedCode: false,
-      minigameLastPlay: 0,
-      minigameWins: 0,
-    },
     createdAt: doc.createdAt,
     lastActive: doc.lastActive
   };
@@ -200,8 +184,6 @@ export class Database {
         afk: player.afk,
         quests: player.quests,
         expBoostCharges: player.expBoostCharges,
-        summerCoins: player.summerCoins,
-        summerEvent: player.summerEvent,
         lastActive: new Date()
       }
     );

@@ -1,22 +1,18 @@
 import { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { Database } from '../game/database';
-import { ITEMS, RARITY_NAMES, Item, ItemType } from '../game/items';
+import { ITEMS, RARITY_NAMES, RARITY_COLORS, Item, ItemType, ItemRarity } from '../game/items';
 import { addItem } from '../game/inventory';
 
 const shopItems: Item[] = [
-  // Weapons
   ITEMS.wooden_sword, ITEMS.iron_sword, ITEMS.steel_sword,
   ITEMS.bronze_axe, ITEMS.silver_blade, ITEMS.battle_axe,
   ITEMS.magic_wand, ITEMS.oak_staff, ITEMS.arcane_rod, ITEMS.crystal_staff,
   ITEMS.short_bow, ITEMS.hunting_bow, ITEMS.long_bow,
   ITEMS.basic_staff, ITEMS.wolf_staff,
-  // Armor
   ITEMS.cloth_armor, ITEMS.leather_armor, ITEMS.chain_vest,
   ITEMS.chain_mail, ITEMS.knight_armor, ITEMS.mage_robe,
-  // Accessories
   ITEMS.iron_ring, ITEMS.speed_ring, ITEMS.power_amulet,
   ITEMS.attack_ring, ITEMS.defense_ring, ITEMS.lucky_charm,
-  // Potions
   ITEMS.health_potion, ITEMS.mega_health, ITEMS.mana_potion, ITEMS.mana_mega, ITEMS.elixir,
   ITEMS.str_potion, ITEMS.def_potion, ITEMS.spd_potion, ITEMS.hp_potion,
   ITEMS.berserk_potion, ITEMS.iron_skin, ITEMS.mega_str, ITEMS.mega_def,
@@ -24,16 +20,50 @@ const shopItems: Item[] = [
 ];
 
 const CATEGORIES = [
-  { id: 'weapon', label: '⚔️ Vũ Khí', emoji: '⚔️', types: ['weapon'] as ItemType[] },
-  { id: 'armor', label: '🛡️ Giáp', emoji: '🛡️', types: ['armor'] as ItemType[] },
-  { id: 'accessory', label: '💍 Phụ Kiện', emoji: '💍', types: ['accessory'] as ItemType[] },
-  { id: 'potion', label: '🧪 Thuốc', emoji: '🧪', types: ['potion'] as ItemType[] }
+  { id: 'weapon', label: '⚔️ Vũ Khí', types: ['weapon'] as ItemType[], color: 0xE74C3C },
+  { id: 'armor', label: '🛡️ Giáp', types: ['armor'] as ItemType[], color: 0x3498DB },
+  { id: 'accessory', label: '💍 Phụ Kiện', types: ['accessory'] as ItemType[], color: 0xF1C40F },
+  { id: 'potion', label: '🧪 Thuốc', types: ['potion'] as ItemType[], color: 0x2ECC71 }
 ];
+
+const RARITY_ORDER: ItemRarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
 
 function getItemsByCategory(categoryId: string): Item[] {
   const cat = CATEGORIES.find(c => c.id === categoryId);
   if (!cat) return [];
   return shopItems.filter(item => cat.types.includes(item.type));
+}
+
+function formatItemStats(item: Item): string {
+  if (!item.stats) return '';
+  const parts: string[] = [];
+  if (item.stats.attack) parts.push(`⚔️ ATK +${item.stats.attack}`);
+  if (item.stats.defense) parts.push(`🛡️ DEF +${item.stats.defense}`);
+  if (item.stats.hp) parts.push(`❤️ HP +${item.stats.hp}`);
+  if (item.stats.mp) parts.push(`💧 MP +${item.stats.mp}`);
+  if (item.stats.speed) parts.push(`⚡ SPD +${item.stats.speed}`);
+  return parts.join(' | ');
+}
+
+function buildItemList(items: Item[], playerGold: number): string {
+  const grouped: Record<ItemRarity, Item[]> = { common: [], uncommon: [], rare: [], epic: [], legendary: [], limited: [] };
+  for (const item of items) grouped[item.rarity].push(item);
+
+  let desc = '';
+  for (const rarity of RARITY_ORDER) {
+    const group = grouped[rarity];
+    if (group.length === 0) continue;
+    desc += `\n**${RARITY_NAMES[rarity]}**\n`;
+    for (const item of group) {
+      const canBuy = playerGold >= item.price;
+      const check = canBuy ? '✅' : '❌';
+      const stats = formatItemStats(item);
+      desc += `${check} ${item.emoji} **${item.name}** — 💰${item.price.toLocaleString()}`;
+      if (stats) desc += `\n     └ ${stats}`;
+      desc += `\n`;
+    }
+  }
+  return desc;
 }
 
 export const prefixCommand = {
@@ -51,48 +81,28 @@ export const prefixCommand = {
 
     if (!action || !['buy', 'sell', 'mua', 'ban'].includes(action)) {
       const embed = new EmbedBuilder()
-        .setTitle('🛒 Cửa Hàng')
-        .setDescription('Cách dùng:\n`,shop buy` - Mua đồ\n`,shop sell` - Bán đồ')
-        .setColor(0xFFD700);
-      return message.reply({ embeds: [embed] });
-    }
-
-    if (action === 'buy' || action === 'mua') {
-      const itemId = args[1]?.toLowerCase();
-
-      if (itemId) {
-        const item = shopItems.find(i => i.id === itemId);
-        if (!item) {
-          return message.reply('❌ Không tìm thấy vật phẩm! Dùng `,shop buy` để xem danh sách.');
-        }
-        if (player.stats.gold < item.price) {
-          return message.reply(`❌ Không đủ gold! Cần ${item.price} gold.`);
-        }
-        const result = addItem(player.inventory, item);
-        if (!result.success) {
-          return message.reply(`❌ ${result.message}`);
-        }
-        await db.removeGold(player, item.price);
-        await db.updatePlayer(player);
-        return message.reply(`✅ Mua thành công **${item.name}** (-${item.price} Gold)`);
-      }
-
-      const embed = new EmbedBuilder()
-        .setTitle('🛒 Mua Đồ')
-        .setDescription(`💰 Gold: **${player.stats.gold}**\n\nChọn loại vật phẩm muốn mua:`)
-        .setColor(0xFFD700);
+        .setTitle('🏪 Cửa Hàng Dungeon')
+        .setDescription(
+          `**💰 Gold của bạn:** ${player.stats.gold.toLocaleString()}\n` +
+          `**💎 Gem của bạn:** ${player.gems.toLocaleString()}\n\n` +
+          '`.shop buy` — Mua vật phẩm\n' +
+          '`shop sell` — Bán vật phẩm\n\n' +
+          '**Chọn loại bên dưới để bắt đầu mua sắm:**'
+        )
+        .setColor(0xFFD700)
+        .setThumbnail('https://img.icons8.com/color/96/shop.png')
+        .setFooter({ text: 'Chọn loại vật phẩm bên dưới' });
 
       const row = new ActionRowBuilder<StringSelectMenuBuilder>();
       row.addComponents(
         new StringSelectMenuBuilder()
           .setCustomId('shop_category')
-          .setPlaceholder('Chọn loại...')
+          .setPlaceholder('🛒 Chọn loại vật phẩm...')
           .addOptions(
             CATEGORIES.map(cat => ({
               label: cat.label,
               value: cat.id,
-              emoji: cat.emoji,
-              description: `Xem ${getItemsByCategory(cat.id).length} vật phẩm`
+              description: `${getItemsByCategory(cat.id).length} vật phẩm`
             }))
           )
       );
@@ -106,7 +116,7 @@ export const prefixCommand = {
 
       collector.on('collect', async (i: any) => {
         if (i.user.id !== userId) {
-          return i.reply({ content: 'Đây không phải shop của bạn!', ephemeral: true });
+          return i.reply({ content: '❌ Đây không phải shop của bạn!', ephemeral: true });
         }
 
         await i.deferUpdate();
@@ -115,31 +125,27 @@ export const prefixCommand = {
         if (!category) return;
 
         const items = getItemsByCategory(categoryId);
+        const displayItems = items.slice(0, 25);
 
         const categoryEmbed = new EmbedBuilder()
-          .setTitle(`${category.emoji} ${category.label}`)
-          .setDescription(`💰 Gold: **${player.stats.gold}**\n\nChọn vật phẩm muốn mua:`)
-          .setColor(0xFFD700);
-
-        const displayItems = items.slice(0, 25);
-        displayItems.forEach(item => {
-          categoryEmbed.addFields({
-            name: `${item.emoji} ${item.name}`,
-            value: `💰 ${item.price} Gold\n${RARITY_NAMES[item.rarity]}\nID: \`${item.id}\``,
-            inline: true
-          });
-        });
+          .setTitle(`${category.label}`)
+          .setDescription(
+            `**💰 Gold:** ${player.stats.gold.toLocaleString()}\n\n` +
+            buildItemList(displayItems, player.stats.gold)
+          )
+          .setColor(category.color)
+          .setFooter({ text: 'Chọn vật phẩm muốn mua bên dưới' });
 
         const buyRow = new ActionRowBuilder<StringSelectMenuBuilder>();
         buyRow.addComponents(
           new StringSelectMenuBuilder()
             .setCustomId('shop_buy_item')
-            .setPlaceholder('Chọn vật phẩm...')
+            .setPlaceholder('🛒 Chọn vật phẩm muốn mua...')
             .addOptions(
               displayItems.map(item => ({
-                label: `${item.name} - ${item.price} Gold`.substring(0, 100),
+                label: `${item.emoji} ${item.name}`.substring(0, 100),
                 value: item.id,
-                description: item.description.substring(0, 100)
+                description: `💰${item.price.toLocaleString()} Gold | ${RARITY_NAMES[item.rarity]}`.substring(0, 100)
               }))
             )
         );
@@ -158,7 +164,7 @@ export const prefixCommand = {
 
         buyCollector.on('collect', async (bi: any) => {
           if (bi.user.id !== userId) {
-            return bi.reply({ content: 'Đây không phải shop của bạn!', ephemeral: true });
+            return bi.reply({ content: '❌ Đây không phải shop của bạn!', ephemeral: true });
           }
 
           await bi.deferUpdate();
@@ -167,7 +173,16 @@ export const prefixCommand = {
           if (!selectedItem) return;
 
           if (player.stats.gold < selectedItem.price) {
-            await bi.message.edit({ content: `❌ Không đủ gold! Cần **${selectedItem.price}** gold.`, embeds: [], components: [] });
+            const failEmbed = new EmbedBuilder()
+              .setTitle('❌ Không Đủ Gold!')
+              .setDescription(
+                `Bạn muốn mua: ${selectedItem.emoji} **${selectedItem.name}**\n\n` +
+                `💰 Cần: **${selectedItem.price.toLocaleString()}** Gold\n` +
+                `💰 Hiện có: **${player.stats.gold.toLocaleString()}** Gold\n` +
+                `💰 Thiếu: **${(selectedItem.price - player.stats.gold).toLocaleString()}** Gold`
+              )
+              .setColor(0xFF0000);
+            await bi.message.edit({ embeds: [failEmbed], components: [] });
             buyCollector.stop();
             return;
           }
@@ -182,10 +197,17 @@ export const prefixCommand = {
           await db.removeGold(player, selectedItem.price);
           await db.updatePlayer(player);
 
+          const stats = formatItemStats(selectedItem);
           const successEmbed = new EmbedBuilder()
             .setTitle('✅ Mua Thành Công!')
-            .setDescription(`${selectedItem.emoji} **${selectedItem.name}**\n\n💰 Gold còn lại: **${player.stats.gold}**`)
-            .setColor(0x00FF00);
+            .setDescription(
+              `${selectedItem.emoji} **${selectedItem.name}**\n\n` +
+              `${stats ? `📊 ${stats}\n` : ''}` +
+              `📜 ${selectedItem.description}\n\n` +
+              `💰 Gold còn lại: **${player.stats.gold.toLocaleString()}**`
+            )
+            .setColor(RARITY_COLORS[selectedItem.rarity])
+            .setFooter({ text: `${RARITY_NAMES[selectedItem.rarity]} • Đã thêm vào hành trang` });
 
           await bi.message.edit({ embeds: [successEmbed], components: [] });
           buyCollector.stop();
@@ -193,20 +215,24 @@ export const prefixCommand = {
 
         buyCollector.on('end', async (_collected: any, reason: string) => {
           if (reason === 'time') {
-            await i.message.edit({ content: '⏰ Hết thời gian!', embeds: [], components: [] });
+            await i.message.edit({ content: '⏰ Hết thời gian mua sắm!', embeds: [], components: [] });
           }
         });
       });
 
       collector.on('end', async (_collected: any, reason: string) => {
         if (reason === 'time') {
-          await reply.edit({ content: '⏰ Hết thời gian!', embeds: [], components: [] });
+          await reply.edit({ content: '⏰ Hết thời gian mua sắm!', embeds: [], components: [] });
         }
       });
 
     } else {
       if (player.inventory.items.length === 0) {
-        return message.reply('📦 Hành trang trống!');
+        const emptyEmbed = new EmbedBuilder()
+          .setTitle('📦 Hành Trang Trống')
+          .setDescription('Bạn chưa có vật phẩm nào để bán!')
+          .setColor(0x808080);
+        return message.reply({ embeds: [emptyEmbed] });
       }
 
       const itemId = args[1]?.toLowerCase();
@@ -235,25 +261,38 @@ export const prefixCommand = {
         }
         await db.addGold(player, gold);
         await db.updatePlayer(player);
-        return message.reply(`✅ Bán **${quantity}x ${item.name}** (+${gold} Gold)`);
+
+        const sellEmbed = new EmbedBuilder()
+          .setTitle('💰 Bán Thành Công!')
+          .setDescription(
+            `${item.emoji} **${item.name}** x${quantity}\n\n` +
+            `+💰 **${gold.toLocaleString()}** Gold\n\n` +
+            `💰 Gold hiện tại: **${player.stats.gold.toLocaleString()}**`
+          )
+          .setColor(RARITY_COLORS[item.rarity]);
+        return message.reply({ embeds: [sellEmbed] });
       }
 
       const embed = new EmbedBuilder()
-        .setTitle('💰 Bán Đồ')
-        .setDescription(`Gold: **${player.stats.gold}**\n\nDùng \`,shop sell <id> [số lượng]\` để bán:\nBỏ trống số lượng = bán hết`)
-        .setColor(0xFFD700);
+        .setTitle('💰 Bán Vật Phẩm')
+        .setDescription(
+          `**💰 Gold:** ${player.stats.gold.toLocaleString()}\n\n` +
+          `Dùng \`,shop sell <id> [số lượng]\` để bán\n` +
+          `Bỏ trống số lượng = bán hết`
+        )
+        .setColor(0xF39C12);
 
       const displayItems = player.inventory.items.slice(0, 25);
-      displayItems.forEach((i: any) => {
+      for (const i of displayItems) {
         const item = ITEMS[i.itemId];
         if (item) {
           embed.addFields({
             name: `${item.emoji} ${item.name} x${i.quantity}`,
-            value: `💰 ${item.sellPrice} Gold/ea\nID: \`${item.id}\``,
+            value: `💰 ${item.sellPrice.toLocaleString()} Gold/ea\nID: \`${item.id}\``,
             inline: true
           });
         }
-      });
+      }
 
       message.reply({ embeds: [embed] });
     }

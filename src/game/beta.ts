@@ -1,4 +1,4 @@
-let betaActive = false;
+let betaActive = true;
 
 export function isBeta(): boolean { return betaActive; }
 export function activateBeta(): void { betaActive = true; }

@@ -30,29 +30,31 @@ export const prefixCommand = {
     if (!action || !['hp', 'mp', 'attack', 'defense', 'speed', 'str', 'dex', 'int', 'vit', 'agi', 'atk', 'def', 'spd'].includes(action)) {
       const embed = new EmbedBuilder()
         .setTitle('📊 Bảng Chỉ Số')
-        .setDescription(`⭐ Skill Points: **${player.skillPoints}**\n💡 Mỗi lần nâng: **${STAT_COST}** Skill Point`)
+        .setDescription(`⭐ Skill Points: **${player.skillPoints}** | Mỗi lần nâng: **${STAT_COST}** Skill Point`)
         .addFields(
           {
             name: '📈 Chỉ Số Hiện Tại',
             value: [
-              `❤️ HP Tối Đa: **${player.stats.maxHP}**`,
-              `💧 MP Tối Đa: **${player.stats.maxMP}**`,
+              `❤️ HP: **${player.stats.maxHP}**`,
+              `💧 MP: **${player.stats.maxMP}**`,
               `⚔️ ATK: **${player.stats.attack}**`,
               `🛡️ DEF: **${player.stats.defense}**`,
               `💨 SPD: **${player.stats.speed}**`
-            ].join('\n')
+            ].join('\n'),
+            inline: true
           },
           {
             name: '🎯 Cách Nâng',
             value: [
-              ',stat atk - Nâng ATK (+2)',
-              ',stat hp - Nâng HP (+10)',
-              ',stat mp - Nâng MP (+5)',
-              ',stat def - Nâng DEF (+1)',
-              ',stat spd - Nâng SPD (+1)',
+              '`stat atk` - ATK +2',
+              '`stat hp` - HP +10',
+              '`stat mp` - MP +5',
+              '`stat def` - DEF +1',
+              '`stat spd` - SPD +1',
               '',
-              ',stat atk 3 - Nâng ATK +6'
-            ].join('\n')
+              '`stat atk 3` - ATK +6'
+            ].join('\n'),
+            inline: true
           }
         )
         .setColor(0x00FF00);
@@ -97,8 +99,6 @@ export const prefixCommand = {
 
     player.skillPoints -= totalCost;
 
-    const otherStats = Object.keys(STAT_INFO).filter(s => s !== stat);
-
     switch (stat) {
       case 'hp':
         player.stats.maxHP += info.base * points;
@@ -125,7 +125,7 @@ export const prefixCommand = {
       .setTitle('✅ Nâng Chỉ Số Thành Công!')
       .setDescription(
         `${info.emoji} **${info.name}** +${info.base * points}\n\n` +
-        `📊 Chỉ số mới:\n` +
+        `**Chỉ số mới:**\n` +
         `❤️ HP: ${player.stats.hp}/${player.stats.maxHP}\n` +
         `💧 MP: ${player.stats.mp}/${player.stats.maxMP}\n` +
         `⚔️ ATK: ${player.stats.attack}\n` +

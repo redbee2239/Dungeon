@@ -18,7 +18,11 @@ export const prefixCommand = {
     if (!action || !['list', 'open', 'xem', 'mo'].includes(action)) {
       const embed = new EmbedBuilder()
         .setTitle('📦 Rương')
-        .setDescription('Cách dùng:\n`,chest list` - Xem rương\n`,chest open <tên>` - Mở rương')
+        .setDescription(
+          '**Cách dùng:**\n' +
+          '`chest list` - Xem danh sách rương\n' +
+          '`chest open <id>` - Mở rương'
+        )
         .setColor(0xFFD700);
       return message.reply({ embeds: [embed] });
     }
@@ -30,7 +34,7 @@ export const prefixCommand = {
 
       const embed = new EmbedBuilder()
         .setTitle('📦 Kho Rương')
-        .setDescription('Dùng `,chest open <id>` để mở rương')
+        .setDescription(`Tổng: **${player.inventory.chests.length}** loại rương`)
         .setColor(0xFFD700);
 
       for (const chestItem of player.inventory.chests) {
@@ -38,7 +42,7 @@ export const prefixCommand = {
         if (chest) {
           embed.addFields({
             name: `${chest.emoji} ${chest.name} x${chestItem.quantity}`,
-            value: `${CHEST_RARITY_NAMES[chest.rarity]} | ${chest.description}\nID: \`${chest.id}\``,
+            value: `**Rarity:** ${CHEST_RARITY_NAMES[chest.rarity]}\n_${chest.description}_\n\`ID: ${chest.id}\``,
             inline: true
           });
         }
@@ -76,12 +80,12 @@ export const prefixCommand = {
       const embed = new EmbedBuilder()
         .setTitle(`${chest.emoji} Mở Rương ${chest.name}!`)
         .setDescription(
-          `**Phần thưởng:**\n` +
+          `**Phần thưởng:**\n\n` +
           `💎 +${reward.gems} Gem\n` +
           `💰 +${reward.gold} Gold`
         )
         .setColor(CHEST_RARITY_COLORS[chest.rarity])
-        .setFooter({ text: `Rương còn lại: ${chestItem.quantity}` });
+        .setFooter({ text: `Rương còn lại: ${chestItem.quantity} | Gold: ${player.stats.gold} | Gem: ${player.gems}` });
 
       return message.reply({ embeds: [embed] });
     }

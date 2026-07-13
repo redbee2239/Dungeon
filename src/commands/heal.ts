@@ -2,6 +2,12 @@ import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
 import { calculateBonusStats } from '../game/inventory';
 
+function generateProgressBar(current: number, max: number, length: number): string {
+  const filled = Math.floor((current / max) * length);
+  const empty = length - filled;
+  return '█'.repeat(filled) + '░'.repeat(empty);
+}
+
 export const prefixCommand = {
   name: 'heal',
   description: 'Hồi phục HP/MP',
@@ -27,14 +33,22 @@ export const prefixCommand = {
     }
 
     await db.removeGold(player, goldCost);
+    const hpHealed = totalHP - player.stats.hp;
+    const mpHealed = totalMP - player.stats.mp;
     player.stats.hp = totalHP;
     player.stats.mp = totalMP;
     await db.updatePlayer(player);
 
     const embed = new EmbedBuilder()
-      .setTitle('💚 Hồi Phục!')
-      .setDescription(`HP: ${totalHP}/${totalHP}\nMP: ${totalMP}/${totalMP}\n💰 -${goldCost} Gold`)
-      .setColor(0x00FF00);
+      .setTitle('💚 Hồi Phục Thành Công!')
+      .setDescription(
+        `**Đã hồi phục:**\n` +
+        `❤️ HP: +${hpHealed} (${player.stats.hp}/${totalHP})\n` +
+        `💧 MP: +${mpHealed} (${player.stats.mp}/${totalMP})\n\n` +
+        `💰 Chi phí: **${goldCost}** Gold`
+      )
+      .setColor(0x00FF00)
+      .setFooter({ text: `Gold còn lại: ${player.stats.gold}` });
 
     message.reply({ embeds: [embed] });
   }

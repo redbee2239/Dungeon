@@ -1,10 +1,33 @@
 import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
-import { ITEMS, RARITY_NAMES, ItemRarity, ItemType } from '../game/items';
+import { ITEMS, RARITY_NAMES, RARITY_COLORS, ItemRarity, ItemType } from '../game/items';
 import { CLASS_DATA, CharacterClass } from '../game/classes';
 
 const PHYSICAL_CLASSES: CharacterClass[] = ['warrior', 'rogue', 'gladiator', 'archer'];
 const MAGIC_CLASSES: CharacterClass[] = ['mage', 'cleric', 'summoner'];
+
+const RARITY_EMOJI: Record<ItemRarity, string> = {
+  common: '⚪',
+  uncommon: '🟢',
+  rare: '🔵',
+  epic: '🟣',
+  legendary: '🟠',
+  limited: '🔴'
+};
+
+const SLOT_INFO: Record<string, { name: string; emoji: string }> = {
+  weapon: { name: 'Vũ Khí', emoji: '⚔️' },
+  armor: { name: 'Giáp', emoji: '🛡️' },
+  accessory: { name: 'Phụ Kiện', emoji: '💍' }
+};
+
+function formatStats(stats: Record<string, number> | undefined): string {
+  if (!stats) return 'Không có stats';
+  return Object.entries(stats)
+    .filter(([_, v]) => v && v !== 0)
+    .map(([k, v]) => `${k.toUpperCase()}: **+${v}**`)
+    .join(' | ');
+}
 
 export const prefixCommand = {
   name: 'equip',
@@ -25,10 +48,11 @@ export const prefixCommand = {
         const embed = new EmbedBuilder()
           .setTitle('⚔️ Trang Bị')
           .setDescription(
-            'Cách dùng:\n' +
-            '`,equip <id>` - Trang bị\n' +
-            '`,unequip <weapon/armor/accessory>` - Tháo trang bị\n' +
-            '`,equip list` - Xem trang bị'
+            '**Cách dùng:**\n' +
+            '`equip <id>` - Trang bị vật phẩm\n' +
+            '`unequip <slot>` - Tháo trang bị\n' +
+            '`equip list` - Xem trang bị đang đeo\n\n' +
+            '**Slot:** weapon, armor, accessory'
           )
           .setColor(0xFF6600);
         return message.reply({ embeds: [embed] });
@@ -82,21 +106,12 @@ export const prefixCommand = {
       const embed = new EmbedBuilder()
         .setTitle('✅ Trang Bị Thành Công!')
         .setDescription(
-          `${item.emoji} **${item.name}**\n` +
-          `Loại: ${equipType === 'weapon' ? '⚔️ Vũ khí' : equipType === 'armor' ? '🛡️ Giáp' : '💍 Phụ kiện'}\n` +
-          `Rarity: ${RARITY_NAMES[item.rarity]}`
+          `${item.emoji} **${item.name}**\n\n` +
+          `**Slot:** ${SLOT_INFO[equipType].emoji} ${SLOT_INFO[equipType].name}\n` +
+          `**Rarity:** ${RARITY_EMOJI[item.rarity]} ${RARITY_NAMES[item.rarity]}\n\n` +
+          `**Stats:** ${formatStats(item.stats)}`
         )
-        .setColor(0x00FF00);
-
-      if (item.stats) {
-        const stats = Object.entries(item.stats)
-          .filter(([_, v]) => v && v !== 0)
-          .map(([k, v]) => `${k.toUpperCase()}: +${v}`)
-          .join('\n');
-        if (stats) {
-          embed.addFields({ name: '📊 Stats', value: stats, inline: true });
-        }
-      }
+        .setColor(RARITY_COLORS[item.rarity]);
 
       return message.reply({ embeds: [embed] });
     }
@@ -106,34 +121,29 @@ export const prefixCommand = {
       
       const embed = new EmbedBuilder()
         .setTitle('⚔️ Trang Bị Hiện Tại')
+        .setDescription('Những vật phẩm đang được trang bị:')
         .setColor(0xFF6600);
 
       const slots = [
-        { type: 'weapon', name: '⚔️ Vũ khí', id: equipped.weapon },
-        { type: 'armor', name: '🛡️ Giáp', id: equipped.armor },
-        { type: 'accessory', name: '💍 Phụ kiện', id: equipped.accessory }
+        { type: 'weapon', id: equipped.weapon },
+        { type: 'armor', id: equipped.armor },
+        { type: 'accessory', id: equipped.accessory }
       ];
 
       for (const slot of slots) {
+        const info = SLOT_INFO[slot.type];
         if (slot.id) {
           const item = ITEMS[slot.id];
           if (item) {
-            let statsText = '';
-            if (item.stats) {
-              statsText = Object.entries(item.stats)
-                .filter(([_, v]) => v && v !== 0)
-                .map(([k, v]) => `${k.toUpperCase()}: +${v}`)
-                .join(', ');
-            }
             embed.addFields({
-              name: slot.name,
-              value: `${item.emoji} **${item.name}** (${RARITY_NAMES[item.rarity]})\n${statsText || 'Không có stats'}`,
+              name: `${info.emoji} ${info.name}`,
+              value: `${item.emoji} **${item.name}**\n${RARITY_EMOJI[item.rarity]} ${RARITY_NAMES[item.rarity]}\n${formatStats(item.stats)}\n\`ID: ${item.id}\``,
               inline: true
             });
           }
         } else {
           embed.addFields({
-            name: slot.name,
+            name: `${info.emoji} ${info.name}`,
             value: '*Trống*',
             inline: true
           });

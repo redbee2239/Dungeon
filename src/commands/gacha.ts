@@ -25,6 +25,15 @@ const GACHA_ITEMS = Object.values(ITEMS).filter(item => item.type !== 'potion');
 const EPIC_PITY = 50;
 const LEGENDARY_PITY = 150;
 
+const RARITY_EMOJI: Record<ItemRarity, string> = {
+  common: '⚪',
+  uncommon: '🟢',
+  rare: '🔵',
+  epic: '🟣',
+  legendary: '🟠',
+  limited: '🔴'
+};
+
 function rollRarity(pityEpic: number, pityLegendary: number): ItemRarity {
   if (pityLegendary >= LEGENDARY_PITY) return 'legendary';
   if (pityEpic >= EPIC_PITY) return 'epic';
@@ -89,20 +98,33 @@ export const prefixCommand = {
     if (!action || !['1', '10', 'single', 'multi', 'roll', 'history'].includes(action)) {
       const embed = new EmbedBuilder()
         .setTitle(betaActive ? '🎲 BETA GACHA' : '🎰 Gacha Trang Bị')
-        .setDescription(`Chi phí:\n- 1 lần: **${gachaCost}** 💎\n- 10 lần: **${multiCost}** 💎 (-10%)\n\nGem của bạn: **${player.gems}** 💎`)
+        .setDescription(
+          `**Chi phí:**\n` +
+          `- 1 lần: **${gachaCost}** 💎\n` +
+          `- 10 lần: **${multiCost}** 💎 (-10%)\n\n` +
+          `**Gem của bạn:** ${player.gems} 💎`
+        )
         .addFields(
-          { name: '📊 Tỷ Lệ', value: [
-            '⚪ Phổ Thông: 40%',
-            '🟢 Thông Thường: 30%',
-            '🔵 Hiếm: 20%',
-            `🟣 Sử Thi: 8% (pity: ${epicPity})`,
-            `🟠 Huyền Thoại: 2% (pity: ${legendaryPity})`
-          ].join('\n') },
-          { name: '💡 Cách Dùng', value: [
-            ',gacha 1 - Quay 1 lần',
-            ',gacha 10 - Quay 10 lần',
-            ',gacha history - Xem lịch sử'
-          ].join('\n') }
+          {
+            name: '📊 Tỷ Lệ',
+            value: [
+              `${RARITY_EMOJI.common} Phổ Thông: **40%**`,
+              `${RARITY_EMOJI.uncommon} Thông Thường: **30%**`,
+              `${RARITY_EMOJI.rare} Hiếm: **20%**`,
+              `${RARITY_EMOJI.epic} Sử Thi: **8%** (pity: ${epicPity})`,
+              `${RARITY_EMOJI.legendary} Huyền Thoại: **2%** (pity: ${legendaryPity})`
+            ].join('\n'),
+            inline: true
+          },
+          {
+            name: '💡 Cách Dùng',
+            value: [
+              '`gacha 1` - Quay 1 lần',
+              '`gacha 10` - Quay 10 lần',
+              '`gacha history` - Xem lịch sử'
+            ].join('\n'),
+            inline: true
+          }
         )
         .setColor(0xFF8000);
 
@@ -158,7 +180,6 @@ export const prefixCommand = {
         date: new Date()
       });
 
-      // Update pity
       if (item.rarity === 'legendary') {
         player.gachaPity.legendary = 0;
         player.gachaPity.epic = 0;
@@ -192,9 +213,9 @@ export const prefixCommand = {
       for (const rarity of ['legendary', 'epic', 'rare', 'uncommon', 'common'] as const) {
         const items = grouped[rarity];
         if (items && items.length > 0) {
-          desc += `\n**${RARITY_NAMES[rarity]}:**\n`;
+          desc += `\n**${RARITY_EMOJI[rarity]} ${RARITY_NAMES[rarity]}:**\n`;
           items.forEach(r => {
-            desc += `${r.item.emoji} ${r.item.name}${r.isNew ? ' ✨' : ''}\n`;
+            desc += `${r.item.emoji} **${r.item.name}**${r.isNew ? ' ✨' : ''}\n`;
           });
         }
       }
@@ -211,18 +232,18 @@ export const prefixCommand = {
       }
 
       embed.setDescription(
-        `${item.emoji} **${item.name}**\n` +
-        `Rarity: ${RARITY_NAMES[item.rarity]}\n` +
-        `Type: ${item.type === 'weapon' ? '⚔️ Vũ khí' : item.type === 'armor' ? '🛡️ Giáp' : '💍 Phụ kiện'}\n` +
-        `${statsText ? `Stats:\n${statsText}\n` : ''}` +
-        `${item.description}\n\n` +
-        `${isNew ? '✨ Trang bị mới!' : '⚠️ Đã có trang bị này (+1)'}` +
-        `\nID: \`${item.id}\``
+        `${item.emoji} **${item.name}**\n\n` +
+        `**Rarity:** ${RARITY_EMOJI[item.rarity]} ${RARITY_NAMES[item.rarity]}\n` +
+        `**Type:** ${item.type === 'weapon' ? '⚔️ Vũ khí' : item.type === 'armor' ? '🛡️ Giáp' : '💍 Phụ kiện'}\n` +
+        (statsText ? `\n**Stats:**\n${statsText}\n` : '') +
+        `\n_${item.description}_\n\n` +
+        `${isNew ? '✨ **Trang bị mới!**' : '⚠️ Đã có trang bị này (+1)'}` +
+        `\n\n\`ID: ${item.id}\``
       );
       embed.setColor(RARITY_COLORS[item.rarity]);
     }
 
-    embed.setFooter({ text: `Gem còn lại: ${player.gems} 💎` });
+    embed.setFooter({ text: `Gem còn lại: ${player.gems} 💎 | Pity Epic: ${player.gachaPity.epic}/${epicPity} | Pity Legendary: ${player.gachaPity.legendary}/${legendaryPity}` });
 
     message.reply({ embeds: [embed] });
   }

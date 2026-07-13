@@ -1,7 +1,18 @@
 import { EmbedBuilder } from 'discord.js';
 import { Database } from '../game/database';
-import { CLASS_DATA } from '../game/classes';
+import { CLASS_DATA, CharacterClass } from '../game/classes';
 import { calculateBonusStats } from '../game/inventory';
+
+const CLASS_COLORS: Record<CharacterClass, number> = {
+  warrior: 0xE74C3C,
+  mage: 0x3498DB,
+  rogue: 0x9B59B6,
+  cleric: 0xF1C40F,
+  gladiator: 0xE67E22,
+  summoner: 0x1ABC9C,
+  archer: 0x2ECC71,
+  necromancer: 0x8E44AD
+};
 
 function generateProgressBar(current: number, max: number, length: number): string {
   const filled = Math.floor((current / max) * length);
@@ -28,44 +39,64 @@ export const prefixCommand = {
     const totalMP = player.stats.maxMP + bonus.mp;
 
     const expPercent = ((player.stats.exp / player.stats.expToNext) * 100).toFixed(1);
-    const progressBar = generateProgressBar(player.stats.exp, player.stats.expToNext, 15);
+    const hpPercent = ((player.stats.hp / totalHP) * 100).toFixed(0);
+    const mpPercent = ((player.stats.mp / totalMP) * 100).toFixed(0);
+
+    const hpBar = generateProgressBar(player.stats.hp, totalHP, 10);
+    const mpBar = generateProgressBar(player.stats.mp, totalMP, 10);
+    const expBar = generateProgressBar(player.stats.exp, player.stats.expToNext, 15);
 
     const embed = new EmbedBuilder()
       .setTitle(`${cls.emoji} ${player.name}`)
-      .setDescription(`**Lớp:** ${cls.name} | **Level:** ${player.stats.level}`)
+      .setDescription(
+        `**Class:** ${cls.name} | **Level:** ${player.stats.level}\n` +
+        `**ID:** \`${player.id}\``
+      )
       .addFields(
         {
-          name: '📊 Thống Kê',
+          name: '❤️ HP',
+          value: `${player.stats.hp}/${totalHP} (${hpPercent}%)\n${hpBar}`,
+          inline: true
+        },
+        {
+          name: '💧 MP',
+          value: `${player.stats.mp}/${totalMP} (${mpPercent}%)\n${mpBar}`,
+          inline: true
+        },
+        {
+          name: '⭐ EXP',
+          value: `${player.stats.exp}/${player.stats.expToNext} (${expPercent}%)\n${expBar}`,
+          inline: false
+        },
+        {
+          name: '⚔️ Combat',
           value: [
-            `❤️ HP: ${player.stats.hp}/${totalHP}`,
-            `💧 MP: ${player.stats.mp}/${totalMP}`,
-            `⚔️ ATK: ${totalAttack}`,
-            `🛡️ DEF: ${totalDefense}`,
-            `💨 SPD: ${player.stats.speed}`
+            `⚔️ ATK: **${totalAttack}**`,
+            `🛡️ DEF: **${totalDefense}**`,
+            `💨 SPD: **${player.stats.speed}**`
           ].join('\n'),
           inline: true
         },
         {
-          name: '📈 Tiến Trình',
+          name: '💰 Resources',
           value: [
-            `EXP: ${player.stats.exp}/${player.stats.expToNext} (${expPercent}%)`,
-            `${progressBar}`,
-            `💰 Gold: ${player.stats.gold}`,
-            `💎 Gem: ${player.gems}`,
-            `⭐ Skill Points: ${player.skillPoints}`
+            `💰 Gold: **${player.stats.gold.toLocaleString()}**`,
+            `💎 Gem: **${player.gems.toLocaleString()}**`,
+            `⭐ Skill Points: **${player.skillPoints}**`
           ].join('\n'),
           inline: true
         },
         {
           name: '🏆 Thành Tích',
           value: [
-            `Quái đã giết: ${player.totalMonstersKilled}`,
-            `Tầng cao nhất: ${player.highestFloor}`,
-            `Tổng gold: ${player.totalGoldEarned}`
-          ].join('\n')
+            `Quái đã giết: **${player.totalMonstersKilled}**`,
+            `Tầng cao nhất: **${player.highestFloor}**`,
+            `Tổng gold: **${player.totalGoldEarned.toLocaleString()}**`
+          ].join('\n'),
+          inline: true
         }
       )
-      .setColor(0x0099FF)
+      .setColor(CLASS_COLORS[player.characterClass] || 0x0099FF)
       .setThumbnail(message.author.displayAvatarURL());
 
     message.reply({ embeds: [embed] });

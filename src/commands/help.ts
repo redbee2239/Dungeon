@@ -94,6 +94,15 @@ export const prefixCommand = {
             inline: true
           },
           {
+            name: '⚔️ PVP',
+            value: [
+              '`pvp @user` - Thách đấu',
+              '20s/turn, hết giờ = thua',
+              'Lv chênh >10 = không EXP'
+            ].join('\n'),
+            inline: true
+          },
+          {
             name: '🛒 Cửa Hàng',
             value: [
               '`shop buy` - Mua đồ (chọn loại)',

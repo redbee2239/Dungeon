@@ -50,7 +50,7 @@ export const prefixCommand = {
     const embed = new EmbedBuilder()
       .setTitle('💤 Bật AFK!')
       .setDescription(
-        'Bạn đã进入 trạng thái AFK.\n\n' +
+        'Bạn đã vào trạng thái AFK.\n\n' +
         '⏰ Mỗi **5 phút** nhận **1 Skill Point**.\n' +
         '⚔️ Không thể đánh dungeon khi AFK.\n' +
         '💡 Dùng `,afk` để tắt AFK và nhận điểm.'

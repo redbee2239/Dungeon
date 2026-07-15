@@ -1828,6 +1828,364 @@ export const ITEMS: Record<string, Item> = {
     type: 'accessory', rarity: 'legendary',
     description: 'Vòng phá hủy thế giới.',
     stats: { attack: 22, defense: 15, hp: 50, mp: 30, speed: 5 }, price: 11000, sellPrice: 5500
+  },
+
+  // === WARRIOR CLASS GEAR ===
+  warrior_plate: {
+    id: 'warrior_plate', name: 'Giáp Chiến Binh', emoji: '⚔️',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Giáp chuẩn cho chiến binh.',
+    stats: { defense: 14, hp: 20 }, price: 200, sellPrice: 90,
+    classRestriction: ['warrior']
+  },
+  iron_fortress: {
+    id: 'iron_fortress', name: 'Pháo Đài Sắt', emoji: '🏰',
+    type: 'armor', rarity: 'rare',
+    description: 'Giáp sắt kiên cố như pháo đài.',
+    stats: { defense: 28, hp: 40, speed: -3 }, price: 600, sellPrice: 290,
+    classRestriction: ['warrior']
+  },
+  warlord_armor: {
+    id: 'warlord_armor', name: 'Giáp Chúa Tể', emoji: '👑',
+    type: 'armor', rarity: 'epic',
+    description: 'Giáp của Chúa Tể Chiến Tranh.',
+    stats: { defense: 38, hp: 60, attack: 5 }, price: 1800, sellPrice: 900,
+    classRestriction: ['warrior']
+  },
+  titan_armor: {
+    id: 'titan_armor', name: 'Giáp Titan', emoji: '🗿',
+    type: 'armor', rarity: 'legendary',
+    description: 'Giáp của tộc Titan, phòng thủ tuyệt đối.',
+    stats: { defense: 55, hp: 120, attack: 8, speed: -5 }, price: 8000, sellPrice: 4000,
+    classRestriction: ['warrior']
+  },
+  warrior_talisman: {
+    id: 'warrior_talisman', name: 'Linh Thú Chiến Binh', emoji: '🎖️',
+    type: 'accessory', rarity: 'rare',
+    description: 'Linh thê tăng sức chiến đấu.',
+    stats: { attack: 12, hp: 30 }, price: 500, sellPrice: 240,
+    classRestriction: ['warrior']
+  },
+  warlord_crown: {
+    id: 'warlord_crown', name: 'Vương Miện Chúa Tể', emoji: '👑',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Vương miện của Chúa Tể Chiến Tranh.',
+    stats: { attack: 20, defense: 15, hp: 80 }, price: 7000, sellPrice: 3500,
+    classRestriction: ['warrior']
+  },
+
+  // === MAGE CLASS GEAR ===
+  apprentice_robe: {
+    id: 'apprentice_robe', name: 'Áo Choàng Học Trò', emoji: '🧙',
+    type: 'armor', rarity: 'common',
+    description: 'Áo choàng cho pháp sư mới.',
+    stats: { defense: 3, mp: 20 }, price: 40, sellPrice: 16,
+    classRestriction: ['mage']
+  },
+  arcane_vestment: {
+    id: 'arcane_vestment', name: 'Áo Giáp Huyền Bí', emoji: '🔮',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Áo giáp tăng năng lượng phép thuật.',
+    stats: { defense: 8, mp: 40 }, price: 180, sellPrice: 85,
+    classRestriction: ['mage']
+  },
+  archmage_robe: {
+    id: 'archmage_robe', name: 'Áo Choàng Đại Pháp Sư', emoji: '🌌',
+    type: 'armor', rarity: 'epic',
+    description: 'Áo choàng của Đại Pháp Sư.',
+    stats: { defense: 18, mp: 80, attack: 5 }, price: 1600, sellPrice: 800,
+    classRestriction: ['mage']
+  },
+  celestial_mantle: {
+    id: 'celestial_mantle', name: 'Áo Choàng Thiên Hà', emoji: '✨',
+    type: 'armor', rarity: 'legendary',
+    description: 'Áo choàng phát sáng từ thiên hà.',
+    stats: { defense: 25, mp: 120, attack: 10, speed: 5 }, price: 7500, sellPrice: 3700,
+    classRestriction: ['mage']
+  },
+  mana_amulet: {
+    id: 'mana_amulet', name: 'Dây Chuyền Mana', emoji: '🔮',
+    type: 'accessory', rarity: 'uncommon',
+    description: 'Dây chuyền tăng mana đáng kể.',
+    stats: { mp: 40, attack: 3 }, price: 200, sellPrice: 90,
+    classRestriction: ['mage']
+  },
+  arcane_crown: {
+    id: 'arcane_crown', name: 'Vương Miện Huyền Bí', emoji: '👑',
+    type: 'accessory', rarity: 'epic',
+    description: 'Vương miện tăng sức mạnh phép thuật.',
+    stats: { mp: 60, attack: 10, speed: 5 }, price: 1500, sellPrice: 750,
+    classRestriction: ['mage']
+  },
+
+  // === ROGUE CLASS GEAR ===
+  shadow_leather: {
+    id: 'shadow_leather', name: 'Áo Da Bóng Tối', emoji: '🌑',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Áo da giúp tàng hình.',
+    stats: { defense: 8, speed: 8 }, price: 170, sellPrice: 80,
+    classRestriction: ['rogue']
+  },
+  assassin_armor: {
+    id: 'assassin_armor', name: 'Giáp Sát Thủ', emoji: '🥷',
+    type: 'armor', rarity: 'rare',
+    description: 'Giáp của sát thủ lão luyện.',
+    stats: { defense: 15, speed: 12, attack: 5 }, price: 550, sellPrice: 270,
+    classRestriction: ['rogue']
+  },
+  phantom_cloak: {
+    id: 'phantom_cloak', name: 'Áo Choàng Ma', emoji: '👻',
+    type: 'armor', rarity: 'epic',
+    description: 'Áo choàng của bóng ma, né tránh cực cao.',
+    stats: { defense: 20, speed: 18, attack: 8 }, price: 1700, sellPrice: 850,
+    classRestriction: ['rogue']
+  },
+  void_cloak: {
+    id: 'void_cloak', name: 'Áo Choàng Hư Không', emoji: '🌀',
+    type: 'armor', rarity: 'legendary',
+    description: 'Áo choàng từ chiều không gian khác.',
+    stats: { defense: 28, speed: 25, attack: 12 }, price: 8000, sellPrice: 4000,
+    classRestriction: ['rogue']
+  },
+  assassin_ring: {
+    id: 'assassin_ring', name: 'Nhẫn Sát Thủ', emoji: '💍',
+    type: 'accessory', rarity: 'rare',
+    description: 'Nhẫn tăng chí mạng và tốc độ.',
+    stats: { attack: 10, speed: 10 }, price: 500, sellPrice: 240,
+    classRestriction: ['rogue']
+  },
+  shadow_emblem: {
+    id: 'shadow_emblem', name: 'Huy Hiệu Bóng Tối', emoji: '🌑',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Huy hiệu của sát thủ huyền thoại.',
+    stats: { attack: 18, speed: 20, hp: 40 }, price: 7500, sellPrice: 3700,
+    classRestriction: ['rogue']
+  },
+
+  // === CLERIC CLASS GEAR ===
+  holy_vestment: {
+    id: 'holy_vestment', name: 'Áo Giáp Thánh', emoji: '✝️',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Áo giáp được ban phước.',
+    stats: { defense: 10, hp: 25, mp: 15 }, price: 180, sellPrice: 85,
+    classRestriction: ['cleric']
+  },
+  paladin_plate: {
+    id: 'paladin_plate', name: 'Giáp Thánh Kỵ Sĩ', emoji: '🛡️',
+    type: 'armor', rarity: 'rare',
+    description: 'Giáp của Thánh Kỵ Sĩ.',
+    stats: { defense: 25, hp: 40, mp: 20 }, price: 600, sellPrice: 290,
+    classRestriction: ['cleric']
+  },
+  divine_armor: {
+    id: 'divine_armor', name: 'Giáp Thần Thánh', emoji: '💫',
+    type: 'armor', rarity: 'epic',
+    description: 'Giáp được ban phước bởi thần linh.',
+    stats: { defense: 32, hp: 60, mp: 30 }, price: 1600, sellPrice: 800,
+    classRestriction: ['cleric']
+  },
+  archbishop_robe: {
+    id: 'archbishop_robe', name: 'Áo Choàng Tổng Giám Mục', emoji: '⛪',
+    type: 'armor', rarity: 'legendary',
+    description: 'Áo choàng của Tổng Giám Mục.',
+    stats: { defense: 38, hp: 80, mp: 50, speed: 3 }, price: 7500, sellPrice: 3700,
+    classRestriction: ['cleric']
+  },
+  holy_symbol: {
+    id: 'holy_symbol', name: 'Biểu Tượng Thánh', emoji: '✝️',
+    type: 'accessory', rarity: 'rare',
+    description: 'Biểu tượng tăng sức mạnh hồi phục.',
+    stats: { hp: 40, mp: 30, defense: 5 }, price: 500, sellPrice: 240,
+    classRestriction: ['cleric']
+  },
+  archbishop_ring: {
+    id: 'archbishop_ring', name: 'Nhẫn Tổng Giám Mục', emoji: '💍',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Nhẫn của Tổng Giám Mục, hồi phục cực mạnh.',
+    stats: { hp: 80, mp: 60, defense: 10, attack: 8 }, price: 7000, sellPrice: 3500,
+    classRestriction: ['cleric']
+  },
+
+  // === GLADIATOR CLASS GEAR ===
+  arena_plate: {
+    id: 'arena_plate', name: 'Giáp Đấu Trường', emoji: '🏟️',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Giáp dùng trong đấu trường.',
+    stats: { defense: 12, attack: 5, hp: 15 }, price: 190, sellPrice: 90,
+    classRestriction: ['gladiator']
+  },
+  colosseum_armor: {
+    id: 'colosseum_armor', name: 'Giáp Colosseum', emoji: '🏟️',
+    type: 'armor', rarity: 'rare',
+    description: 'Giáp của võ sĩ đài Colosseum.',
+    stats: { defense: 22, attack: 8, hp: 25 }, price: 580, sellPrice: 280,
+    classRestriction: ['gladiator']
+  },
+  champion_armor: {
+    id: 'champion_armor', name: 'Giáp Nhà Vô Địch', emoji: '🏆',
+    type: 'armor', rarity: 'epic',
+    description: 'Giáp của nhà vô địch đấu trường.',
+    stats: { defense: 30, attack: 12, hp: 40 }, price: 1600, sellPrice: 800,
+    classRestriction: ['gladiator']
+  },
+  god_of_war_armor: {
+    id: 'god_of_war_armor', name: 'Giáp Thần Chiến Tranh', emoji: '⚡',
+    type: 'armor', rarity: 'legendary',
+    description: 'Giáp của Thần Chiến Tranh Ares.',
+    stats: { defense: 45, attack: 18, hp: 70, speed: 3 }, price: 8500, sellPrice: 4200,
+    classRestriction: ['gladiator']
+  },
+  gladiator_medal: {
+    id: 'gladiator_medal', name: 'Huy Chương Đấu Sĩ', emoji: '🏅',
+    type: 'accessory', rarity: 'rare',
+    description: 'Huy chương vinh danh đấu sĩ.',
+    stats: { attack: 10, defense: 8, hp: 20 }, price: 480, sellPrice: 230,
+    classRestriction: ['gladiator']
+  },
+  arena_champion_ring: {
+    id: 'arena_champion_ring', name: 'Nhẫn Vô Địch', emoji: '🏆',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Nhẫn của nhà vô địch bất bại.',
+    stats: { attack: 22, defense: 12, hp: 60, speed: 5 }, price: 7500, sellPrice: 3700,
+    classRestriction: ['gladiator']
+  },
+
+  // === SUMMONER CLASS GEAR ===
+  spirit_robe: {
+    id: 'spirit_robe', name: 'Áo Choàng Tinh Linh', emoji: '✨',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Áo choàng tăng sức mạnh triệu hồi.',
+    stats: { defense: 6, mp: 35, hp: 10 }, price: 160, sellPrice: 75,
+    classRestriction: ['summoner'],
+    summonBoost: 10
+  },
+  beastmaster_armor: {
+    id: 'beastmaster_armor', name: 'Giáp Thuần Thú', emoji: '🐾',
+    type: 'armor', rarity: 'rare',
+    description: 'Giáp của bậc thầy thuần thú.',
+    stats: { defense: 12, mp: 50, hp: 20 }, price: 550, sellPrice: 270,
+    classRestriction: ['summoner'],
+    summonBoost: 20
+  },
+  dragoncaller_armor: {
+    id: 'dragoncaller_armor', name: 'Giáp Triệu Rồng', emoji: '🐉',
+    type: 'armor', rarity: 'epic',
+    description: 'Giáp tăng sức mạnh triệu hồi rồng.',
+    stats: { defense: 20, mp: 70, hp: 30 }, price: 1500, sellPrice: 750,
+    classRestriction: ['summoner'],
+    summonBoost: 35
+  },
+  eternal_summoner_armor: {
+    id: 'eternal_summoner_armor', name: 'Giáp Vĩnh Hằng Triệu Hồi', emoji: '♾️',
+    type: 'armor', rarity: 'legendary',
+    description: 'Giáp của triệu hồi sư vĩnh hằng.',
+    stats: { defense: 30, mp: 100, hp: 50, attack: 10 }, price: 7000, sellPrice: 3500,
+    classRestriction: ['summoner'],
+    summonBoost: 50
+  },
+  spirit_charm: {
+    id: 'spirit_charm', name: 'Bùa Tinh Linh', emoji: '✨',
+    type: 'accessory', rarity: 'rare',
+    description: 'Bùa tăng sức mạnh triệu hồi.',
+    stats: { mp: 40, attack: 5 }, price: 480, sellPrice: 230,
+    classRestriction: ['summoner'],
+    summonBoost: 15
+  },
+  eternal_summon_ring: {
+    id: 'eternal_summon_ring', name: 'Nhẫn Triệu Hồi Vĩnh Hằng', emoji: '♾️',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Nhẫn tăng triệu hồi cực mạnh.',
+    stats: { mp: 80, attack: 12, hp: 40 }, price: 7000, sellPrice: 3500,
+    classRestriction: ['summoner'],
+    summonBoost: 40
+  },
+
+  // === ARCHER CLASS GEAR ===
+  ranger_armor: {
+    id: 'ranger_armor', name: 'Giáp Thợ Săn', emoji: '🏹',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Giáp nhẹ cho thợ săn.',
+    stats: { defense: 8, speed: 6, attack: 3 }, price: 170, sellPrice: 80,
+    classRestriction: ['archer']
+  },
+  windrunner_armor: {
+    id: 'windrunner_armor', name: 'Giáp Gió Lốc', emoji: '💨',
+    type: 'armor', rarity: 'rare',
+    description: 'Giáp giúp chạy nhanh như gió.',
+    stats: { defense: 14, speed: 12, attack: 5 }, price: 550, sellPrice: 270,
+    classRestriction: ['archer']
+  },
+  skyhunter_armor: {
+    id: 'skyhunter_armor', name: 'Giáp Săn Bầu Trời', emoji: '🦅',
+    type: 'armor', rarity: 'epic',
+    description: 'Giáp của thợ săn bầu trời.',
+    stats: { defense: 22, speed: 16, attack: 8 }, price: 1500, sellPrice: 750,
+    classRestriction: ['archer']
+  },
+  celestial_ranger_armor: {
+    id: 'celestial_ranger_armor', name: 'Giáp Thợ Săn Thiên Hà', emoji: '🌌',
+    type: 'armor', rarity: 'legendary',
+    description: 'Giáp của thợ săn thiên hà.',
+    stats: { defense: 30, speed: 22, attack: 12, hp: 30 }, price: 7500, sellPrice: 3700,
+    classRestriction: ['archer']
+  },
+  archer_amulet: {
+    id: 'archer_amulet', name: 'Dây Chuyền Cung Thủ', emoji: '🏹',
+    type: 'accessory', rarity: 'rare',
+    description: 'Dây chuyền tăng tốc và chí mạng.',
+    stats: { attack: 8, speed: 10 }, price: 480, sellPrice: 230,
+    classRestriction: ['archer']
+  },
+  skyhunter_ring: {
+    id: 'skyhunter_ring', name: 'Nhẫn Săn Bầu Trời', emoji: '🦅',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Nhẫn của thợ săn huyền thoại.',
+    stats: { attack: 18, speed: 18, hp: 40 }, price: 7000, sellPrice: 3500,
+    classRestriction: ['archer']
+  },
+
+  // === NECROMANCER CLASS GEAR ===
+  death_robe: {
+    id: 'death_robe', name: 'Áo Choàng Tử Thần', emoji: '💀',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Áo choàng mang năng lượng tử thần.',
+    stats: { defense: 6, mp: 30, hp: 15 }, price: 160, sellPrice: 75,
+    classRestriction: ['necromancer']
+  },
+  lich_armor: {
+    id: 'lich_armor', name: 'Giáp Bất Tử', emoji: '⚰️',
+    type: 'armor', rarity: 'rare',
+    description: 'Giáp của Lich, hút sinh lực.',
+    stats: { defense: 15, mp: 45, hp: 25 }, price: 550, sellPrice: 270,
+    classRestriction: ['necromancer']
+  },
+  dreadlord_armor: {
+    id: 'dreadlord_armor', name: 'Giáp Chúa Tể Kinh Hoàng', emoji: '👻',
+    type: 'armor', rarity: 'epic',
+    description: 'Giáp của Chúa Tể Kinh Hoàng.',
+    stats: { defense: 22, mp: 70, hp: 35, attack: 5 }, price: 1500, sellPrice: 750,
+    classRestriction: ['necromancer']
+  },
+  abyss_lord_armor: {
+    id: 'abyss_lord_armor', name: 'Giáp Chúa Tể Abyss', emoji: '🕳️',
+    type: 'armor', rarity: 'legendary',
+    description: 'Giáp từ vực sâu địa ngục.',
+    stats: { defense: 30, mp: 100, hp: 50, attack: 10 }, price: 7000, sellPrice: 3500,
+    classRestriction: ['necromancer']
+  },
+  death_charm: {
+    id: 'death_charm', name: 'Bùa Tử Thần', emoji: '💀',
+    type: 'accessory', rarity: 'rare',
+    description: 'Bùa tăng sức mạnh tử thần.',
+    stats: { mp: 35, attack: 8, hp: 20 }, price: 480, sellPrice: 230,
+    classRestriction: ['necromancer']
+  },
+  abyss_ring: {
+    id: 'abyss_ring', name: 'Nhẫn Abyss', emoji: '🕳️',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Nhẫn từ vực sâu, hút sinh lực kẻ thù.',
+    stats: { mp: 70, attack: 15, hp: 40, speed: 5 }, price: 7000, sellPrice: 3500,
+    classRestriction: ['necromancer']
   }
 };
 

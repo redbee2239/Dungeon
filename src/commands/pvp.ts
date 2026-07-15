@@ -267,9 +267,11 @@ function setupTurnCollector(collector: any, battle: PvPBattle, db: Database) {
 
     if (i.customId === 'pvp_skill') {
       const availableSkills = getAvailableSkillsPvP(activePlayer.playerData);
+      const isSummoner = activePlayer.playerData.characterClass === 'summoner';
+      const skillLimit = isSummoner ? 1 : 3;
       const usableSkills = availableSkills.filter(s => {
         const used = activePlayer.skillUsage[s.id] || 0;
-        return used < 3 && activePlayer.mp >= s.manaCost;
+        return used < skillLimit && activePlayer.mp >= s.manaCost;
       });
 
       if (usableSkills.length === 0) {
@@ -284,7 +286,7 @@ function setupTurnCollector(collector: any, battle: PvPBattle, db: Database) {
           .addOptions(usableSkills.slice(0, 25).map(s => {
             const used = activePlayer.skillUsage[s.id] || 0;
             return {
-              label: `${s.name} (${s.manaCost} MP) [${3 - used}]`.substring(0, 100),
+              label: `${s.name} (${s.manaCost} MP) [${skillLimit - used}]`.substring(0, 100),
               value: s.id,
               description: s.description.substring(0, 100)
             };

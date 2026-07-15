@@ -1593,6 +1593,241 @@ export const ITEMS: Record<string, Item> = {
       { type: 'execute', chance: 15, value: 20 },
       { type: 'lifesteal', chance: 25, value: 15 }
     ]
+  },
+
+  // === NECROMANCER WEAPONS ===
+  bone_wand: {
+    id: 'bone_wand', name: 'Gậy Xương Cốt', emoji: '🦴',
+    type: 'weapon', rarity: 'common', weaponType: 'magic',
+    classRestriction: ['necromancer'],
+    description: 'Gậy làm từ xương người chết.',
+    stats: { attack: 4, mp: 12 }, price: 30, sellPrice: 12
+  },
+  soul_staff: {
+    id: 'soul_staff', name: 'Gậy Linh Hồn', emoji: '👻',
+    type: 'weapon', rarity: 'uncommon', weaponType: 'magic',
+    classRestriction: ['necromancer'],
+    description: 'Gậy hút linh hồn kẻ thù.',
+    stats: { attack: 10, mp: 25 }, price: 160, sellPrice: 75
+  },
+  death_staff: {
+    id: 'death_staff', name: 'Gậy Tử Thần', emoji: '💀',
+    type: 'weapon', rarity: 'rare', weaponType: 'magic',
+    classRestriction: ['necromancer'],
+    description: 'Gậy mang sức mạnh tử thần.',
+    stats: { attack: 20, mp: 45 }, price: 500, sellPrice: 240
+  },
+  lich_staff: {
+    id: 'lich_staff', name: 'Gậy Bất Tử', emoji: '⚰️',
+    type: 'weapon', rarity: 'epic', weaponType: 'magic',
+    classRestriction: ['necromancer'],
+    description: 'Gậy của lich, hút sinh lực.',
+    stats: { attack: 32, mp: 70 }, price: 1500, sellPrice: 750
+  },
+  oblivion_staff: {
+    id: 'oblivion_staff', name: 'Gậy Hủy Diệt', emoji: '🌀',
+    type: 'weapon', rarity: 'legendary', weaponType: 'magic',
+    classRestriction: ['necromancer'],
+    description: 'Gậy hủy diệt mọi sự sống.',
+    stats: { attack: 42, mp: 100, hp: 30 }, price: 5500, sellPrice: 2700
+  },
+
+  // === MORE PHYSICAL WEAPONS ===
+  iron_mace: {
+    id: 'iron_mace', name: 'Chùy Sắt', emoji: '🔨',
+    type: 'weapon', rarity: 'common', weaponType: 'physical',
+    classRestriction: ['warrior', 'gladiator'],
+    description: 'Chùy sắt nặng nề.',
+    stats: { attack: 7, defense: 2 }, price: 60, sellPrice: 25
+  },
+  greatsword: {
+    id: 'greatsword', name: 'Đại Kiếm', emoji: '⚔️',
+    type: 'weapon', rarity: 'uncommon', weaponType: 'physical',
+    classRestriction: ['warrior', 'gladiator'],
+    description: 'Kiếm lớn uy lực mạnh.',
+    stats: { attack: 16, speed: -2 }, price: 220, sellPrice: 100
+  },
+  falchion: {
+    id: 'falchion', name: 'Kiếm cong', emoji: '🗡️',
+    type: 'weapon', rarity: 'uncommon', weaponType: 'physical',
+    classRestriction: ['warrior', 'rogue'],
+    description: 'Kiếm cong sắc bén.',
+    stats: { attack: 13, speed: 4 }, price: 190, sellPrice: 90
+  },
+  claymore: {
+    id: 'claymore', name: 'Claymore', emoji: '⚔️',
+    type: 'weapon', rarity: 'rare', weaponType: 'physical',
+    classRestriction: ['warrior', 'gladiator'],
+    description: 'Kiếm hai lưỡi khổng lồ.',
+    stats: { attack: 32, hp: 20, speed: -3 }, price: 700, sellPrice: 340
+  },
+  dual_daggers: {
+    id: 'dual_daggers', name: 'Song Dao', emoji: '🗡️',
+    type: 'weapon', rarity: 'rare', weaponType: 'physical',
+    classRestriction: ['rogue'],
+    description: 'Hai dao găm tấn công liên tiếp.',
+    stats: { attack: 20, speed: 12 }, price: 620, sellPrice: 300
+  },
+  butcher_cleaver: {
+    id: 'butcher_cleaver', name: 'Dao Mổ', emoji: '🔪',
+    type: 'weapon', rarity: 'epic', weaponType: 'physical',
+    classRestriction: ['warrior', 'rogue', 'gladiator'],
+    description: 'Dao butcher gây chảy máu.',
+    stats: { attack: 36, speed: 4 }, price: 1450, sellPrice: 720
+  },
+  chaos_blade: {
+    id: 'chaos_blade', name: 'Kiếm Hỗn Loạn', emoji: '🌀',
+    type: 'weapon', rarity: 'legendary', weaponType: 'physical',
+    classRestriction: ['warrior', 'rogue', 'gladiator'],
+    description: 'Kiếm hỗn loạn, ngẫu nhiên buff/debuff.',
+    stats: { attack: 48, speed: 6, defense: 5 }, price: 7500, sellPrice: 3700
+  },
+
+  // === CLERIC WEAPONS ===
+  mace: {
+    id: 'mace', name: 'Chùy Thánh', emoji: '🔨',
+    type: 'weapon', rarity: 'common', weaponType: 'physical',
+    classRestriction: ['cleric'],
+    description: 'Chùy của tu sĩ.',
+    stats: { attack: 5, hp: 10 }, price: 40, sellPrice: 16
+  },
+  war_mace: {
+    id: 'war_mace', name: 'Chùy Chiến', emoji: '🔨',
+    type: 'weapon', rarity: 'uncommon', weaponType: 'physical',
+    classRestriction: ['cleric'],
+    description: 'Chùy chiến tranh thánh thần.',
+    stats: { attack: 11, hp: 20 }, price: 170, sellPrice: 80
+  },
+  bishop_staff: {
+    id: 'bishop_staff', name: 'Gậy Giám Mục', emoji: '⛪',
+    type: 'weapon', rarity: 'rare', weaponType: 'magic',
+    classRestriction: ['cleric'],
+    description: 'Gậy của giám mục, hồi phục mạnh.',
+    stats: { attack: 16, mp: 50, hp: 30 }, price: 550, sellPrice: 260
+  },
+
+  // === MORE ARMOR ===
+  wooden_shield: {
+    id: 'wooden_shield', name: 'Khiên Gỗ', emoji: '🛡️',
+    type: 'armor', rarity: 'common',
+    description: 'Khiên gỗ đơn giản.',
+    stats: { defense: 4, hp: 5 }, price: 30, sellPrice: 12
+  },
+  iron_shield: {
+    id: 'iron_shield', name: 'Khiên Sắt', emoji: '🛡️',
+    type: 'armor', rarity: 'common',
+    description: 'Khiên sắt chắc chắn.',
+    stats: { defense: 7, hp: 10 }, price: 65, sellPrice: 28
+  },
+  scout_armor: {
+    id: 'scout_armor', name: 'Áo Trinh Sát', emoji: '🧥',
+    type: 'armor', rarity: 'common',
+    description: 'Áo nhẹ cho trinh sát.',
+    stats: { defense: 4, speed: 3 }, price: 55, sellPrice: 22
+  },
+  studded_armor: {
+    id: 'studded_armor', name: 'Áo Đinh', emoji: '🦺',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Áo da đóng đinh sắt.',
+    stats: { defense: 11, hp: 8 }, price: 140, sellPrice: 65
+  },
+  dragonhide: {
+    id: 'dragonhide', name: 'Vảy Rồng non', emoji: '🐲',
+    type: 'armor', rarity: 'uncommon',
+    description: 'Áo làm từ vảy rồng non.',
+    stats: { defense: 14, hp: 15 }, price: 200, sellPrice: 95
+  },
+  tower_shield: {
+    id: 'tower_shield', name: 'Khiên Tháp', emoji: '🏰',
+    type: 'armor', rarity: 'rare',
+    description: 'Khiên lớn phòng thủ cực tốt.',
+    stats: { defense: 30, hp: 25, speed: -4 }, price: 650, sellPrice: 310
+  },
+  shadow_vest: {
+    id: 'shadow_vest', name: 'Áo Bóng Tối', emoji: '🌑',
+    type: 'armor', rarity: 'rare',
+    description: 'Áo giúp tàng hình trong bóng tối.',
+    stats: { defense: 18, speed: 8 }, price: 580, sellPrice: 280
+  },
+  berserker_plate: {
+    id: 'berserker_plate', name: 'Giáp Điên', emoji: '💢',
+    type: 'armor', rarity: 'epic',
+    description: 'Giáp tăng sức mạnh khiHP thấp.',
+    stats: { defense: 32, attack: 8, hp: 40 }, price: 1400, sellPrice: 700
+  },
+  assassin_cloak: {
+    id: 'assassin_cloak', name: 'Áo Choàng Sát Thủ', emoji: '🥷',
+    type: 'armor', rarity: 'epic',
+    description: 'Áo choàng giúp tàng hình hoàn toàn.',
+    stats: { defense: 22, speed: 15, attack: 5 }, price: 1600, sellPrice: 800
+  },
+  thunder_guard: {
+    id: 'thunder_guard', name: 'Giáp Sấm Sét', emoji: '⚡',
+    type: 'armor', rarity: 'legendary',
+    description: 'Giáp mang sức mạnh sấm sét, phản伤.',
+    stats: { defense: 48, hp: 60, speed: 5 }, price: 8500, sellPrice: 4200
+  },
+
+  // === MORE ACCESSORIES ===
+  copper_ring: {
+    id: 'copper_ring', name: 'Nhẫn Đồng', emoji: '💍',
+    type: 'accessory', rarity: 'common',
+    description: 'Nhẫn đồng đơn giản.',
+    stats: { attack: 2 }, price: 25, sellPrice: 10
+  },
+  silver_amulet: {
+    id: 'silver_amulet', name: 'Dây Chuyền Bạc', emoji: '📿',
+    type: 'accessory', rarity: 'common',
+    description: 'Dây chuyền bạc.',
+    stats: { hp: 15 }, price: 35, sellPrice: 14
+  },
+  warrior_band: {
+    id: 'warrior_band', name: 'Vòng Chiến Binh', emoji: '🔴',
+    type: 'accessory', rarity: 'uncommon',
+    description: 'Vòng tăng sức chiến đấu.',
+    stats: { attack: 6, hp: 10 }, price: 160, sellPrice: 75
+  },
+  mystic_ring: {
+    id: 'mystic_ring', name: 'Nhẫn Huyền Bí', emoji: '🔮',
+    type: 'accessory', rarity: 'uncommon',
+    description: 'Nhẫn mang năng lượng huyền bí.',
+    stats: { mp: 25, speed: 3 }, price: 180, sellPrice: 85
+  },
+  guard_amulet: {
+    id: 'guard_amulet', name: 'Bùa Bảo Vệ', emoji: '🛡️',
+    type: 'accessory', rarity: 'uncommon',
+    description: 'Bùa tăng phòng thủ.',
+    stats: { defense: 6, hp: 20 }, price: 170, sellPrice: 80
+  },
+  crystal_pendant: {
+    id: 'crystal_pendant', name: 'Dây Chuyền Pha Lê', emoji: '💎',
+    type: 'accessory', rarity: 'rare',
+    description: 'Dây chuyền pha lê phát sáng.',
+    stats: { mp: 40, attack: 5, speed: 3 }, price: 480, sellPrice: 230
+  },
+  bone_charm: {
+    id: 'bone_charm', name: 'Bùa Xương', emoji: '💀',
+    type: 'accessory', rarity: 'rare',
+    description: 'Bùa làm từ xương cổ đại.',
+    stats: { attack: 10, defense: 8 }, price: 520, sellPrice: 250
+  },
+  titan_ring: {
+    id: 'titan_ring', name: 'Nhẫn Khổng Lồ', emoji: '💍',
+    type: 'accessory', rarity: 'epic',
+    description: 'Nhẫn của titan, tăng mọi chỉ số.',
+    stats: { attack: 12, defense: 10, hp: 40 }, price: 1300, sellPrice: 650
+  },
+  storm_pendant: {
+    id: 'storm_pendant', name: 'Dây Chuyền Bão', emoji: '⛈️',
+    type: 'accessory', rarity: 'epic',
+    description: 'Dây chuyền mang sức mạnh bão tố.',
+    stats: { attack: 14, speed: 10, mp: 30 }, price: 1400, sellPrice: 700
+  },
+  worldbreaker: {
+    id: 'worldbreaker', name: 'Phá Thế Giới', emoji: '🌍',
+    type: 'accessory', rarity: 'legendary',
+    description: 'Vòng phá hủy thế giới.',
+    stats: { attack: 22, defense: 15, hp: 50, mp: 30, speed: 5 }, price: 11000, sellPrice: 5500
   }
 };
 

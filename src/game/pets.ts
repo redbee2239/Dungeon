@@ -41,7 +41,7 @@ export const PET_RARITY_COLORS: Record<PetRarity, number> = {
   legendary: 0xFF8800
 };
 
-export const PET_GACHA_COST = 100;
+export const PET_GACHA_COST = 300;
 
 export const PETS: Pet[] = [
   // Common

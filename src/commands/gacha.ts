@@ -3,11 +3,11 @@ import { Database } from '../game/database';
 import { ITEMS, RARITY_NAMES, RARITY_COLORS, ItemRarity, Item } from '../game/items';
 import { isBeta, isSecretChannel } from '../game/beta';
 
-const GACHA_COST = 50;
-const MULTI_COST = 450;
+const GACHA_COST = 150;
+const MULTI_COST = 1350;
 
-const BETA_1_3_COST_SINGLE = 40;
-const BETA_1_3_COST_MULTI = 360;
+const BETA_1_3_COST_SINGLE = 120;
+const BETA_1_3_COST_MULTI = 1080;
 const BETA_1_3_RAINBOW_PITY = 30;
 const BETA_1_3_SSR_PITY = 10;
 

@@ -145,8 +145,8 @@ export const prefixCommand = {
           {
             name: '🎰 Gacha Trang Bị',
             value: [
-              '`gacha 1` - Quay 1 lần (50 💎)',
-              '`gacha 10` - Quay 10 lần (450 💎)',
+              '`gacha 1` - Quay 1 lần (150 💎)',
+              '`gacha 10` - Quay 10 lần (1350 💎)',
               '`gacha history` - Xem lịch sử quay'
             ].join('\n'),
             inline: true
@@ -154,7 +154,7 @@ export const prefixCommand = {
           {
             name: '🐾 Gacha Pet',
             value: [
-              '`pet` - Quay pet (100 💎)',
+              '`pet` - Quay pet (300 💎)',
               '`pet list` - Xem danh sách pet',
               '`pet equip` - Mang pet',
               '`pet info` - Xem pet đang mang'
